@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using BioSim;
+using BioSim.Datastructures;
 using BioSim.Simulation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,29 +15,25 @@ namespace Simple_graphical_implementation;
 /// </summary>
 public class VisualSimulation : Game
 {
-    private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
+    private GraphicsDeviceManager graphics;
+    private SpriteBatch spriteBatch;
 
     private const int screenWidth = 1280;
     private const int screenHeight = 720;
-
     private RenderManager renderManager;
-    private static Random random = new Random();
+    private bool updateDrawnImage = true;
 
-    public static Color BackgroundColor
-    {
-        get {
-        return new Color(200, 200, random.Next(50, 150));
-    }
-    }
+    public static Color BackgroundColor = Color.CornflowerBlue;
 
+    private Simulation simulation;
+    
     public VisualSimulation()
     {
-        _graphics = new GraphicsDeviceManager(this);
+        graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-        _graphics.PreferredBackBufferWidth = screenWidth;
-        _graphics.PreferredBackBufferHeight = screenHeight;
+        graphics.PreferredBackBufferWidth = screenWidth;
+        graphics.PreferredBackBufferHeight = screenHeight;
     }
 
     protected override void Initialize()
@@ -45,7 +43,7 @@ public class VisualSimulation : Game
 
     protected override void LoadContent()
     {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
+        spriteBatch = new SpriteBatch(GraphicsDevice);
 
         int sizeX = screenWidth / 2;
         int sizeY = screenHeight / 2;
@@ -58,6 +56,18 @@ public class VisualSimulation : Game
             new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth / 2, screenHeight / 2),
                 ViewDirection.XZPlane, new Rectangle(0, sizeY, sizeX, sizeY))
         });
+        renderManager.DrawBorders = true;
+        renderManager.LoadContent(Content);
+        
+        simulation = new Simulation();
+        World world = new TestWorld();
+        DataStructure dataStructure = new NoDataStructure(world);
+        simulation.CreateSimulation(world);
+        simulation.DrawingEnabled = true;
+        simulation.FileWritingEnabled = false;
+        simulation.SetDrawFrequency(1);
+
+        simulation.OnDraw += OnDrawCall;
     }
 
     protected override void Update(GameTime gameTime)
@@ -66,15 +76,27 @@ public class VisualSimulation : Game
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
+        simulation.Step();
+        
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
+        if (!updateDrawnImage)
+            return;
+        
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        renderManager.Render(_spriteBatch);
+        renderManager.Render(spriteBatch);
+
+        updateDrawnImage = false;
         
         base.Draw(gameTime);
+    }
+
+    private void OnDrawCall(World world)
+    {
+        updateDrawnImage = true;
     }
 }

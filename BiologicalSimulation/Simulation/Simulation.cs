@@ -8,7 +8,8 @@ public partial class Simulation
     private DataStructure dataStructure;
     private bool abort;
     public int Tick { get; private set; } //The current tick we are on
-    private bool drawingEnabled;
+    public bool DrawingEnabled { get; set; }
+    public bool FileWritingEnabled { get; set; }
     private int ticksPerDrawCall;
     private int ticksPerFileWrite;
     
@@ -16,26 +17,27 @@ public partial class Simulation
     
     //This event happens at the end of every tick
     public delegate void OnTickEventHandler(World world);
-    public static event OnTickEventHandler? OnTick;
+    public event OnTickEventHandler? OnTick;
     
     //This event happens at depending on if it is turned on and if it's frequency, basically a lesser called OnTick
     public delegate void OnDrawEventHandler(World world);
-    public static event OnDrawEventHandler? OnDraw;
+    public event OnDrawEventHandler? OnDraw;
     
     //This event happens at depending on if it is turned on and if it's frequency, basically a lesser called OnTick
     public delegate void OnFileWriteEventHandler(string filePath, string fileContents);
-    public static event OnFileWriteEventHandler? OnFileWrite;
+    public event OnFileWriteEventHandler? OnFileWrite;
     
     //This event happens when the simulation is finished
     public delegate void OnEndEventHandler(World world);
-    public static event OnEndEventHandler? OnEnd;
+    public event OnEndEventHandler? OnEnd;
 
     public void CreateSimulation(World world)
     {
         this.world = world;
         abort = false;
         Tick = 0;
-        drawingEnabled = false;
+        DrawingEnabled = false;
+        FileWritingEnabled = true;
         ticksPerDrawCall = 0;
         ticksPerFileWrite = 0;
         simulationExporter = new SimulationExporter();
@@ -43,27 +45,34 @@ public partial class Simulation
 
     public void StartSimulation()
     {
+        /*
         while (!world.StopCondition() && !abort)
         {
-            Tick++;
-            world.Step();
-            OnTick?.Invoke(world);
-
-            //Invoke OnDraw if it has been a set amount of ticks
-            if (drawingEnabled && Tick % ticksPerDrawCall == 0)
-            {
-                OnDraw?.Invoke(world);
-            }
-
-            //Save file and invoke event letting know that it happened
-            if (Tick % ticksPerFileWrite == 0)
-            {
-                (string filePath, string fileContents) = simulationExporter.SaveToFile(world);
-                OnFileWrite?.Invoke(filePath, fileContents);
-            }
+            
         }
         
         OnSimulationEnd();
+        */
+    }
+
+    public void Step()
+    {
+        Tick++;
+        world.Step();
+        OnTick?.Invoke(world);
+
+        //Invoke OnDraw if it has been a set amount of ticks
+        if (DrawingEnabled && Tick % ticksPerDrawCall == 0)
+        {
+            OnDraw?.Invoke(world);
+        }
+
+        //Save file and invoke event letting know that it happened
+        if (FileWritingEnabled && Tick % ticksPerFileWrite == 0)
+        {
+            (string filePath, string fileContents) = simulationExporter.SaveToFile(world);
+            OnFileWrite?.Invoke(filePath, fileContents);
+        }
     }
 
     public void AbortSimulation()

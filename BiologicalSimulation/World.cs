@@ -1,3 +1,5 @@
+using BioSim.Datastructures;
+
 namespace BioSim;
 
 public abstract class World
@@ -11,13 +13,13 @@ public abstract class World
 
     public void Step()
     {
-        foreach (Organism organism in Organisms.Reverse())
+        foreach (Organism organism in Organisms)
         {
             organism.Step();
         }
     }
 
-    public abstract void StartingDistribution(); //Where all organisms start
+    public abstract void StartingDistribution(DataStructure dataStructure); //Where all organisms start
     public abstract bool IsInBounds(Organism organism); //Use this to define the confines of space all organisms are in, if false, it can't move to that position
     public abstract bool StopCondition(); //If this is true, the program will halt
 }

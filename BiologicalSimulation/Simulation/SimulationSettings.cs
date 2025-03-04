@@ -10,11 +10,6 @@ public partial class Simulation
         this.dataStructure = dataStructure;
     }
 
-    public void EnableDrawing(bool enable)
-    {
-        drawingEnabled = enable;
-    }
-
     public void SetDrawFrequency(int ticksPerDrawCall)
     {
         if (ticksPerDrawCall <= 0)
