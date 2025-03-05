@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using BioSim;
 using BioSim.Datastructures;
 using BioSim.Simulation;
+using System.Numerics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Vector3 = System.Numerics.Vector3;
 
 namespace Simple_graphical_implementation;
 
@@ -25,7 +27,9 @@ public class VisualSimulation : Game
 
     public static Color BackgroundColor = Color.CornflowerBlue;
 
+    private World world;
     private Simulation simulation;
+    private ViewingInformation viewingInformation;
     
     public VisualSimulation()
     {
@@ -39,6 +43,12 @@ public class VisualSimulation : Game
     protected override void Initialize()
     {
         base.Initialize();
+
+        viewingInformation = new ViewingInformation();
+        viewingInformation.Position = Vector3.Zero;
+        viewingInformation.Scale = 100;
+        viewingInformation.Width = screenWidth;
+        viewingInformation.Height = screenHeight;
     }
 
     protected override void LoadContent()
@@ -49,18 +59,18 @@ public class VisualSimulation : Game
         int sizeY = screenHeight / 2;
         renderManager = new RenderManager(GraphicsDevice, new List<Renderer>()
         {
-            new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth / 2, screenHeight / 2), 
+            new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth, screenHeight), 
                 ViewDirection.XYPlane, new Rectangle(0, 0, sizeX, sizeY)),
-            new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth / 2, screenHeight / 2),
+            new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth, screenHeight),
                 ViewDirection.YZPlane, new Rectangle(sizeX, 0, sizeX, sizeY)),
-            new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth / 2, screenHeight / 2),
+            new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth, screenHeight),
                 ViewDirection.XZPlane, new Rectangle(0, sizeY, sizeX, sizeY))
         });
         renderManager.DrawBorders = true;
         renderManager.LoadContent(Content);
         
         simulation = new Simulation();
-        World world = new TestWorld();
+        world = new TestWorld();
         DataStructure dataStructure = new NoDataStructure(world);
         simulation.CreateSimulation(world);
         simulation.DrawingEnabled = true;
@@ -68,6 +78,8 @@ public class VisualSimulation : Game
         simulation.SetDrawFrequency(1);
 
         simulation.OnDraw += OnDrawCall;
+        
+        simulation.StartSimulation();
     }
 
     protected override void Update(GameTime gameTime)
@@ -88,7 +100,7 @@ public class VisualSimulation : Game
         
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        renderManager.Render(spriteBatch);
+        renderManager.Render(spriteBatch, world, viewingInformation);
 
         updateDrawnImage = false;
         
@@ -99,4 +111,12 @@ public class VisualSimulation : Game
     {
         updateDrawnImage = true;
     }
+}
+
+public class ViewingInformation
+{
+    public System.Numerics.Vector3 Position { get; set; } //Where the center of the viewpoint is
+    public float Width { get; set; }
+    public float Height { get; set; }
+    public float Scale { get; set; } //How many pixels are equal to a unit of distance in the simulation
 }

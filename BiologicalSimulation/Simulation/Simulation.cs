@@ -45,6 +45,8 @@ public partial class Simulation
 
     public void StartSimulation()
     {
+        world.StartingDistribution(dataStructure);
+        
         /*
         while (!world.StopCondition() && !abort)
         {

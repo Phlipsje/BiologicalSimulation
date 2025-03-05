@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BioSim;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,15 +20,20 @@ public class RenderManager
 
     public void LoadContent(ContentManager content)
     {
+        foreach (Renderer renderer in renderers)
+        {
+            renderer.LoadContent(content);
+        }
+        
         pixel = content.Load<Texture2D>("Square");
     }
 
-    public void Render(SpriteBatch spriteBatch)
+    public void Render(SpriteBatch spriteBatch, World world, ViewingInformation viewingInformation)
     {
         //First let every render target be formed
         foreach (Renderer renderer in renderers)
         {
-            renderer.Render(graphicsDevice, spriteBatch);
+            renderer.Render(graphicsDevice, spriteBatch, world, viewingInformation);
         }
         
         graphicsDevice.Clear(Color.Black);
