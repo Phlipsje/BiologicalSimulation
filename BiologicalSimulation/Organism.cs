@@ -15,9 +15,10 @@ public abstract class Organism : IOrganism
     protected World World { get; } //Needs this to check if it is in bounds
     protected DataStructure DataStructure { get; } //Needs this to understand where other organisms are
 
-    public Organism(Vector3 startingPosition, World world, DataStructure dataStructure)
+    public Organism(Vector3 startingPosition, float size, World world, DataStructure dataStructure)
     {
         Position = startingPosition;
+        Size = size;
         World = world;
         DataStructure = dataStructure;
     }

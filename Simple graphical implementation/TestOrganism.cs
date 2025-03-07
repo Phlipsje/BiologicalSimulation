@@ -10,7 +10,7 @@ public class TestOrganism : Organism
     private Random random = new Random();
     private int growthTimeTicks;
     private int currentTicks;
-    public TestOrganism(Vector3 startingPosition, World world, DataStructure dataStructure) : base(startingPosition, world, dataStructure)
+    public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure) : base(startingPosition, size, world, dataStructure)
     {
         growthTimeTicks = random.Next(50, 200);
         currentTicks = 0;
@@ -18,7 +18,7 @@ public class TestOrganism : Organism
 
     public override TestOrganism CreateNewOrganism(Vector3 startingPosition)
     {
-        return new TestOrganism(startingPosition, World, DataStructure);
+        return new TestOrganism(startingPosition, Size, World, DataStructure);
     }
     
     public override void Step()

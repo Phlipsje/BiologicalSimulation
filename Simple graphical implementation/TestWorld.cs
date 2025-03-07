@@ -16,7 +16,7 @@ public class TestWorld : World
     public override void StartingDistribution(DataStructure dataStructure)
     {
         //One singular organism at the center
-        Organisms.AddFirst(new TestOrganism(new Vector3(0, 0, 0), this, dataStructure));
+        Organisms.AddFirst(new TestOrganism(new Vector3(0, 0, 0), 0.5f, this, dataStructure));
     }
 
     public override bool IsInBounds(Organism organism)
