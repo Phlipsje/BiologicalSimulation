@@ -34,6 +34,7 @@ public partial class Simulation
     public void CreateSimulation(World world)
     {
         this.world = world;
+        dataStructure = new NoDataStructure(world); //Default data structure has no optimizations
         abort = false;
         Tick = 0;
         DrawingEnabled = false;
@@ -46,15 +47,6 @@ public partial class Simulation
     public void StartSimulation()
     {
         world.StartingDistribution(dataStructure);
-        
-        /*
-        while (!world.StopCondition() && !abort)
-        {
-            
-        }
-        
-        OnSimulationEnd();
-        */
     }
 
     public void Step()

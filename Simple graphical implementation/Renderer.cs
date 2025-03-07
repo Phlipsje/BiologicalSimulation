@@ -70,6 +70,7 @@ public class Renderer
             if (posAxis1 < -organismPixelSize || posAxis0 > viewingInformation.Height + organismPixelSize)
                 continue;
 
+            //TODO base scale, color and layerDepth off of what is in the foreground (and don't draw what is behind the camera)
             Vector2 position = new Vector2(posAxis0, posAxis1);
             float scale = viewingInformation.Scale / 1000f; //1000 because the size of the organism sprite is 1000x1000
             spriteBatch.Draw(organismTexture, position, null, OrganismColor, 0f, Vector2.Zero, scale, SpriteEffects.None, 1f);

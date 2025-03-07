@@ -46,6 +46,36 @@ public class NoDataStructure : DataStructure
         return closestOrganism;
     }
 
+    public override bool CheckCollision(Organism organism, Vector3 position)
+    {
+        //If out of bounds, then there is a collision
+        if (!World.IsInBounds(organism))
+            return false;
+        
+        foreach (Organism otherOrganism in this)
+        {
+            //Cannot be a collision with itself
+            if(otherOrganism == organism)
+                continue;
+            
+            //Check for each dimension if the organism is within distance of the new position
+            float x = position.X - otherOrganism.Position.X;
+            if (MathF.Abs(x) < organism.Size + otherOrganism.Size)
+                return true;
+            
+            float y = position.Y - otherOrganism.Position.Y;
+            if (MathF.Abs(y) < organism.Size + otherOrganism.Size)
+                return true;
+            
+            float z = position.Z - otherOrganism.Position.Z;
+            if (MathF.Abs(z) < organism.Size + otherOrganism.Size)
+                return true;
+        }
+
+        //If we reach this, then no collision
+        return false;
+    }
+
     protected override IEnumerator<IOrganism> ToEnumerator()
     {
         return organisms.GetEnumerator();
