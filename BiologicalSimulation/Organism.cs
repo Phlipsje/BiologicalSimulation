@@ -36,7 +36,7 @@ public abstract class Organism : IOrganism
             Position = newPosition;
     }
     
-    public void Reproduce()
+    public Organism Reproduce()
     {
         float stepSize = Size * 2;
         //Try to add an organism around the current organism, fairly rigid test, can definitely be improved
@@ -50,14 +50,17 @@ public abstract class Organism : IOrganism
                     if (!CheckCollision(possibleReproductionPosition))
                     {
                         //Creates a new organism of the same type at the new location
-                        World.AddOrganism(CreateNewOrganism(possibleReproductionPosition));
+                        Organism newOrganism = CreateNewOrganism(possibleReproductionPosition);
+                        World.AddOrganism(newOrganism);
                         
                         //Stops the entire loop after reproduction has taken place
-                        return;
+                        return newOrganism;
                     }
                 }
             }
         }
+
+        return null;
     }
 
     public Organism ClosestNeighbour()

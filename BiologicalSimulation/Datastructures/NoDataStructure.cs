@@ -9,7 +9,7 @@ namespace BioSim.Datastructures;
 public class NoDataStructure : DataStructure
 {
     private World world;
-    private LinkedList<Organism> organisms => world.Organisms;
+    private IEnumerable<Organism> Organisms => world.Organisms.Concat(World.OrganismsToAdd);
     
     public NoDataStructure(World world) : base(world)
     {
@@ -26,7 +26,7 @@ public class NoDataStructure : DataStructure
         //Tracking distance without the square root, because it is not needed to find the closest organism and would only take more compute
         float currentDistanceSquared = float.MaxValue;
         Organism closestOrganism = organism;
-        foreach (Organism otherOrganism in organisms)
+        foreach (Organism otherOrganism in Organisms)
         {
             //If the organism is itself, we need to exclude it (because it's distance to itself is not what we want)
             if (otherOrganism == organism)
@@ -78,6 +78,6 @@ public class NoDataStructure : DataStructure
 
     protected override IEnumerator<IOrganism> ToEnumerator()
     {
-        return organisms.GetEnumerator();
+        return Organisms.GetEnumerator();
     }
 }
