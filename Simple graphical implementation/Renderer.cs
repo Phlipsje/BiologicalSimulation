@@ -67,7 +67,7 @@ public class Renderer
                 continue;
             
             //Skip if out of scope
-            if (posAxis1 < -organismPixelSize || posAxis0 > viewingInformation.Height + organismPixelSize)
+            if (posAxis1 < -organismPixelSize || posAxis1 > viewingInformation.Height + organismPixelSize)
                 continue;
 
             //TODO base scale, color and layerDepth off of what is in the foreground (and don't draw what is behind the camera)
