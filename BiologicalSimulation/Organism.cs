@@ -47,7 +47,8 @@ public abstract class Organism : IOrganism
             {
                 for (int z = -1; z <= 1; z++)
                 {
-                    Vector3 possibleReproductionPosition = Position + new Vector3(x, y, z) * stepSize;
+                    //1.02f to slightly distance reproduction, otherwise they would practically be touching and might get stuck more easily
+                    Vector3 possibleReproductionPosition = Position + new Vector3(x, y, z) * stepSize * 1.02f;
                     if (!CheckCollision(possibleReproductionPosition))
                     {
                         //Creates a new organism of the same type at the new location

@@ -50,7 +50,7 @@ public class NoDataStructure : DataStructure
     {
         //If out of bounds, then there is a collision
         if (!World.IsInBounds(organism))
-            return false;
+            return true;
         
         foreach (Organism otherOrganism in this)
         {
@@ -58,17 +58,15 @@ public class NoDataStructure : DataStructure
             if(otherOrganism == organism)
                 continue;
             
-            //Check for each dimension if the organism is within distance of the new position
+            //Checks collision by checking distance between circles
             float x = position.X - otherOrganism.Position.X;
-            if (MathF.Abs(x) < organism.Size + otherOrganism.Size)
-                return true;
-            
+            float x2 = x*x;
             float y = position.Y - otherOrganism.Position.Y;
-            if (MathF.Abs(y) < organism.Size + otherOrganism.Size)
-                return true;
-            
+            float y2 = y * y;
             float z = position.Z - otherOrganism.Position.Z;
-            if (MathF.Abs(z) < organism.Size + otherOrganism.Size)
+            float z2 = z*z;
+            float sizes = organism.Size + otherOrganism.Size;
+            if (x2 + y2 + z2 <= sizes * sizes)
                 return true;
         }
 

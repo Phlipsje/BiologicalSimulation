@@ -22,7 +22,7 @@ public class TestWorld : World
     public override bool IsInBounds(Organism organism)
     {
         //Check if within cube
-        int cubeHalfSize = 50;
+        int cubeHalfSize = 2;
 
         if (MathF.Abs(organism.Position.X) > cubeHalfSize)
             return false;
