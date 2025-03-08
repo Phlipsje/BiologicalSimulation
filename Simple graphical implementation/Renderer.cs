@@ -12,9 +12,12 @@ public class Renderer
     public Rectangle DisplayRectangle { get; }
     private ViewDirection viewDirection;
     private Texture2D organismTexture;
+    private SpriteFont font;
     private Color OrganismColor { get; } = Color.Green;
-    private int axesIndex0;
-    private int axesIndex1;
+    private int axisIndex0;
+    private int axisIndex1;
+    private char axis0Char;
+    private char axis1Char;
     
     public Renderer(RenderTarget2D renderTarget, ViewDirection viewDirection, Rectangle displayRectangle)
     {
@@ -25,16 +28,22 @@ public class Renderer
         switch (viewDirection)
         {
             case ViewDirection.XYPlane:
-                axesIndex0 = 0; //X
-                axesIndex1 = 1; //Y
+                axisIndex0 = 0; //X
+                axis0Char = 'X';
+                axisIndex1 = 1; //Y
+                axis1Char = 'Y';
                 break;
             case ViewDirection.YZPlane:
-                axesIndex0 = 1; //Y
-                axesIndex1 = 2; //Z
+                axisIndex0 = 1; //Y
+                axis0Char = 'Y';
+                axisIndex1 = 2; //Z
+                axis1Char = 'Z';
                 break;
             case ViewDirection.XZPlane:
-                axesIndex0 = 0; //X
-                axesIndex1 = 2; //Z
+                axisIndex0 = 0; //X
+                axis0Char = 'X';
+                axisIndex1 = 2; //Z
+                axis1Char = 'Z';
                 break;
         }
     }
@@ -42,6 +51,7 @@ public class Renderer
     public void LoadContent(ContentManager content)
     {
         organismTexture = content.Load<Texture2D>("Big circle");
+        font = content.Load<SpriteFont>("Font");
     }
 
     public void Render(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, World world, ViewingInformation viewingInformation)
@@ -57,8 +67,8 @@ public class Renderer
 
         foreach (Organism organism in world.Organisms)
         {
-            float posAxis0 = (organism.Position[axesIndex0] - viewingInformation.Position[axesIndex0] - organism.Size/2) * viewingInformation.Scale + viewingInformation.Width/2;
-            float posAxis1 = (organism.Position[axesIndex1] - viewingInformation.Position[axesIndex1] - organism.Size/2) * viewingInformation.Scale + viewingInformation.Height/2;
+            float posAxis0 = (organism.Position[axisIndex0] - viewingInformation.Position[axisIndex0] - organism.Size/2) * viewingInformation.Scale + viewingInformation.Width/2;
+            float posAxis1 = (organism.Position[axisIndex1] - viewingInformation.Position[axisIndex1] - organism.Size/2) * viewingInformation.Scale + viewingInformation.Height/2;
 
             float organismPixelSize = organism.Size * viewingInformation.Scale;
             
@@ -75,6 +85,11 @@ public class Renderer
             float scale = viewingInformation.Scale / 1000f; //1000 because the size of the organism sprite is 1000x1000
             spriteBatch.Draw(organismTexture, position, null, OrganismColor, 0f, Vector2.Zero, scale, SpriteEffects.None, 1f);
         }
+        
+        spriteBatch.DrawString(font, axis0Char + " ->", new Vector2(50, 20), Color.White);
+        spriteBatch.DrawString(font, axis1Char.ToString(), new Vector2(20, 50), Color.White);
+        spriteBatch.DrawString(font, "|", new Vector2(30, 80), Color.White);
+        spriteBatch.DrawString(font, "V", new Vector2(20, 105), Color.White);
         
         //Finish the buffer and flush output to gpu
         spriteBatch.End();
