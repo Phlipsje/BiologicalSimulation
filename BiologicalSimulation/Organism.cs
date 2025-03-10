@@ -44,16 +44,19 @@ public abstract class Organism : IOrganism
         //Will do a maximum of 5 attempts
         for (int i = 0; i < 5; i++)
         {
-            //Get a direction in a 3D circular radius
-            float randValueXY = (float)(random.NextDouble() * Math.PI);
-            float randValueZ = (float)(random.NextDouble() * Math.PI);
-        
-            Vector3 direction = new Vector3(MathF.Sin(randValueXY), MathF.Cos(randValueXY), MathF.Sin(randValueZ));
-        
-            Vector3 positiveNewPosition = Position + direction * Size * 1.05f;
-            Vector3 negativeNewPosition = Position - direction * Size * 1.05f;
-            Vector3 onlyPositiveNewPosition = Position + direction * 2 *Size * 1.05f;
-            Vector3 onlyNegativeNewPosition = Position - direction * 2 * Size * 1.05f;
+            //Get a direction in a 3D circular radius, length is exactly 1
+            float phi = (float)(MathF.Acos(2 * (float)random.NextDouble() - 1) - Math.PI / 2);
+            float lambda = (float)(2 * Math.PI * random.NextDouble());
+            float x = MathF.Cos(phi) * MathF.Cos(lambda);
+            float y = MathF.Cos(phi) * MathF.Sin(lambda);
+            float z = MathF.Sin(phi);
+            
+            Vector3 direction = new Vector3(x, y, z);
+            
+            Vector3 positiveNewPosition = Position + direction * Size;
+            Vector3 negativeNewPosition = Position - direction * Size;
+            Vector3 onlyPositiveNewPosition = Position + direction * 2 * Size;
+            Vector3 onlyNegativeNewPosition = Position - direction * 2 * Size;
 
             //Check if both positions are not within another organism
             if (!CheckCollision(positiveNewPosition) && !CheckCollision(negativeNewPosition))
