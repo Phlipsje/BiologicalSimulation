@@ -14,6 +14,7 @@ public abstract class Organism : IOrganism
     public float Size { get; } //Organism is a sphere, so this is the radius
     protected World World { get; } //Needs this to check if it is in bounds
     protected DataStructure DataStructure { get; } //Needs this to understand where other organisms are
+    private Random random;
 
     public Organism(Vector3 startingPosition, float size, World world, DataStructure dataStructure)
     {
@@ -21,6 +22,7 @@ public abstract class Organism : IOrganism
         Size = size;
         World = world;
         DataStructure = dataStructure;
+        random = new Random();
     }
 
     public abstract Organism CreateNewOrganism(Vector3 startingPosition);
@@ -39,26 +41,47 @@ public abstract class Organism : IOrganism
     
     public Organism Reproduce()
     {
-        float stepSize = Size * 2;
-        //Try to add an organism around the current organism, fairly rigid test, can definitely be improved
-        for (int x = -1; x <= 1; x++)
+        //Will do a maximum of 5 attempts
+        for (int i = 0; i < 5; i++)
         {
-            for (int y = -1; y <= 1; y++)
+            //Get a direction in a 3D circular radius
+            float randValueXY = (float)(random.NextDouble() * Math.PI);
+            float randValueZ = (float)(random.NextDouble() * Math.PI);
+        
+            Vector3 direction = new Vector3(MathF.Sin(randValueXY), MathF.Cos(randValueXY), MathF.Sin(randValueZ));
+        
+            Vector3 positiveNewPosition = Position + direction * Size * 1.05f;
+            Vector3 negativeNewPosition = Position - direction * Size * 1.05f;
+            Vector3 onlyPositiveNewPosition = Position + direction * 2 *Size * 1.05f;
+            Vector3 onlyNegativeNewPosition = Position - direction * 2 * Size * 1.05f;
+
+            //Check if both positions are not within another organism
+            if (!CheckCollision(positiveNewPosition) && !CheckCollision(negativeNewPosition))
             {
-                for (int z = -1; z <= 1; z++)
-                {
-                    //1.02f to slightly distance reproduction, otherwise they would practically be touching and might get stuck more easily
-                    Vector3 possibleReproductionPosition = Position + new Vector3(x, y, z) * stepSize * 1.02f;
-                    if (!CheckCollision(possibleReproductionPosition))
-                    {
-                        //Creates a new organism of the same type at the new location
-                        Organism newOrganism = CreateNewOrganism(possibleReproductionPosition);
-                        World.AddOrganism(newOrganism);
-                        
-                        //Stops the entire loop after reproduction has taken place
-                        return newOrganism;
-                    }
-                }
+                //Create new organism 
+                Organism newOrganism = CreateNewOrganism(positiveNewPosition);
+                World.AddOrganism(newOrganism);
+            
+                //Push the original organism away in the other direction
+                Position = negativeNewPosition;
+            
+                return newOrganism;
+            }
+            else if (!CheckCollision(onlyPositiveNewPosition))
+            {
+                //Create new organism 
+                Organism newOrganism = CreateNewOrganism(onlyPositiveNewPosition);
+                World.AddOrganism(newOrganism);
+            
+                return newOrganism;
+            }
+            else if (!CheckCollision(onlyNegativeNewPosition))
+            {
+                //Create new organism 
+                Organism newOrganism = CreateNewOrganism(onlyNegativeNewPosition);
+                World.AddOrganism(newOrganism);
+            
+                return newOrganism;
             }
         }
 
@@ -70,6 +93,11 @@ public abstract class Organism : IOrganism
         return DataStructure.ClosestNeighbour(this);
     }
 
+    private bool CheckCollision(Organism organism, Vector3 position)
+    {
+        return DataStructure.CheckCollision(organism, position);
+    }
+    
     private bool CheckCollision(Vector3 position)
     {
         return DataStructure.CheckCollision(this, position);

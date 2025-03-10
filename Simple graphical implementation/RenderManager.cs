@@ -11,6 +11,7 @@ public class RenderManager
     GraphicsDevice graphicsDevice;
     List<Renderer> renderers;
     private Texture2D pixel;
+    private SpriteFont font;
     public bool DrawBorders { get; set; }
     public RenderManager(GraphicsDevice graphicsDevice, List<Renderer> renderers)
     {
@@ -26,6 +27,7 @@ public class RenderManager
         }
         
         pixel = content.Load<Texture2D>("Square");
+        font = content.Load<SpriteFont>("Font");
     }
 
     public void Render(SpriteBatch spriteBatch, World world, ViewingInformation viewingInformation)
@@ -49,6 +51,9 @@ public class RenderManager
                 DrawRectangle(spriteBatch, renderer.DisplayRectangle, Color.Red);
             }
         }
+        
+        //Draw some extra information on screen
+        spriteBatch.DrawString(font, $"Organisms: {world.Organisms.Count}", new Vector2(660, 380), Color.White);
 
         //Stop drawing to the buffer and flush the output to the gpu
         spriteBatch.End();

@@ -7,6 +7,7 @@ using System.Numerics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
 using Vector3 = System.Numerics.Vector3;
 
 namespace Simple_graphical_implementation;
@@ -101,7 +102,7 @@ public class VisualSimulation : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         renderManager.Render(spriteBatch, world, viewingInformation);
-
+        
         updateDrawnImage = false;
         
         base.Draw(gameTime);
