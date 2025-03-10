@@ -24,7 +24,7 @@ public class TestOrganism : Organism
     public override void Step()
     {
         //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
-        Move(new Vector3(0.01f, (float)(random.NextDouble() * 0.02 - 0.01),(float)(random.NextDouble() * 0.02 - 0.01)));
+        Move(new Vector3((float)(random.NextDouble() * 0.02 - 0.01), (float)(random.NextDouble() * 0.02 - 0.01),(float)(random.NextDouble() * 0.02 - 0.01)));
 
         currentTicks++;
 

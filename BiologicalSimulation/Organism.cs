@@ -34,9 +34,11 @@ public abstract class Organism : IOrganism
     {
         //Simply add movement towards direction if there is no collision there
         Vector3 newPosition = Position + direction;
-        
-        if(!CheckCollision(newPosition))
+
+        if (!CheckCollision(newPosition))
+        {
             Position = newPosition;
+        }
     }
     
     public Organism Reproduce()
