@@ -4,6 +4,7 @@ using BioSim;
 using BioSim.Datastructures;
 using BioSim.Simulation;
 using System.Numerics;
+using BiologicalSimulation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -73,6 +74,8 @@ public class VisualSimulation : Game
         simulation = new Simulation();
         world = new TestWorld();
         DataStructure dataStructure = new NoDataStructure(world);
+        TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, 0.5f, world, dataStructure);
+        OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
         simulation.CreateSimulation(world);
         simulation.DrawingEnabled = true;
         simulation.FileWritingEnabled = false;

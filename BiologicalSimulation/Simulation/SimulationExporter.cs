@@ -21,6 +21,8 @@ public class SimulationExporter
         foreach (Organism organism in world.Organisms)
         {
             //A string builder is a lot faster at concatenating a lot of string together than using the + operation on strings
+            sb.Append(organism.Key);
+            sb.Append(ImportExportHelper.KeySeperator);
             sb.Append(organism.ToString());
             sb.Append(ImportExportHelper.OrganismSeparator);
         }
