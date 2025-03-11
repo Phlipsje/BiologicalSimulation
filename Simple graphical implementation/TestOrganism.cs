@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Numerics;
 using BioSim;
 using BioSim.Datastructures;
@@ -38,11 +39,42 @@ public class TestOrganism : Organism
 
     public override string ToString()
     {
-        throw new System.NotImplementedException();
+        //Save position 2 decimal points precise
+        int x = (int)(Position.X * 100);
+        int y = (int)(Position.Y * 100);
+        int z = (int)(Position.Z * 100);
+        return $"x{x/100}y{y/100}z{z/100}t{currentTicks}g{growthTimeTicks}";
     }
 
     public override void FromString(string s)
     {
-        throw new System.NotImplementedException();
+        StringReader sr = new StringReader(s);
+        char[] chars = ['x', 'y', 'z', 't', 'g'];
+        float[] values = new float[5];
+        for (int i = 0; i < 5; i++)
+        {
+            sr.Read();
+            values[i] = BuildUpNumber(sr, chars[i]);
+        }
+        
+        //Assignment
+        Position = new Vector3(values[0], values[1], values[2]);
+        currentTicks = (int)values[3];
+        growthTimeTicks = (int)values[4];
+    }
+
+    //Made specifically to read this specific organism type FromString, no safety checks and a lot of assumptions
+    private float BuildUpNumber(StringReader sr, char ch)
+    {
+        int resultingNumber = 0;
+        while (sr.Peek() != ch)
+        {
+            if (sr.Peek() == '.')
+                continue;
+
+            resultingNumber *= 10;
+            resultingNumber += int.Parse(sr.Read().ToString());
+        }
+        return resultingNumber / 100f;
     }
 }
