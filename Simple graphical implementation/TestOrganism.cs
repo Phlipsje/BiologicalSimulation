@@ -8,6 +8,7 @@ namespace Simple_graphical_implementation;
 
 public class TestOrganism : Organism
 {
+    public override string Key => "T";
     private Random random = new Random();
     private int growthTimeTicks;
     private int currentTicks;

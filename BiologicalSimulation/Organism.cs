@@ -9,7 +9,7 @@ namespace BioSim;
 /// </summary>
 public abstract class Organism : IOrganism
 {
-    public string Key { get; } //Used to identify which organism it is in a file
+    public abstract string Key { get; } //Used to identify which organism it is in a file
     public Vector3 Position { get; protected set; }
     public float Size { get; } //Organism is a sphere, so this is the radius
     protected World World { get; } //Needs this to check if it is in bounds
