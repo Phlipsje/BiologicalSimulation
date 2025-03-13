@@ -17,6 +17,7 @@ public class TestWorld : World
     {
         //One singular organism at the center
         Organisms.AddFirst(new TestOrganism(new Vector3(0, 0, 0), 0.5f, this, dataStructure));
+        Organisms.AddFirst(new TestOrganismB(new Vector3(1, 0, 0), 0.5f, this, dataStructure));
     }
 
     public override bool IsInBounds(Organism organism)

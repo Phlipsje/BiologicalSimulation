@@ -7,22 +7,22 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace Simple_graphical_implementation;
 
-public class TestOrganism : VisualOrganism
+public class TestOrganismB : VisualOrganism
 {
-    public override string Key => "TA";
+    public override string Key => "TB";
     private Random random = new Random();
     private int growthTimeTicks;
     private int currentTicks;
-    public override Color Color => Color.Green;
-    public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure) : base(startingPosition, size, world, dataStructure)
+    public override Color Color => Color.Yellow;
+    public TestOrganismB(Vector3 startingPosition, float size, World world, DataStructure dataStructure) : base(startingPosition, size, world, dataStructure)
     {
         growthTimeTicks = random.Next(50, 200);
         currentTicks = 0;
     }
 
-    public override TestOrganism CreateNewOrganism(Vector3 startingPosition)
+    public override TestOrganismB CreateNewOrganism(Vector3 startingPosition)
     {
-        return new TestOrganism(startingPosition, Size, World, DataStructure);
+        return new TestOrganismB(startingPosition, Size, World, DataStructure);
     }
     
     public override void Step()

@@ -13,7 +13,6 @@ public class Renderer
     private ViewDirection viewDirection;
     private Texture2D organismTexture;
     private SpriteFont font;
-    private Color OrganismColor { get; } = Color.Green;
     private int axisIndex0;
     private int axisIndex1;
     private char axis0Char;
@@ -65,8 +64,9 @@ public class Renderer
         //Start a new buffer to draw to
         spriteBatch.Begin();
 
-        foreach (Organism organism in world.Organisms)
+        foreach (Organism visualOrganism in world.Organisms)
         {
+            var organism = (VisualOrganism)visualOrganism;
             float posAxis0 = (organism.Position[axisIndex0] - viewingInformation.Position[axisIndex0] - organism.Size/2) * viewingInformation.Scale + viewingInformation.Width/2;
             float posAxis1 = (organism.Position[axisIndex1] - viewingInformation.Position[axisIndex1] - organism.Size/2) * viewingInformation.Scale + viewingInformation.Height/2;
 
@@ -83,7 +83,7 @@ public class Renderer
             //TODO base scale, color and layerDepth off of what is in the foreground (and don't draw what is behind the camera)
             Vector2 position = new Vector2(posAxis0, posAxis1);
             float scale = viewingInformation.Scale / 1000f; //1000 because the size of the organism sprite is 1000x1000
-            spriteBatch.Draw(organismTexture, position, null, OrganismColor, 0f, Vector2.Zero, scale, SpriteEffects.None, 1f);
+            spriteBatch.Draw(organismTexture, position, null, organism.Color, 0f, Vector2.Zero, scale, SpriteEffects.None, 1f);
         }
         
         spriteBatch.DrawString(font, axis0Char + " ->", new Vector2(50, 20), Color.White);
