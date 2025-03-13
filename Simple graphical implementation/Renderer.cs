@@ -87,7 +87,7 @@ public class Renderer
             //TODO base scale, color and layerDepth off of what is in the foreground (and don't draw what is behind the camera)
             float minDistanceToCamera = -3f;
             float maxDistanceToCamera = 3f;
-            float layerDepth = (organism.Position[topDownAxis] - minDistanceToCamera) / (maxDistanceToCamera - minDistanceToCamera); //TODO fix this
+            float layerDepth = (organism.Position[topDownAxis] - minDistanceToCamera) / (maxDistanceToCamera - minDistanceToCamera);
             Vector2 position = new Vector2(posAxis0, posAxis1);
             float scale = viewingInformation.Scale / 1000f; //1000 because the size of the organism sprite is 1000x1000
             spriteBatch.Draw(organismTexture, position, null, organism.Color, 0f, Vector2.Zero, scale, SpriteEffects.None, layerDepth);
