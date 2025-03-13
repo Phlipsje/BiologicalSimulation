@@ -15,6 +15,7 @@ public class Renderer
     private SpriteFont font;
     private int axisIndex0;
     private int axisIndex1;
+    private int topDownAxis;
     private char axis0Char;
     private char axis1Char;
     
@@ -31,18 +32,21 @@ public class Renderer
                 axis0Char = 'X';
                 axisIndex1 = 1; //Y
                 axis1Char = 'Y';
+                topDownAxis = 2; //Z
                 break;
             case ViewDirection.YZPlane:
                 axisIndex0 = 1; //Y
                 axis0Char = 'Y';
                 axisIndex1 = 2; //Z
                 axis1Char = 'Z';
+                topDownAxis = 0; //X
                 break;
             case ViewDirection.XZPlane:
                 axisIndex0 = 0; //X
                 axis0Char = 'X';
                 axisIndex1 = 2; //Z
                 axis1Char = 'Z';
+                topDownAxis = 1; //Y
                 break;
         }
     }
@@ -81,9 +85,12 @@ public class Renderer
                 continue;
 
             //TODO base scale, color and layerDepth off of what is in the foreground (and don't draw what is behind the camera)
+            float minDistanceToCamera = -3f;
+            float maxDistanceToCamera = 3f;
+            float layerDepth = (organism.Position[topDownAxis] - minDistanceToCamera) / (maxDistanceToCamera - minDistanceToCamera); //TODO fix this
             Vector2 position = new Vector2(posAxis0, posAxis1);
             float scale = viewingInformation.Scale / 1000f; //1000 because the size of the organism sprite is 1000x1000
-            spriteBatch.Draw(organismTexture, position, null, organism.Color, 0f, Vector2.Zero, scale, SpriteEffects.None, 1f);
+            spriteBatch.Draw(organismTexture, position, null, organism.Color, 0f, Vector2.Zero, scale, SpriteEffects.None, layerDepth);
         }
         
         spriteBatch.DrawString(font, axis0Char + " ->", new Vector2(50, 20), Color.White);

@@ -53,7 +53,9 @@ public class RenderManager
         }
         
         //Draw some extra information on screen
-        spriteBatch.DrawString(font, $"Organisms: {world.Organisms.Count}", new Vector2(660, 380), Color.White);
+        spriteBatch.DrawString(font, $"Total Organisms: {VisualSimulation.OrganismACount + VisualSimulation.OrganismBCount}", new Vector2(660, 380), Color.White);
+        spriteBatch.DrawString(font, $"Green Organisms: {VisualSimulation.OrganismACount}", new Vector2(660, 410), Color.White);
+        spriteBatch.DrawString(font, $"Yellow Organisms: {VisualSimulation.OrganismBCount}", new Vector2(660, 440), Color.White);
 
         //Stop drawing to the buffer and flush the output to the gpu
         spriteBatch.End();

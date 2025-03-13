@@ -22,6 +22,7 @@ public class TestOrganism : VisualOrganism
 
     public override TestOrganism CreateNewOrganism(Vector3 startingPosition)
     {
+        VisualSimulation.OrganismACount++;
         return new TestOrganism(startingPosition, Size, World, DataStructure);
     }
     

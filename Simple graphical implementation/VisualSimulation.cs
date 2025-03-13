@@ -32,6 +32,10 @@ public class VisualSimulation : Game
     private World world;
     private Simulation simulation;
     private ViewingInformation viewingInformation;
+
+    //Easiest way to implement global counter, not most safe way of doing it
+    public static int OrganismACount = 0;
+    public static int OrganismBCount = 0;
     
     public VisualSimulation()
     {
