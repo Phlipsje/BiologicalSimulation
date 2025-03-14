@@ -16,7 +16,7 @@ public class TestOrganismB : VisualOrganism
     public override Color Color => Color.Yellow;
     public TestOrganismB(Vector3 startingPosition, float size, World world, DataStructure dataStructure) : base(startingPosition, size, world, dataStructure)
     {
-        growthTimeTicks = random.Next(50, 200);
+        growthTimeTicks = random.Next(200, 200);
         currentTicks = 0;
     }
 
