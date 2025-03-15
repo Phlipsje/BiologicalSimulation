@@ -19,12 +19,8 @@ public class TestWorld : World
         Organisms.AddFirst(new TestOrganism(new Vector3(0, 0, 0), 0.5f, this, dataStructure));
         Organisms.AddFirst(new TestOrganismB(new Vector3(1, 0, 0), 0.5f, this, dataStructure));
         Organisms.AddFirst(new TestOrganismB(new Vector3(0, 1, 0), 0.5f, this, dataStructure));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(0, 0, 1), 0.5f, this, dataStructure));
         Organisms.AddFirst(new TestOrganismB(new Vector3(-1, 0, 0), 0.5f, this, dataStructure));
         Organisms.AddFirst(new TestOrganismB(new Vector3(0, -1, 0), 0.5f, this, dataStructure));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(0, 0, -1), 0.5f, this, dataStructure));
-        VisualSimulation.OrganismACount = 1;
-        VisualSimulation.OrganismBCount = 6;
     }
 
     public override bool IsInBounds(Organism organism)

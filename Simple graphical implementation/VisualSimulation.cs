@@ -86,7 +86,9 @@ public class VisualSimulation : Game
         simulation.SetDrawFrequency(1);
 
         simulation.OnDraw += OnDrawCall;
-        
+
+        OrganismACount = 0;
+        OrganismBCount = 0;
         simulation.StartSimulation();
     }
 

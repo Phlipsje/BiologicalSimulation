@@ -16,13 +16,13 @@ public class TestOrganismB : VisualOrganism
     public override Color Color => Color.Yellow;
     public TestOrganismB(Vector3 startingPosition, float size, World world, DataStructure dataStructure) : base(startingPosition, size, world, dataStructure)
     {
+        VisualSimulation.OrganismBCount++;
         growthTimeTicks = random.Next(200, 200);
         currentTicks = 0;
     }
 
     public override TestOrganismB CreateNewOrganism(Vector3 startingPosition)
     {
-        VisualSimulation.OrganismBCount++;
         return new TestOrganismB(startingPosition, Size, World, DataStructure);
     }
     
@@ -47,38 +47,15 @@ public class TestOrganismB : VisualOrganism
         int x = (int)(Position.X * 100);
         int y = (int)(Position.Y * 100);
         int z = (int)(Position.Z * 100);
-        return $"x{x/100}y{y/100}z{z/100}t{currentTicks}g{growthTimeTicks}";
+        return $"{x/100} {y/100} {z/100} {currentTicks} {growthTimeTicks}";
     }
 
     public override void FromString(string s)
     {
-        StringReader sr = new StringReader(s);
-        char[] chars = ['x', 'y', 'z', 't', 'g'];
-        float[] values = new float[5];
-        for (int i = 0; i < 5; i++)
-        {
-            sr.Read();
-            values[i] = BuildUpNumber(sr, chars[i]);
-        }
+        string[] values = s.Split(' ');
         
-        //Assignment
-        Position = new Vector3(values[0], values[1], values[2]);
-        currentTicks = (int)values[3];
-        growthTimeTicks = (int)values[4];
-    }
-
-    //Made specifically to read this specific organism type FromString, no safety checks and a lot of assumptions
-    private float BuildUpNumber(StringReader sr, char ch)
-    {
-        int resultingNumber = 0;
-        while (sr.Peek() != ch)
-        {
-            if (sr.Peek() == '.')
-                continue;
-
-            resultingNumber *= 10;
-            resultingNumber += int.Parse(sr.Read().ToString());
-        }
-        return resultingNumber / 100f;
+        Position = new Vector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
+        currentTicks = int.Parse(values[3]);
+        growthTimeTicks = int.Parse(values[4]);
     }
 }
