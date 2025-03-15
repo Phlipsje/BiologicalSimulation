@@ -82,8 +82,14 @@ public class VisualSimulation : Game
         OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
         simulation.CreateSimulation(world);
         simulation.DrawingEnabled = true;
-        simulation.FileWritingEnabled = false;
         simulation.SetDrawFrequency(1);
+        
+        //For saving to file
+        simulation.FileWritingEnabled = true;
+        simulation.SetFileWriteFrequency(100);
+        SimulationExporter.FileName = "test";
+        SimulationExporter.SaveDirectory = "Content\\Test run";
+        SimulationExporter.ShowExportFilePath = true;
 
         simulation.OnDraw += OnDrawCall;
 
@@ -96,7 +102,10 @@ public class VisualSimulation : Game
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
+        {
+            simulation.AbortSimulation();
             Exit();
+        }
 
         simulation.Step();
         

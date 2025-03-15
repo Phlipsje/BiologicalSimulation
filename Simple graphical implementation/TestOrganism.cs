@@ -9,7 +9,7 @@ namespace Simple_graphical_implementation;
 
 public class TestOrganism : VisualOrganism
 {
-    public override string Key => "TA";
+    public override string Key => "A";
     private Random random = new Random();
     private int growthTimeTicks;
     private int currentTicks;
@@ -47,7 +47,7 @@ public class TestOrganism : VisualOrganism
         int x = (int)(Position.X * 100);
         int y = (int)(Position.Y * 100);
         int z = (int)(Position.Z * 100);
-        return $"{x/100} {y/100} {z/100} {currentTicks} {growthTimeTicks}";
+        return $" {x/100} {y/100} {z/100} {currentTicks} {growthTimeTicks}";
     }
 
     public override void FromString(string s)

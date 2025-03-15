@@ -51,6 +51,12 @@ public partial class Simulation
 
     public void Step()
     {
+        if (abort)
+        {
+            OnSimulationEnd();
+            return;
+        }
+        
         Tick++;
         world.Step();
         OnTick?.Invoke(world);
@@ -64,7 +70,7 @@ public partial class Simulation
         //Save file and invoke event letting know that it happened
         if (FileWritingEnabled && Tick % ticksPerFileWrite == 0)
         {
-            (string filePath, string fileContents) = simulationExporter.SaveToFile(world);
+            (string filePath, string fileContents) = simulationExporter.SaveToFile(world, this);
             OnFileWrite?.Invoke(filePath, fileContents);
         }
     }
@@ -80,7 +86,7 @@ public partial class Simulation
     private void OnSimulationEnd()
     {
         //Save simulation to file
-        (string filePath, string fileContents) = simulationExporter.SaveToFile(world);
+        (string filePath, string fileContents) = simulationExporter.SaveToFile(world, this);
         OnFileWrite?.Invoke(filePath, fileContents);
         
         //Tell the user that the simulation is over
