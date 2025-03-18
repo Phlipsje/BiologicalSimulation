@@ -84,7 +84,7 @@ public class VisualSimulation : Game
         renderManager.DrawBorders = true;
         renderManager.LoadContent(Content);
         
-        simulation = new Simulation();
+        
         Random random = new Random(442302142);
         float worldHalfSize = 8f;
         world = new TestWorld(worldHalfSize);
@@ -92,7 +92,9 @@ public class VisualSimulation : Game
         DataStructure dataStructure = new Chunk2DFixedDataStructure(world, new System.Numerics.Vector2(-worldHalfSize, -worldHalfSize), new System.Numerics.Vector2(worldHalfSize, worldHalfSize), new System.Numerics.Vector2(0.5f, 0.5f), organismSize);
         TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
         OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
+        simulation = new Simulation();
         simulation.CreateSimulation(world, random);
+        simulation.SetDataStructure(dataStructure);
         simulation.DrawingEnabled = true;
         simulation.SetDrawFrequency(1);
         

@@ -33,12 +33,8 @@ public class Chunk2D {
         Organisms.AddLast(organism);
     }
 
-    public bool CheckCollision(Organism organism, Vector3 position, World world)
+    public bool CheckCollision(Organism organism, Vector3 position)
     {
-        //If out of bounds, then there is a collision
-        if (!world.IsInBounds(organism))
-            return true;
-        
         foreach (Organism otherOrganism in Organisms)
         {
             //Cannot be a collision with itself

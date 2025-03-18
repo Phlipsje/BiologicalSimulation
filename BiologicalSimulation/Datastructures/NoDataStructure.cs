@@ -48,7 +48,7 @@ public class NoDataStructure(World world) : DataStructure(world)
     public override bool CheckCollision(Organism organism, Vector3 position)
     {
         //If out of bounds, then there is a collision
-        if (!World.IsInBounds(organism))
+        if (!World.IsInBounds(position))
             return true;
         
         foreach (Organism otherOrganism in this)

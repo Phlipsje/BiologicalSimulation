@@ -20,6 +20,8 @@ public class Chunk2DFixedDataStructure : DataStructure
 
     public Chunk2DFixedDataStructure(World world, Vector2 minPosition, Vector2 maxPosition, Vector2 chunkSize, float largestOrganismSize) : base(world)
     {
+        minPosition = minPosition - chunkSize*2;
+        maxPosition = maxPosition + chunkSize*2;
         int chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize.X);
         int chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize.Y);
         chunks = new Chunk2D[chunkCountX, chunkCountY];
@@ -74,9 +76,12 @@ public class Chunk2DFixedDataStructure : DataStructure
 
     public override bool CheckCollision(Organism organism, Vector3 position)
     {
+        if (!World.IsInBounds(position))
+            return true;
+        
         (int chunkX, int chunkY) = GetChunk(position);
         
-        if(chunks[chunkX, chunkY].CheckCollision(organism, position, World))
+        if(chunks[chunkX, chunkY].CheckCollision(organism, position))
             return true;
         
         //If no collision in the chunk the organism is in, then check surrounding possible chunks
@@ -87,7 +92,7 @@ public class Chunk2DFixedDataStructure : DataStructure
                 if (i == 0 && j == 0)
                     continue;
                 
-                if (chunks[chunkX+i, chunkY+j].CheckCollision(organism, position, World))
+                if (chunks[chunkX+i, chunkY+j].CheckCollision(organism, position))
                     return true;
             }
         }

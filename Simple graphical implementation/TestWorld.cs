@@ -28,16 +28,16 @@ public class TestWorld : World
         Organisms.AddFirst(new TestOrganismB(new Vector3(0, -1, 0), 0.5f, this, dataStructure, random));
     }
 
-    public override bool IsInBounds(Organism organism)
+    public override bool IsInBounds(Vector3 position)
     {
         //Check if within cube
         float cubeHalfSize = worldHalfSize;
 
-        if (MathF.Abs(organism.Position.X) > cubeHalfSize)
+        if (MathF.Abs(position.X) > cubeHalfSize)
             return false;
-        if (MathF.Abs(organism.Position.Y) > cubeHalfSize)
+        if (MathF.Abs(position.Y) > cubeHalfSize)
             return false;
-        if (MathF.Abs(organism.Position.Z) > cubeHalfSize)
+        if (MathF.Abs(position.Z) > cubeHalfSize)
             return false;
 
         return true;
