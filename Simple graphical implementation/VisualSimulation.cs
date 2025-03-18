@@ -37,6 +37,12 @@ public class VisualSimulation : Game
     public static int OrganismACount = 0;
     public static int OrganismBCount = 0;
     
+    //For tracking fps performance
+    public static float AverageFps { get; private set; }
+    private float tallyFps;
+    private int fpsCounter;
+    private const int ticksPerUpdate = 15;
+    
     public VisualSimulation()
     {
         graphics = new GraphicsDeviceManager(this);
@@ -44,6 +50,9 @@ public class VisualSimulation : Game
         IsMouseVisible = true;
         graphics.PreferredBackBufferWidth = screenWidth;
         graphics.PreferredBackBufferHeight = screenHeight;
+
+        IsFixedTimeStep = false;
+        AverageFps = 60;
     }
 
     protected override void Initialize()
@@ -96,6 +105,8 @@ public class VisualSimulation : Game
         OrganismACount = 0;
         OrganismBCount = 0;
         simulation.StartSimulation();
+        
+        
     }
 
     protected override void Update(GameTime gameTime)
@@ -106,6 +117,21 @@ public class VisualSimulation : Game
             simulation.AbortSimulation();
             Exit();
         }
+        
+        #region Performance tracking
+        tallyFps += 1 / (float)gameTime.ElapsedGameTime.TotalSeconds; 
+        fpsCounter++;
+        if (fpsCounter >= ticksPerUpdate) 
+        { 
+            AverageFps = tallyFps / fpsCounter;
+            if (AverageFps is Single.PositiveInfinity)
+                AverageFps = 0;
+                
+            fpsCounter = 0;
+            tallyFps = 0;
+        }
+        //Now can write average fps in render manager
+        #endregion
 
         simulation.Step();
         

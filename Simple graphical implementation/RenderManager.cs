@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BioSim;
 using Microsoft.Xna.Framework;
@@ -53,9 +54,10 @@ public class RenderManager
         }
         
         //Draw some extra information on screen
-        spriteBatch.DrawString(font, $"Total Organisms: {VisualSimulation.OrganismACount + VisualSimulation.OrganismBCount}", new Vector2(660, 380), Color.White);
-        spriteBatch.DrawString(font, $"Green Organisms: {VisualSimulation.OrganismACount}", new Vector2(660, 410), Color.White);
-        spriteBatch.DrawString(font, $"Yellow Organisms: {VisualSimulation.OrganismBCount}", new Vector2(660, 440), Color.White);
+        spriteBatch.DrawString(font, $"FPS: {Math.Round(VisualSimulation.AverageFps)}", new Vector2(660, 380), Color.White);
+        spriteBatch.DrawString(font, $"Total Organisms: {VisualSimulation.OrganismACount + VisualSimulation.OrganismBCount}", new Vector2(660, 410), Color.White);
+        spriteBatch.DrawString(font, $"Green Organisms: {VisualSimulation.OrganismACount}", new Vector2(660, 440), Color.White);
+        spriteBatch.DrawString(font, $"Yellow Organisms: {VisualSimulation.OrganismBCount}", new Vector2(660, 470), Color.White);
 
         //Stop drawing to the buffer and flush the output to the gpu
         spriteBatch.End();
