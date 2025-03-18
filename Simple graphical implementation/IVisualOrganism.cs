@@ -1,3 +1,4 @@
+using System;
 using BioSim;
 using BioSim.Datastructures;
 using Microsoft.Xna.Framework;
@@ -11,7 +12,7 @@ namespace Simple_graphical_implementation;
 /// </summary>
 public abstract class VisualOrganism : Organism
 {
-    protected VisualOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure) : base(startingPosition, size, world, dataStructure)
+    protected VisualOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
     }
 

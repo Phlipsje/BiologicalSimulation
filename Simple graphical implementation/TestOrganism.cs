@@ -10,11 +10,10 @@ namespace Simple_graphical_implementation;
 public class TestOrganism : VisualOrganism
 {
     public override string Key => "A";
-    private Random random = new Random();
     private int growthTimeTicks;
     private int currentTicks;
     public override Color Color => Color.Green;
-    public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure) : base(startingPosition, size, world, dataStructure)
+    public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
         VisualSimulation.OrganismACount++;
         growthTimeTicks = random.Next(200, 200);
@@ -23,13 +22,13 @@ public class TestOrganism : VisualOrganism
 
     public override TestOrganism CreateNewOrganism(Vector3 startingPosition)
     {
-        return new TestOrganism(startingPosition, Size, World, DataStructure);
+        return new TestOrganism(startingPosition, Size, World, DataStructure, Random);
     }
     
     public override void Step()
     {
         //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
-        Move(new Vector3((float)(random.NextDouble() * 0.02 - 0.01), (float)(random.NextDouble() * 0.02 - 0.01),(float)(random.NextDouble() * 0.02 - 0.01)));
+        Move(new Vector3((float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01),(float)(Random.NextDouble() * 0.02 - 0.01)));
 
         currentTicks++;
 

@@ -36,7 +36,7 @@ public abstract class World
         OrganismsToAdd.AddFirst(organism);
     }
 
-    public abstract void StartingDistribution(DataStructure dataStructure); //Where all organisms start
+    public abstract void StartingDistribution(DataStructure dataStructure, Random random); //Where all organisms start
     public abstract bool IsInBounds(Organism organism); //Use this to define the confines of space all organisms are in, if false, it can't move to that position
     public abstract bool StopCondition(); //If this is true, the program will halt
 }

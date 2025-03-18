@@ -18,14 +18,14 @@ public class TestWorld : World
     {
         this.worldHalfSize = worldHalfSize;
     }
-    public override void StartingDistribution(DataStructure dataStructure)
+    public override void StartingDistribution(DataStructure dataStructure, Random random)
     {
         //One singular organism at the center
-        Organisms.AddFirst(new TestOrganism(new Vector3(0, 0, 0), 0.5f, this, dataStructure));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(1, 0, 0), 0.5f, this, dataStructure));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(0, 1, 0), 0.5f, this, dataStructure));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(-1, 0, 0), 0.5f, this, dataStructure));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(0, -1, 0), 0.5f, this, dataStructure));
+        Organisms.AddFirst(new TestOrganism(new Vector3(0, 0, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganismB(new Vector3(1, 0, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganismB(new Vector3(0, 1, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganismB(new Vector3(-1, 0, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganismB(new Vector3(0, -1, 0), 0.5f, this, dataStructure, random));
     }
 
     public override bool IsInBounds(Organism organism)

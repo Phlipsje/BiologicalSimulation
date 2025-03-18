@@ -14,15 +14,15 @@ public abstract class Organism : IOrganism
     public float Size { get; } //Organism is a sphere, so this is the radius
     protected World World { get; } //Needs this to check if it is in bounds
     protected DataStructure DataStructure { get; } //Needs this to understand where other organisms are
-    private Random random;
+    protected Random Random;
 
-    public Organism(Vector3 startingPosition, float size, World world, DataStructure dataStructure)
+    public Organism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random)
     {
         Position = startingPosition;
         Size = size;
         World = world;
         DataStructure = dataStructure;
-        random = new Random();
+        Random = random;
     }
 
     public abstract Organism CreateNewOrganism(Vector3 startingPosition);
@@ -47,8 +47,8 @@ public abstract class Organism : IOrganism
         for (int i = 0; i < 5; i++)
         {
             //Get a direction in a 3D circular radius, length is exactly 1
-            float phi = (float)(MathF.Acos(2 * (float)random.NextDouble() - 1) - Math.PI / 2);
-            float lambda = (float)(2 * Math.PI * random.NextDouble());
+            float phi = (float)(MathF.Acos(2 * (float)Random.NextDouble() - 1) - Math.PI / 2);
+            float lambda = (float)(2 * Math.PI * Random.NextDouble());
             float x = MathF.Cos(phi) * MathF.Cos(lambda);
             float y = MathF.Cos(phi) * MathF.Sin(lambda);
             float z = MathF.Sin(phi);

@@ -6,6 +6,7 @@ public partial class Simulation
 {
     private World world;
     private DataStructure dataStructure;
+    private Random random;
     private bool abort;
     public int Tick { get; private set; } //The current tick we are on
     public bool DrawingEnabled { get; set; }
@@ -31,9 +32,10 @@ public partial class Simulation
     public delegate void OnEndEventHandler(World world);
     public event OnEndEventHandler? OnEnd;
 
-    public void CreateSimulation(World world)
+    public void CreateSimulation(World world, Random random)
     {
         this.world = world;
+        this.random = random;
         dataStructure = new NoDataStructure(world); //Default data structure has no optimizations
         abort = false;
         Tick = 0;
@@ -46,7 +48,7 @@ public partial class Simulation
 
     public void StartSimulation()
     {
-        world.StartingDistribution(dataStructure);
+        world.StartingDistribution(dataStructure, random);
     }
 
     public void Step()
