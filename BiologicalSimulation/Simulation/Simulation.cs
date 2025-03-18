@@ -58,6 +58,7 @@ public partial class Simulation
         }
         
         Tick++;
+        dataStructure.Step();
         world.Step();
         OnTick?.Invoke(world);
 

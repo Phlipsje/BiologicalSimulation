@@ -14,6 +14,8 @@ public abstract class DataStructure : IEnumerable<IOrganism>
         World = world;
     }
 
+    //Gets called every frame (before updating world)
+    public abstract void Step();
     public abstract Organism ClosestNeighbour(Organism organism);
     public abstract bool CheckCollision(Organism organism, Vector3 position);
     

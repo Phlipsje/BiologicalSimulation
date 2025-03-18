@@ -6,16 +6,15 @@ namespace BioSim.Datastructures;
 /// This implements DataStructure (because that is required), but isn't a data structure
 /// It simply stores all organisms in a list
 /// </summary>
-public class NoDataStructure : DataStructure
+public class NoDataStructure(World world) : DataStructure(world)
 {
-    private World world;
-    private IEnumerable<Organism> Organisms => world.Organisms.Concat(World.OrganismsToAdd);
-    
-    public NoDataStructure(World world) : base(world)
+    private IEnumerable<Organism> Organisms => World.Organisms.Concat(World.OrganismsToAdd);
+
+    public override void Step()
     {
-        this.world = world;
+        //Nothing
     }
-    
+
     /// <summary>
     /// Gets the organism closest to this organism
     /// </summary>

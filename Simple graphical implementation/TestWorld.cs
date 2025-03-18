@@ -13,6 +13,11 @@ namespace Simple_graphical_implementation;
 /// </summary>
 public class TestWorld : World
 {
+    private float worldHalfSize;
+    public TestWorld(float worldHalfSize)
+    {
+        this.worldHalfSize = worldHalfSize;
+    }
     public override void StartingDistribution(DataStructure dataStructure)
     {
         //One singular organism at the center
@@ -26,7 +31,7 @@ public class TestWorld : World
     public override bool IsInBounds(Organism organism)
     {
         //Check if within cube
-        int cubeHalfSize = 8;
+        float cubeHalfSize = worldHalfSize;
 
         if (MathF.Abs(organism.Position.X) > cubeHalfSize)
             return false;
