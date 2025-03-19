@@ -82,6 +82,7 @@ public class VisualSimulation : Game
                 ViewDirection.XZPlane, new Rectangle(0, sizeY, sizeX, sizeY))
         });
         renderManager.DrawBorders = true;
+        renderManager.Draw = false;
         renderManager.LoadContent(Content);
         
         
@@ -105,6 +106,7 @@ public class VisualSimulation : Game
         SimulationExporter.FileName = "test";
         SimulationExporter.SaveDirectory = "Content\\Test run";
         SimulationExporter.ShowExportFilePath = true;
+        SimulationExporter.ClearDirectory = true;
 
         simulation.OnDraw += OnDrawCall;
 

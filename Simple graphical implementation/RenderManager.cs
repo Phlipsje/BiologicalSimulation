@@ -14,6 +14,7 @@ public class RenderManager
     private Texture2D pixel;
     private SpriteFont font;
     public bool DrawBorders { get; set; }
+    public bool Draw { get; set; } = true;
     public RenderManager(GraphicsDevice graphicsDevice, List<Renderer> renderers)
     {
         this.graphicsDevice = graphicsDevice;
@@ -33,10 +34,13 @@ public class RenderManager
 
     public void Render(SpriteBatch spriteBatch, World world, ViewingInformation viewingInformation)
     {
-        //First let every render target be formed
-        foreach (Renderer renderer in renderers)
+        if (Draw)
         {
-            renderer.Render(graphicsDevice, spriteBatch, world, viewingInformation);
+            //First let every render target be formed
+            foreach (Renderer renderer in renderers)
+            {
+                renderer.Render(graphicsDevice, spriteBatch, world, viewingInformation);
+            } 
         }
         
         graphicsDevice.Clear(Color.Black);
@@ -44,13 +48,16 @@ public class RenderManager
         //Create a new buffer to draw to (the screen in the case)
         spriteBatch.Begin();
 
-        foreach (Renderer renderer in renderers)
+        if (Draw)
         {
-            spriteBatch.Draw(renderer.RenderTarget, renderer.DisplayRectangle, Color.White);
-            if (DrawBorders)
+            foreach (Renderer renderer in renderers)
             {
-                DrawRectangle(spriteBatch, renderer.DisplayRectangle, Color.Red);
-            }
+                spriteBatch.Draw(renderer.RenderTarget, renderer.DisplayRectangle, Color.White);
+                if (DrawBorders)
+                {
+                    DrawRectangle(spriteBatch, renderer.DisplayRectangle, Color.Red);
+                }
+            } 
         }
         
         //Draw some extra information on screen

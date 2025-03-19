@@ -7,6 +7,7 @@ public class SimulationExporter
     public static string FileName { get; set; }
     public static string SaveDirectory { get; set; }
     public static bool ShowExportFilePath { get; set; } = false;
+    public static bool ClearDirectory { get; set; } = false;
 
     /// <summary>
     /// Saves all organisms in the simulation to a file
@@ -32,6 +33,15 @@ public class SimulationExporter
         if (!Directory.Exists(SaveDirectory))
         {
             Directory.CreateDirectory(SaveDirectory);
+        }
+        else
+        {
+            if (ClearDirectory) //Only do this is the directory exists and we want it to be empty
+            {
+                //Quickest way to clear everything
+                Directory.Delete(SaveDirectory, true);
+                Directory.CreateDirectory(SaveDirectory);
+            }
         }
 
         //Get file path
