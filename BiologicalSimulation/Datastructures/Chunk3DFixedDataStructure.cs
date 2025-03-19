@@ -8,24 +8,24 @@ namespace BioSim.Datastructures;
 /// Organisms are re-inserted after every frame
 /// This version of this data structure has a maximum size so that the chunks can be stored in a grid (which is a lot faster),
 ///  the program does not check if the position is supported before inserting.
-/// For a version that supports an infinitely sized continuous space, use Chunk2DDataStructure.cs
-/// 2D version is optimal for simulating system that mostly grow in two dimensions, such as biofilms.
+/// For a version that supports an infinitely sized continuous space, use Chunk3DDataStructure.cs
 /// </summary>
-public class Chunk2DFixedDataStructure : DataStructure
+public class Chunk3DFixedDataStructure : DataStructure
 {
-    private Chunk[,] chunks;
-    private Vector2 minPosition;
-    private Vector2 chunkSize;
+    private Chunk[,,] chunks;
+    private Vector3 minPosition;
+    private Vector3 chunkSize;
     private float largestOrganismSize;
     private IEnumerable<Organism> Organisms => World.Organisms.Concat(World.OrganismsToAdd); //TODO make this work without a concat, because is slow-ish
 
-    public Chunk2DFixedDataStructure(World world, Vector2 minPosition, Vector2 maxPosition, Vector2 chunkSize, float largestOrganismSize) : base(world)
+    public Chunk3DFixedDataStructure(World world, Vector3 minPosition, Vector3 maxPosition, Vector3 chunkSize, float largestOrganismSize) : base(world)
     {
         minPosition = minPosition - chunkSize*2;
         maxPosition = maxPosition + chunkSize*2;
         int chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize.X);
         int chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize.Y);
-        chunks = new Chunk[chunkCountX, chunkCountY];
+        int chunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize.Z);
+        chunks = new Chunk[chunkCountX, chunkCountY, chunkCountZ];
         this.minPosition = minPosition;
         this.chunkSize = chunkSize;
         this.largestOrganismSize = largestOrganismSize;
@@ -34,7 +34,10 @@ public class Chunk2DFixedDataStructure : DataStructure
         {
             for (int j = 0; j < chunkCountY; j++)
             {
-                chunks[i, j] = new Chunk();
+                for (int k = 0; k < chunkCountZ; k++)
+                {
+                    chunks[i, j, k] = new Chunk();
+                }
             }
         }
     }
@@ -54,15 +57,16 @@ public class Chunk2DFixedDataStructure : DataStructure
 
     private void InsertIntoChunk(Organism organism)
     {
-        (int chunkX, int chunkY) = GetChunk(organism.Position);
-        chunks[chunkX,chunkY].Insert(organism);
+        (int chunkX, int chunkY, int chunkZ) = GetChunk(organism.Position);
+        chunks[chunkX,chunkY, chunkZ].Insert(organism);
     }
 
-    private (int, int) GetChunk(Vector3 position)
+    private (int, int, int) GetChunk(Vector3 position)
     {
         int chunkX = (int)Math.Ceiling((position.X - minPosition.X) / chunkSize.X);
         int chunkY = (int)Math.Ceiling((position.Y - minPosition.Y) / chunkSize.Y);
-        return (chunkX, chunkY);
+        int chunkZ = (int)Math.Ceiling((position.Z - minPosition.Z) / chunkSize.Z);
+        return (chunkX, chunkY, chunkZ);
     }
 
     public override void Step()
@@ -80,9 +84,9 @@ public class Chunk2DFixedDataStructure : DataStructure
         if (!World.IsInBounds(position))
             return true;
         
-        (int chunkX, int chunkY) = GetChunk(position);
+        (int chunkX, int chunkY, int chunkZ) = GetChunk(position);
         
-        if(chunks[chunkX, chunkY].CheckCollision(organism, position))
+        if(chunks[chunkX, chunkY, chunkZ].CheckCollision(organism, position))
             return true;
         
         //If no collision in the chunk the organism is in, then check surrounding possible chunks
@@ -90,11 +94,14 @@ public class Chunk2DFixedDataStructure : DataStructure
         {
             for (int j = -1; j <= 1; j++)
             {
-                if (i == 0 && j == 0)
-                    continue;
+                for (int k = -1; k <= 1; k++)
+                {
+                    if (i == 0 && j == 0 && k == 0)
+                        continue;
                 
-                if (chunks[chunkX+i, chunkY+j].CheckCollision(organism, position))
-                    return true;
+                    if (chunks[chunkX+i, chunkY+j, chunkZ+k].CheckCollision(organism, position))
+                        return true;
+                }
             }
         }
 

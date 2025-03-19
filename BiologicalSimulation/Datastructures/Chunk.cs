@@ -3,24 +3,16 @@ using System.Numerics;
 namespace BioSim.Datastructures;
 
 /// <summary>
-/// A chunk that has infinite length in the 3rd dimension, thus it only selects based off of 2D location
-/// This is a simpler type of chunk to make and is more optimal for flat growth patterns like Biofilms.
+/// A chunk is the term for a bucket when grouping based off of position.
+/// It's only function is holding references of organisms in World and looping through its (smaller) group of organisms as to exclude irrelevant organisms.
 /// </summary>
-public class Chunk2D {
-    public float X { get; private set; }
-    public float Y { get; private set; }
-    public float Width { get; private set; }
-    public float Height { get; private set; }
+public class Chunk {
     
     public LinkedList<Organism> Organisms { get; }
 
-    public Chunk2D(float x, float y, float width, float height)
+    public Chunk()
     {
         Organisms = new LinkedList<Organism>();
-        X = x;
-        Y = y;
-        Width = width;
-        Height = height;
     }
     
     public void Clear()

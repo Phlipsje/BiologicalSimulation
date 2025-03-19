@@ -89,7 +89,8 @@ public class VisualSimulation : Game
         float worldHalfSize = 8f;
         world = new TestWorld(worldHalfSize);
         float organismSize = 0.5f;
-        DataStructure dataStructure = new Chunk2DFixedDataStructure(world, new System.Numerics.Vector2(-worldHalfSize, -worldHalfSize), new System.Numerics.Vector2(worldHalfSize, worldHalfSize), new System.Numerics.Vector2(0.5f, 0.5f), organismSize);
+        DataStructure dataStructure = new Chunk3DFixedDataStructure(world, new System.Numerics.Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
+            new System.Numerics.Vector3(worldHalfSize, worldHalfSize, worldHalfSize), new System.Numerics.Vector3(1f, 1f, 1f), organismSize);
         TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
         OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
         simulation = new Simulation();
