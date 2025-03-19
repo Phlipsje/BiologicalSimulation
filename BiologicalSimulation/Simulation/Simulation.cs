@@ -44,6 +44,10 @@ public partial class Simulation
         ticksPerDrawCall = 0;
         ticksPerFileWrite = 0;
         simulationExporter = new SimulationExporter();
+        
+        //Sets culture to US-English, specific language does not matter, but because we set this, using float.Parse and writing floats to file always use '.' as decimal point.
+        System.Globalization.CultureInfo ci = new System.Globalization.CultureInfo("en-US");
+        System.Threading.Thread.CurrentThread.CurrentCulture = ci;
     }
 
     public void StartSimulation()

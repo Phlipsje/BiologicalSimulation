@@ -46,7 +46,7 @@ public class TestOrganism : VisualOrganism
         int x = (int)(Position.X * 100);
         int y = (int)(Position.Y * 100);
         int z = (int)(Position.Z * 100);
-        return $" {x/100} {y/100} {z/100} {currentTicks} {growthTimeTicks}";
+        return $" {x/100f} {y/100f} {z/100f} {currentTicks} {growthTimeTicks}";
     }
 
     public override void FromString(string s)
