@@ -8,28 +8,36 @@ namespace BioSim.Datastructures;
 /// </summary>
 public class Chunk {
     
-    public LinkedList<Organism> Organisms { get; }
+    //An array that gets reused is faster than a linked list getting clear every frame, as resetting and overwriting never calls the garbage collector
+    //When using a linked list, it is accompanied by a LinkedListNode<T> which does get garbage collected after an element is removed
+    public Organism[] Organisms { get; }
+    private int count = 0;
 
     public Chunk()
     {
-        Organisms = new LinkedList<Organism>();
+        //Currently hardcoded to 40 as that should be an upper bound for a normally sized chunk,
+        // but should look into finding a dynamic upper bound based off of size
+        Organisms = new Organism[40];
     }
     
     public void Clear()
     {
-        Organisms.Clear();
+        count = 0;
     }
 
     public void Insert(Organism organism)
     {
-        Organisms.AddLast(organism);
+        //Organisms.AddLast(organism);
+        Organisms[count] = organism;
+        count++;
     }
 
     public bool CheckCollision(Organism organism, Vector3 position)
     {
-        foreach (Organism otherOrganism in Organisms)
+        for (int i = 0; i < count; i++)
         {
-            //Cannot be a collision with itself
+            Organism otherOrganism = Organisms[i];
+            
             if(otherOrganism == organism)
                 continue;
             
