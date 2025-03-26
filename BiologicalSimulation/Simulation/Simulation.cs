@@ -53,11 +53,14 @@ public partial class Simulation
     public void StartSimulation()
     {
         world.StartingDistribution(dataStructure, random);
+        
+        (string filePath, string fileContents) = simulationExporter.SaveToFile(world, this);
+        OnFileWrite?.Invoke(filePath, fileContents);
     }
 
     public void Step()
     {
-        if (abort)
+        if (abort || world.StopCondition())
         {
             OnSimulationEnd();
             return;

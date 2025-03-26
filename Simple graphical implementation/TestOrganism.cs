@@ -16,7 +16,7 @@ public class TestOrganism : VisualOrganism
     public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
         VisualSimulation.OrganismACount++;
-        growthTimeTicks = random.Next(200, 200);
+        growthTimeTicks = 200; //random.Next(200, 200);
         currentTicks = 0;
     }
 

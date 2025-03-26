@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using BioSim;
 using BioSim.Datastructures;
 using BioSim.Simulation;
@@ -32,6 +33,7 @@ public class VisualSimulation : Game
     private World world;
     private Simulation simulation;
     private ViewingInformation viewingInformation;
+    public new int Tick => simulation.Tick;
 
     //Easiest way to implement global counter, not most safe way of doing it
     public static int OrganismACount = 0;
@@ -42,6 +44,7 @@ public class VisualSimulation : Game
     private float tallyFps;
     private int fpsCounter;
     private const int ticksPerUpdate = 15;
+    private Stopwatch stopwatch;
     
     public VisualSimulation()
     {
@@ -61,9 +64,10 @@ public class VisualSimulation : Game
 
         viewingInformation = new ViewingInformation();
         viewingInformation.Position = Vector3.Zero;
-        viewingInformation.Scale = 100;
+        viewingInformation.Scale = 50;
         viewingInformation.Width = screenWidth;
         viewingInformation.Height = screenHeight;
+        stopwatch = new Stopwatch();
     }
 
     protected override void LoadContent()
@@ -72,7 +76,7 @@ public class VisualSimulation : Game
 
         int sizeX = screenWidth / 2;
         int sizeY = screenHeight / 2;
-        renderManager = new RenderManager(GraphicsDevice, new List<Renderer>()
+        renderManager = new RenderManager(this, GraphicsDevice, new List<Renderer>()
         {
             new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth, screenHeight), 
                 ViewDirection.XYPlane, new Rectangle(0, 0, sizeX, sizeY)),
@@ -85,16 +89,15 @@ public class VisualSimulation : Game
         renderManager.Draw = false;
         renderManager.LoadContent(Content);
         
-        
-        Random random = new Random(442302142);
-        float worldHalfSize = 8f;
-        world = new TestWorld(worldHalfSize);
+        simulation = new Simulation();
+        Random random = new Random(); //Can enter seed here
+        float worldHalfSize = 10f;
+        world = new TestWorld(simulation, worldHalfSize);
         float organismSize = 0.5f;
         DataStructure dataStructure = new Chunk3DFixedDataStructure(world, new System.Numerics.Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
             new System.Numerics.Vector3(worldHalfSize, worldHalfSize, worldHalfSize), new System.Numerics.Vector3(1f, 1f, 1f), organismSize);
         TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
         OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
-        simulation = new Simulation();
         simulation.CreateSimulation(world, random);
         simulation.SetDataStructure(dataStructure);
         simulation.DrawingEnabled = true;
@@ -103,18 +106,19 @@ public class VisualSimulation : Game
         //For saving to file
         simulation.FileWritingEnabled = true;
         simulation.SetFileWriteFrequency(100);
-        SimulationExporter.FileName = "test";
-        SimulationExporter.SaveDirectory = "Content\\Test run";
+        SimulationExporter.FileName = "simulation";
+        SimulationExporter.SaveDirectory = "Content\\3D-partial trapping-fixed growth-10";
         SimulationExporter.ShowExportFilePath = true;
         SimulationExporter.ClearDirectory = true;
 
         simulation.OnDraw += OnDrawCall;
+        simulation.OnEnd += StopProgram;
 
         OrganismACount = 0;
         OrganismBCount = 0;
         simulation.StartSimulation();
         
-        
+        stopwatch.Start();
     }
 
     protected override void Update(GameTime gameTime)
@@ -142,6 +146,12 @@ public class VisualSimulation : Game
         #endregion
 
         simulation.Step();
+
+        if (simulation.Tick == 2000)
+        {
+            Console.WriteLine("Simulation reached 2000 ticks in:");
+            Console.WriteLine(stopwatch.ElapsedMilliseconds/1000f + " seconds"); //Elapsed seconds
+        }
         
         base.Update(gameTime);
     }
@@ -163,6 +173,12 @@ public class VisualSimulation : Game
     private void OnDrawCall(World world)
     {
         updateDrawnImage = true;
+    }
+
+    private void StopProgram(World world)
+    {
+        //Simulation has already stopped before this
+        Exit();
     }
 }
 

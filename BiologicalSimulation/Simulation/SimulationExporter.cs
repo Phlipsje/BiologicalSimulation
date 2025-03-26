@@ -38,6 +38,8 @@ public class SimulationExporter
         {
             if (ClearDirectory) //Only do this is the directory exists and we want it to be empty
             {
+                ClearDirectory = false; //Don't repeat
+                
                 //Quickest way to clear everything
                 Directory.Delete(SaveDirectory, true);
                 Directory.CreateDirectory(SaveDirectory);
