@@ -145,9 +145,9 @@ public class VisualSimulation : Game
         simulation.Step();
 
         secondsCount += (float)gameTime.ElapsedGameTime.TotalSeconds;
-        if (simulation.Tick == 2000)
+        if (simulation.Tick == 4000)
         {
-            Console.WriteLine("Simulation reached 2000 ticks in:");
+            Console.WriteLine("Simulation reached 4000 ticks in:");
             Console.WriteLine(secondsCount + " seconds"); //Elapsed seconds
         }
         

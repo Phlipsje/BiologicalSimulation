@@ -53,6 +53,7 @@ public partial class Simulation
     public void StartSimulation()
     {
         world.StartingDistribution(dataStructure, random);
+        world.Initialize();
         
         (string filePath, string fileContents) = simulationExporter.SaveToFile(world, this);
         OnFileWrite?.Invoke(filePath, fileContents);

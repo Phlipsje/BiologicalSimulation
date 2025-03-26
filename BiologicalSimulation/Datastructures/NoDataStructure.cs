@@ -8,8 +8,6 @@ namespace BioSim.Datastructures;
 /// </summary>
 public class NoDataStructure(World world) : DataStructure(world)
 {
-    private IEnumerable<Organism> Organisms => World.Organisms.Concat(World.OrganismsToAdd);
-
     public override void Step()
     {
         //Nothing
@@ -25,7 +23,7 @@ public class NoDataStructure(World world) : DataStructure(world)
         //Tracking distance without the square root, because it is not needed to find the closest organism and would only take more compute
         float currentDistanceSquared = float.MaxValue;
         Organism closestOrganism = organism;
-        foreach (Organism otherOrganism in Organisms)
+        foreach (Organism otherOrganism in World.Organisms)
         {
             //If the organism is itself, we need to exclude it (because it's distance to itself is not what we want)
             if (otherOrganism == organism)
@@ -50,9 +48,14 @@ public class NoDataStructure(World world) : DataStructure(world)
         //If out of bounds, then there is a collision
         if (!World.IsInBounds(position))
             return true;
-        
-        foreach (Organism otherOrganism in this)
+
+        //Not using foreach but for loop, because organisms can be added while the loop is active
+        LinkedListNode<Organism> organismNode = World.Organisms.First!;
+        for (int i = 0; i < World.OrganismCount; i++)
         {
+            Organism otherOrganism = organismNode.Value;
+            organismNode = organismNode.Next!;
+            
             //Cannot be a collision with itself
             if(otherOrganism == organism)
                 continue;
@@ -75,6 +78,6 @@ public class NoDataStructure(World world) : DataStructure(world)
 
     protected override IEnumerator<IOrganism> ToEnumerator()
     {
-        return Organisms.GetEnumerator();
+        return World.Organisms.GetEnumerator();
     }
 }

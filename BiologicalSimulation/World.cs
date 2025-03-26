@@ -6,35 +6,35 @@ namespace BioSim;
 public abstract class World
 {
     public LinkedList<Organism> Organisms { get; }
-    //This exists, because a collection cannot be altered while it is being looped through
-    // so we add new organisms to this list and at the end of a loop, we add all these to Organisms and then clear this.
-    public LinkedList<Organism> OrganismsToAdd { get; } 
-
+    public int OrganismCount { get; private set; }
+    
     public World()
     {
         Organisms = new LinkedList<Organism>();
-        OrganismsToAdd = new LinkedList<Organism>();
+    }
+
+    public void Initialize()
+    {
+        OrganismCount = Organisms.Count;
     }
 
     public void Step()
     {
-        foreach (Organism organism in Organisms)
+        //Not using foreach but for loop, because organisms can be added while the loop is active
+        LinkedListNode<Organism> organismNode = Organisms.First!;
+        for (int i = 0; i < OrganismCount; i++)
         {
+            Organism organism = organismNode.Value;
+            organismNode = organismNode.Next!;
+            
             organism.Step();
         }
-
-        //When looping is done, add all new organisms to the main list
-        foreach (Organism organism in OrganismsToAdd)
-        {
-            Organisms.AddFirst(organism);
-        }
-        
-        OrganismsToAdd.Clear();
     }
 
     public void AddOrganism(Organism organism)
     {
-        OrganismsToAdd.AddFirst(organism);
+        Organisms.AddLast(organism);
+        OrganismCount++;
     }
 
     public abstract void StartingDistribution(DataStructure dataStructure, Random random); //Where all organisms start

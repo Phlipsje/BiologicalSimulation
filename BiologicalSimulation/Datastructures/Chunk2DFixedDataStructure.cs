@@ -17,8 +17,7 @@ public class Chunk2DFixedDataStructure : DataStructure
     private Vector2 minPosition;
     private Vector2 chunkSize;
     private float largestOrganismSize;
-    private IEnumerable<Organism> Organisms => World.Organisms.Concat(World.OrganismsToAdd); //TODO make this work without a concat, because is slow-ish
-
+    
     public Chunk2DFixedDataStructure(World world, Vector2 minPosition, Vector2 maxPosition, Vector2 chunkSize, float largestOrganismSize) : base(world)
     {
         minPosition = minPosition - chunkSize*2;
@@ -46,7 +45,7 @@ public class Chunk2DFixedDataStructure : DataStructure
             chunk.Clear();
         }
         
-        foreach (Organism organism in Organisms)
+        foreach (Organism organism in World.Organisms)
         {
             InsertIntoChunk(organism);
         }
@@ -103,6 +102,6 @@ public class Chunk2DFixedDataStructure : DataStructure
 
     protected override IEnumerator<IOrganism> ToEnumerator()
     {
-        return Organisms.GetEnumerator();
+        return World.Organisms.GetEnumerator();
     }
 }
