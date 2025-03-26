@@ -44,7 +44,7 @@ public class VisualSimulation : Game
     private float tallyFps;
     private int fpsCounter;
     private const int ticksPerUpdate = 15;
-    private Stopwatch stopwatch;
+    private float secondsCount = 0f;
     
     public VisualSimulation()
     {
@@ -67,7 +67,6 @@ public class VisualSimulation : Game
         viewingInformation.Scale = 50;
         viewingInformation.Width = screenWidth;
         viewingInformation.Height = screenHeight;
-        stopwatch = new Stopwatch();
     }
 
     protected override void LoadContent()
@@ -104,21 +103,19 @@ public class VisualSimulation : Game
         simulation.SetDrawFrequency(1);
         
         //For saving to file
-        simulation.FileWritingEnabled = true;
+        simulation.FileWritingEnabled = false;
         simulation.SetFileWriteFrequency(100);
         SimulationExporter.FileName = "simulation";
-        SimulationExporter.SaveDirectory = "Content\\3D-partial trapping-fixed growth-10";
+        SimulationExporter.SaveDirectory = "Content\\nothing";
         SimulationExporter.ShowExportFilePath = true;
         SimulationExporter.ClearDirectory = true;
 
         simulation.OnDraw += OnDrawCall;
         simulation.OnEnd += StopProgram;
-
+        
         OrganismACount = 0;
         OrganismBCount = 0;
         simulation.StartSimulation();
-        
-        stopwatch.Start();
     }
 
     protected override void Update(GameTime gameTime)
@@ -147,10 +144,11 @@ public class VisualSimulation : Game
 
         simulation.Step();
 
+        secondsCount += (float)gameTime.ElapsedGameTime.TotalSeconds;
         if (simulation.Tick == 2000)
         {
             Console.WriteLine("Simulation reached 2000 ticks in:");
-            Console.WriteLine(stopwatch.ElapsedMilliseconds/1000f + " seconds"); //Elapsed seconds
+            Console.WriteLine(secondsCount + " seconds"); //Elapsed seconds
         }
         
         base.Update(gameTime);
