@@ -30,7 +30,7 @@ public static class GrowthGrid
             {
                 for (int k = 0; k < chunkCountZ; k++)
                 {
-                    values[i, j, k] = new GridValues(); //TODO do something with this
+                    values[i, j, k] = new GridValues();
                 }
             }
         }

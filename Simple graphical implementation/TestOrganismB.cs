@@ -12,11 +12,11 @@ public class TestOrganismB : VisualOrganism
     public override string Key => "B";
     private int growthTimeTicks;
     private int currentTicks;
-    private float growthRate;
-    private float resources;
-    private float BB1; //No idea what this is
-    private float BB2; //No idea what this is
-    private float biomass;
+    public float GrowthRate;
+    public float Resources;
+    public float BB1; //No idea what this is
+    public float BB2; //No idea what this is
+    public float Biomass;
     public override Color Color => Color.Yellow;
     public TestOrganismB(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
@@ -24,10 +24,10 @@ public class TestOrganismB : VisualOrganism
         growthTimeTicks = 200; //random.Next(200, 200);
         currentTicks = 0;
         
-        growthRate = random.NextSingle(); //Between 0 and 1
-        resources = 0;
+        GrowthRate = random.NextSingle(); //Between 0 and 1
+        Resources = 0;
         BB2 = 0;
-        biomass = 1;
+        Biomass = 1;
     }
 
     public override TestOrganismB CreateNewOrganism(Vector3 startingPosition)
@@ -42,13 +42,13 @@ public class TestOrganismB : VisualOrganism
         Move(new Vector3((float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01),(float)(Random.NextDouble() * 0.02 - 0.01)));
 
         GridValues values = GrowthGrid.GetValues(Position);
-        float uptake = values.R * 0.01f * (1-resources/(resources+0.1f));
+        float uptake = values.R * 0.01f * (1-Resources/(Resources+0.1f));
         GrowthGrid.SetRValue(Position, values.R - uptake);
-        resources += uptake;
+        Resources += uptake;
 
-        float fractConverted = 0.5f * resources;
+        float fractConverted = 0.5f * Resources;
         BB2 += fractConverted*150;
-        resources -= fractConverted;
+        Resources -= fractConverted;
 
         float leak = BB2 * 0.01f;
         GrowthGrid.SetBB2Valus(Position, BB2 + leak);
@@ -58,16 +58,24 @@ public class TestOrganismB : VisualOrganism
         BB1 += upBB1;
         GrowthGrid.SetBB1Valus(Position, BB1 - upBB1);
         
-        growthRate += (BB1 * BB2 / (BB1 * BB2 + 1.0f)) * 0.99f;
+        GrowthRate += (BB1 * BB2 / (BB1 * BB2 + 1.0f)) * 0.99f;
         
-        BB1 *= 1-growthRate;
-        BB2 *= 1-growthRate;
-        biomass += growthRate;
+        BB1 *= 1-GrowthRate;
+        BB2 *= 1-GrowthRate;
+        Biomass += GrowthRate;
 
-        if (biomass > 10)
+        if (Biomass > 200)
         {
-            Reproduce();
-            biomass = 0;
+            TestOrganismB child = Reproduce() as TestOrganismB;
+            if (child is null)
+                return;
+            
+            child.GrowthRate = GrowthRate;
+            child.Resources = Resources;
+            child.BB1 = BB1;
+            child.BB2 = BB2;
+            child.Biomass = Biomass / 2;
+            Biomass = Biomass / 2;
         }
     }
 
