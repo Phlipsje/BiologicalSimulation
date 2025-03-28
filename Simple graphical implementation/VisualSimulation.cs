@@ -85,7 +85,7 @@ public class VisualSimulation : Game
                 ViewDirection.XZPlane, new Rectangle(0, sizeY, sizeX, sizeY))
         });
         renderManager.DrawBorders = true;
-        renderManager.Draw = false;
+        renderManager.Draw = true;
         renderManager.LoadContent(Content);
         
         simulation = new Simulation();
@@ -93,8 +93,8 @@ public class VisualSimulation : Game
         float worldHalfSize = 10f;
         world = new TestWorld(simulation, worldHalfSize);
         float organismSize = 0.5f;
-        DataStructure dataStructure = new Chunk3DFixedDataStructure(world, new System.Numerics.Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
-            new System.Numerics.Vector3(worldHalfSize, worldHalfSize, worldHalfSize), new System.Numerics.Vector3(1f, 1f, 1f), organismSize);
+        DataStructure dataStructure = new Chunk3DFixedDataStructure(world, new Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
+            new Vector3(worldHalfSize, worldHalfSize, worldHalfSize), new Vector3(1f, 1f, 1f), organismSize);
         TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
         OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
         simulation.CreateSimulation(world, random);
@@ -115,6 +115,8 @@ public class VisualSimulation : Game
         
         OrganismACount = 0;
         OrganismBCount = 0;
+        GrowthGrid.Initialize(new Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
+            new Vector3(worldHalfSize, worldHalfSize, worldHalfSize), new Vector3(0.5f, 0.5f, 0.5f));
         simulation.StartSimulation();
     }
 

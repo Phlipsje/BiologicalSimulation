@@ -12,12 +12,22 @@ public class TestOrganismB : VisualOrganism
     public override string Key => "B";
     private int growthTimeTicks;
     private int currentTicks;
+    private float growthRate;
+    private float resources;
+    private float BB1; //No idea what this is
+    private float BB2; //No idea what this is
+    private float biomass;
     public override Color Color => Color.Yellow;
     public TestOrganismB(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
         VisualSimulation.OrganismBCount++;
         growthTimeTicks = 200; //random.Next(200, 200);
         currentTicks = 0;
+        
+        growthRate = random.NextSingle(); //Between 0 and 1
+        resources = 0;
+        BB2 = 0;
+        biomass = 1;
     }
 
     public override TestOrganismB CreateNewOrganism(Vector3 startingPosition)
@@ -28,15 +38,36 @@ public class TestOrganismB : VisualOrganism
     public override void Step()
     {
         //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
+        //Also known as brownian motion
         Move(new Vector3((float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01),(float)(Random.NextDouble() * 0.02 - 0.01)));
 
-        currentTicks++;
+        GridValues values = GrowthGrid.GetValues(Position);
+        float uptake = values.R * 0.01f * (1-resources/(resources+0.1f));
+        GrowthGrid.SetRValue(Position, values.R - uptake);
+        resources += uptake;
 
-        //Reproduce every so often
-        if (currentTicks >= growthTimeTicks)
+        float fractConverted = 0.5f * resources;
+        BB2 += fractConverted*150;
+        resources -= fractConverted;
+
+        float leak = BB2 * 0.01f;
+        GrowthGrid.SetBB2Valus(Position, BB2 + leak);
+        BB2 -= leak;
+        
+        float upBB1 = values.BB1 / (BB1 + 1);
+        BB1 += upBB1;
+        GrowthGrid.SetBB1Valus(Position, BB1 - upBB1);
+        
+        growthRate += (BB1 * BB2 / (BB1 * BB2 + 1.0f)) * 0.99f;
+        
+        BB1 *= 1-growthRate;
+        BB2 *= 1-growthRate;
+        biomass += growthRate;
+
+        if (biomass > 10)
         {
-            currentTicks = 0;
             Reproduce();
+            biomass = 0;
         }
     }
 
