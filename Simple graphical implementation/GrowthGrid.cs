@@ -12,6 +12,7 @@ public static class GrowthGrid
     private static GridValues[,,] values;
     private static Vector3 minPosition;
     private static Vector3 chunkSize;
+    private static (int, int, int) maxIndices;
 
     public static void Initialize(Vector3 minPosition, Vector3 maxPosition, Vector3 chunkSize)
     {
@@ -23,6 +24,7 @@ public static class GrowthGrid
         values = new GridValues[chunkCountX, chunkCountY, chunkCountZ];
         GrowthGrid.minPosition = minPosition;
         GrowthGrid.chunkSize = chunkSize;
+        maxIndices = (chunkCountX, chunkCountY, chunkCountZ);
 
         for (int i = 0; i < chunkCountX; i++)
         {
@@ -31,6 +33,29 @@ public static class GrowthGrid
                 for (int k = 0; k < chunkCountZ; k++)
                 {
                     values[i, j, k] = new GridValues();
+                }
+            }
+        }
+    }
+
+    public static void Step()
+    {
+        float dR = 0.2f;
+        float dBB1 = 0.2f;
+        float dBB2 = 0.2f;
+        float decayR = 0.001f;
+        float decayBB = 0.001f;
+
+        for (int x = 0; x < maxIndices.Item1; x++)
+        {
+            for (int y = 0; y < maxIndices.Item2; y++)
+            {
+                for (int z = 0; z < maxIndices.Item3; z++)
+                {
+                    GridValues oldValues = values[x, y, z];
+                    values[x,y,z].R = oldValues.R*(1-decayR);
+                    values[x,y,z].BB1 = oldValues.BB1 * (1-decayBB);
+                    values[x,y,z].BB2 = oldValues.BB2 * (1-decayBB);
                 }
             }
         }

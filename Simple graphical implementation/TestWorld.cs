@@ -30,7 +30,7 @@ public class TestWorld : World
         //Organisms.AddFirst(new TestOrganismB(new Vector3(1, 0, 0), 0.5f, this, dataStructure, random));
         
         //Partial trapping setup 3D
-        
+        /*
         Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, -0.5f, 0), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganism(new Vector3(0.5f, -0.5f, 0), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, 0.5f, 0), 0.5f, this, dataStructure, random));
@@ -40,7 +40,7 @@ public class TestWorld : World
         Organisms.AddFirst(new TestOrganismB(new Vector3(1.5f, 0, 0), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganismB(new Vector3(0, -1.5f, 0), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganismB(new Vector3(0, 1.5f, 0), 0.5f, this, dataStructure, random));
-        
+        */
         
         //Partial trapping setup 2D
         /*
@@ -96,7 +96,6 @@ public class TestWorld : World
         */
         
         //Random 3D
-        /*
         Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
@@ -114,7 +113,6 @@ public class TestWorld : World
         Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
-        */
     }
 
     public override bool IsInBounds(Vector3 position)

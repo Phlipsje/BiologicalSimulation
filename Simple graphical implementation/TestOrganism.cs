@@ -9,8 +9,6 @@ namespace Simple_graphical_implementation;
 public class TestOrganism : VisualOrganism
 {
     public override string Key => "A";
-    private int growthTimeTicks;
-    private int currentTicks;
     public float GrowthRate;
     public float Resources;
     public float BB1; //No idea what this is
@@ -20,12 +18,10 @@ public class TestOrganism : VisualOrganism
     public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
         VisualSimulation.OrganismACount++;
-        growthTimeTicks = 200; //random.Next(200, 200);
-        currentTicks = 0;
-        
         GrowthRate = random.NextSingle(); //Between 0 and 1
         Resources = 0;
         BB1 = 0;
+        BB2 = 0;
         Biomass = 1;
     }
 
@@ -40,11 +36,12 @@ public class TestOrganism : VisualOrganism
         //Also known as brownian motion
         Move(new Vector3((float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01),(float)(Random.NextDouble() * 0.02 - 0.01)));
 
+        GrowthRate = 0.03f;
         GridValues values = GrowthGrid.GetValues(Position);
         float uptake = values.R * 0.01f * (1-Resources/(Resources+0.1f));
         GrowthGrid.SetRValue(Position, values.R - uptake);
         Resources += uptake;
-
+        
         float fractConverted = 0.5f * Resources;
         BB1 += fractConverted*150;
         Resources -= fractConverted;
@@ -63,7 +60,7 @@ public class TestOrganism : VisualOrganism
         BB2 *= 1-GrowthRate;
         Biomass += GrowthRate;
 
-        if (Biomass > 200)
+        if (Biomass > 6)
         {
             TestOrganism child = Reproduce() as TestOrganism;
             if (child is null)
@@ -84,7 +81,7 @@ public class TestOrganism : VisualOrganism
         int x = (int)(Position.X * 100);
         int y = (int)(Position.Y * 100);
         int z = (int)(Position.Z * 100);
-        return $" {x/100f} {y/100f} {z/100f} {currentTicks} {growthTimeTicks}";
+        return $" {x/100f} {y/100f} {z/100f}";
     }
 
     public override void FromString(string s)
@@ -92,7 +89,5 @@ public class TestOrganism : VisualOrganism
         string[] values = s.Split(' ');
         
         Position = new Vector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
-        currentTicks = int.Parse(values[3]);
-        growthTimeTicks = int.Parse(values[4]);
     }
 }

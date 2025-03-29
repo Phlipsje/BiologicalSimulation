@@ -145,6 +145,7 @@ public class VisualSimulation : Game
         #endregion
 
         simulation.Step();
+        GrowthGrid.Step();
 
         secondsCount += (float)gameTime.ElapsedGameTime.TotalSeconds;
         if (simulation.Tick == 4000)
