@@ -11,6 +11,7 @@ public partial class Simulation
     public int Tick { get; private set; } //The current tick we are on
     public bool DrawingEnabled { get; set; }
     public bool FileWritingEnabled { get; set; }
+    public bool WriteToSameFile { get; set; }
     private int ticksPerDrawCall;
     private int ticksPerFileWrite;
     
@@ -55,7 +56,7 @@ public partial class Simulation
         world.StartingDistribution(dataStructure, random);
         world.Initialize();
         
-        (string filePath, string fileContents) = simulationExporter.SaveToFile(world, this);
+        (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(world, this) : simulationExporter.SaveToSeparateFiles(world, this);
         OnFileWrite?.Invoke(filePath, fileContents);
     }
 
@@ -81,7 +82,7 @@ public partial class Simulation
         //Save file and invoke event letting know that it happened
         if (FileWritingEnabled && Tick % ticksPerFileWrite == 0)
         {
-            (string filePath, string fileContents) = simulationExporter.SaveToFile(world, this);
+            (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(world, this) : simulationExporter.SaveToSeparateFiles(world, this);
             OnFileWrite?.Invoke(filePath, fileContents);
         }
     }
@@ -97,7 +98,7 @@ public partial class Simulation
     private void OnSimulationEnd()
     {
         //Save simulation to file
-        (string filePath, string fileContents) = simulationExporter.SaveToFile(world, this);
+        (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(world, this) : simulationExporter.SaveToSeparateFiles(world, this);
         OnFileWrite?.Invoke(filePath, fileContents);
         
         //Tell the user that the simulation is over

@@ -103,10 +103,11 @@ public class VisualSimulation : Game
         simulation.SetDrawFrequency(1);
         
         //For saving to file
-        simulation.FileWritingEnabled = false;
+        simulation.FileWritingEnabled = true;
+        simulation.WriteToSameFile = true;
         simulation.SetFileWriteFrequency(100);
-        SimulationExporter.FileName = "simulation";
-        SimulationExporter.SaveDirectory = "Content\\nothing";
+        SimulationExporter.FileName = "random-3D-1";
+        SimulationExporter.SaveDirectory = "Content\\Random";
         SimulationExporter.ShowExportFilePath = true;
         SimulationExporter.ClearDirectory = true;
 

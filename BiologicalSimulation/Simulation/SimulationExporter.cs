@@ -14,7 +14,7 @@ public class SimulationExporter
     /// </summary>
     /// <param name="world"></param>
     /// <returns>Returns 2 strings, first is the file path, second is the file contents</returns>
-    public (string, string) SaveToFile(World world, Simulation simulation)
+    public (string, string) SaveToSeparateFiles(World world, Simulation simulation)
     {
         StringBuilder sb = new StringBuilder();
         
@@ -97,7 +97,6 @@ public class SimulationExporter
             resultingString = previousString + $" _{simulation.Tick}_ " + resultingString;
         }
         
-        File.Open(filePath, FileMode.Create);
         File.WriteAllText(filePath, resultingString);
         return (Path.GetFullPath(filePath), resultingString);
     }
