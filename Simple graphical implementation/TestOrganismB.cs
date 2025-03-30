@@ -38,7 +38,7 @@ public class TestOrganismB : VisualOrganism
         //Also known as brownian motion
         Move(new Vector3((float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01),(float)(Random.NextDouble() * 0.02 - 0.01)));
 
-        GrowthRate = 0.03f;
+        GrowthRate = 0.02f;
         GridValues values = GrowthGrid.GetValues(Position);
         float uptake = values.R * 0.01f * (1-Resources/(Resources+0.1f));
         GrowthGrid.SetRValue(Position, values.R - uptake);

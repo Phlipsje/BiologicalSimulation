@@ -139,7 +139,7 @@ public class TestWorld : World
 
     public override bool StopCondition()
     {
-        if (simulation.Tick > 5000)
+        if (simulation.Tick > 2500)
             return true;
         
         //We only stop when program is forcefully halted

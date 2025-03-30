@@ -16,8 +16,6 @@ public class SimulationExporter
     /// <returns>Returns 2 strings, first is the file path, second is the file contents</returns>
     public (string, string) SaveToFile(World world, Simulation simulation)
     {
-        //This should write to a file, not tested yet
-        
         StringBuilder sb = new StringBuilder();
         
         foreach (Organism organism in world.Organisms)
@@ -60,5 +58,47 @@ public class SimulationExporter
         }
         
         return (Path.GetFullPath(filePath),resultingString);
+    }
+
+    /// <summary>
+    /// Adds all save data of every given timestep to the same file
+    /// </summary>
+    /// <param name="world"></param>
+    /// <param name="simulation"></param>
+    /// <returns></returns>
+    public (string, string) SaveToSameFile(World world, Simulation simulation)
+    {
+        StringBuilder sb = new StringBuilder();
+        
+        foreach (Organism organism in world.Organisms)
+        {
+            //A string builder is a lot faster at concatenating a lot of string together than using the + operation on strings
+            sb.Append(organism.Key);
+            sb.Append(ImportExportHelper.KeySeperator);
+            sb.Append(organism.ToString());
+            sb.Append(ImportExportHelper.OrganismSeparator);
+        }
+
+        //Create the directory if it does not yet exist
+        if (!Directory.Exists(SaveDirectory))
+        {
+            Directory.CreateDirectory(SaveDirectory);
+        }
+        
+        //Get file path
+        string filePath = SaveDirectory + "\\" + FileName + ".txt";
+        string resultingString = sb.ToString();
+        
+        //Save to file
+        if (File.Exists(filePath))
+        {
+            string previousString = File.ReadAllText(filePath);
+            
+            resultingString = previousString + $" _{simulation.Tick}_ " + resultingString;
+        }
+        
+        File.Open(filePath, FileMode.Create);
+        File.WriteAllText(filePath, resultingString);
+        return (Path.GetFullPath(filePath), resultingString);
     }
 }
