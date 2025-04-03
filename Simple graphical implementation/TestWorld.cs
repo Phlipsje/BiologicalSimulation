@@ -26,8 +26,10 @@ public class TestWorld : World
         //One singular organism at the center
         
         //Singular setup 3D, 2D, 1D
-        //Organisms.AddFirst(new TestOrganism(new Vector3(-1, 0, 0), 0.5f, this, dataStructure, random));
-        //Organisms.AddFirst(new TestOrganismB(new Vector3(1, 0, 0), 0.5f, this, dataStructure, random));
+        /*
+        Organisms.AddFirst(new TestOrganism(new Vector3(-1, 0, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganismB(new Vector3(1, 0, 0), 0.5f, this, dataStructure, random));
+        */
         
         //Partial trapping setup 3D
         /*
@@ -96,6 +98,7 @@ public class TestWorld : World
         */
         
         //Random 3D
+        
         Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
@@ -113,6 +116,29 @@ public class TestWorld : World
         Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
         Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, dataStructure, random));
+        
+        
+        //Random 2D
+        /*
+        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
+        
+        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
+        */
+        
+        //Random 1D
+        /*
+        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, 0, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, 0, 0), 0.5f, this, dataStructure, random));
+        
+        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, 0, 0), 0.5f, this, dataStructure, random));
+        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, 0, 0), 0.5f, this, dataStructure, random));
+        */
     }
 
     public override bool IsInBounds(Vector3 position)
@@ -127,11 +153,11 @@ public class TestWorld : World
         if (MathF.Abs(position.Z) > cubeHalfSize)
             return false;
         //For 2D
-        //if (MathF.Abs(position.Z) > 0.8f)
+        //if (MathF.Abs(position.Z) > 0.6f)
         //    return false;
         
         //For 1D
-        //if (MathF.Abs(position.Y) > 0.8f)
+        //if (MathF.Abs(position.Y) > 0.6f)
         //    return false;
         
         return true;
@@ -139,7 +165,7 @@ public class TestWorld : World
 
     public override bool StopCondition()
     {
-        if (simulation.Tick > 2500)
+        if (simulation.Tick > 3000)
             return true;
         
         //We only stop when program is forcefully halted

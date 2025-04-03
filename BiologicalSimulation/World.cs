@@ -24,6 +24,9 @@ public abstract class World
         LinkedListNode<Organism> organismNode = Organisms.First!;
         for (int i = 0; i < OrganismCount; i++)
         {
+            if (organismNode is null)
+                return;
+            
             Organism organism = organismNode.Value;
             organismNode = organismNode.Next!;
             

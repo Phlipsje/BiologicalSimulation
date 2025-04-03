@@ -94,7 +94,11 @@ public class SimulationExporter
         {
             string previousString = File.ReadAllText(filePath);
             
-            resultingString = previousString + $" _{simulation.Tick}_ " + resultingString;
+            resultingString = previousString + $"\r\n{simulation.Tick} " + resultingString;
+        }
+        else
+        {
+            resultingString = $"{simulation.Tick} " + resultingString;
         }
         
         File.WriteAllText(filePath, resultingString);
