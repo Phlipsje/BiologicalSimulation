@@ -36,11 +36,9 @@ public class Chunk3D
         CheckNewPossibleAdditions();
         
         //Run update loop
-        LinkedListNode<Organism> organismNode = Organisms.First!;
-        for (int i = 0; i < Organisms.Count; i++)
+        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
         {
             Organism organism = organismNode.Value;
-            organismNode = organismNode.Next!;
             
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
             organism.Step(Organisms, extendedCheck);
@@ -48,27 +46,19 @@ public class Chunk3D
         
         //Update what should and should not be in this chunk
         //No additions happen during this (to this chunk)
-        organismNode = Organisms.First!;
-        for (int i = 0; i < Organisms.Count; i++)
+        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
         {
             //Get organism at this index
             Organism organism = organismNode.Value;
             
             CheckPosition(organism, organismNode);
-            
-            //Goto next
-            organismNode = organismNode.Next!;
         }
-        organismNode = extendedCheck.First!;
-        for (int i = 0; i < extendedCheck.Count; i++)
+        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
         {
             //Get organism at this index
             Organism organism = organismNode.Value;
             
             CheckRemoveFromExtension(organism, organismNode);
-            
-            //Goto next
-            organismNode = organismNode.Next!;
         }
     }
     

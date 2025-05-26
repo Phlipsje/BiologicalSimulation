@@ -86,7 +86,7 @@ public class VisualSimulation : Game
                 ViewDirection.XZPlane, new Rectangle(0, sizeY, sizeX, sizeY))
         });
         renderManager.DrawBorders = true;
-        renderManager.Draw = false;
+        renderManager.Draw = true;
         renderManager.LoadContent(Content);
         
         simulation = new Simulation();
@@ -95,7 +95,7 @@ public class VisualSimulation : Game
         world = new TestWorld(simulation, worldHalfSize);
         float organismSize = 0.5f;
         DataStructure dataStructure = new NewChunk3DFixedDataStructure(world, new Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
-            new Vector3(worldHalfSize, worldHalfSize, worldHalfSize), new Vector3(4f, 4f, 4f), organismSize);
+            new Vector3(worldHalfSize, worldHalfSize, worldHalfSize), new Vector3(2f, 2f, 2f), organismSize);
         TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
         OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
         simulation.CreateSimulation(world, random);
