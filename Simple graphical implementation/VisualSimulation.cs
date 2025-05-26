@@ -86,7 +86,7 @@ public class VisualSimulation : Game
                 ViewDirection.XZPlane, new Rectangle(0, sizeY, sizeX, sizeY))
         });
         renderManager.DrawBorders = true;
-        renderManager.Draw = true;
+        renderManager.Draw = false;
         renderManager.LoadContent(Content);
         
         simulation = new Simulation();

@@ -10,7 +10,7 @@ namespace BioSim;
 public abstract class Organism : IOrganism
 {
     public abstract string Key { get; } //Used to identify which organism it is in a file
-    public Vector3 Position { get; protected set; }
+    public Vector3 Position { get; set; }
     public float Size { get; } //Organism is a sphere, so this is the radius
     protected World World { get; } //Needs this to check if it is in bounds
     protected DataStructure DataStructure { get; } //Needs this to understand where other organisms are
@@ -18,9 +18,10 @@ public abstract class Organism : IOrganism
 
     public Organism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random)
     {
+        World = world;
         Position = startingPosition;
         Size = size;
-        World = world;
+        
         DataStructure = dataStructure;
         Random = random;
         DataStructure.AddOrganism(this);
@@ -50,10 +51,10 @@ public abstract class Organism : IOrganism
         Vector3 newPosition = Position + direction;
 
         if (!CheckCollision(newPosition, collideableOrganisms, collideableExtendedOrganisms))
-            return;
-        
-        //Otherwise no collision, so update position
-        Position = newPosition;
+        {
+            //Otherwise no collision, so update position
+            Position = newPosition;
+        }
     }
     
     public Organism Reproduce()
@@ -164,8 +165,8 @@ public abstract class Organism : IOrganism
     private bool CheckCollision(Vector3 position, LinkedList<Organism> collideableOrganisms,
         LinkedList<Organism> collideableExtendedOrganisms)
     {
-        if (!World.IsInBounds(Position))
-            return false;
+        if (!World.IsInBounds(position))
+            return true;
         
         //Check for organisms within the chunk
         foreach (Organism otherOrganism in collideableOrganisms)
@@ -174,11 +175,11 @@ public abstract class Organism : IOrganism
                 continue;
             
             //Checks collision by checking distance between circles
-            float x = Position.X - otherOrganism.Position.X;
+            float x = position.X - otherOrganism.Position.X;
             float x2 = x * x;
-            float y = Position.Y - otherOrganism.Position.Y;
+            float y = position.Y - otherOrganism.Position.Y;
             float y2 = y * y;
-            float z = Position.Z - otherOrganism.Position.Z;
+            float z = position.Z - otherOrganism.Position.Z;
             float z2 = z * z;
             float sizes = Size + otherOrganism.Size;
             if (x2 + y2 + z2 <= sizes * sizes)
@@ -192,11 +193,11 @@ public abstract class Organism : IOrganism
                 continue;
             
             //Checks collision by checking distance between circles
-            float x = Position.X - otherOrganism.Position.X;
+            float x = position.X - otherOrganism.Position.X;
             float x2 = x * x;
-            float y = Position.Y - otherOrganism.Position.Y;
+            float y = position.Y - otherOrganism.Position.Y;
             float y2 = y * y;
-            float z = Position.Z - otherOrganism.Position.Z;
+            float z = position.Z - otherOrganism.Position.Z;
             float z2 = z * z;
             float sizes = Size + otherOrganism.Size;
             if (x2 + y2 + z2 <= sizes * sizes)

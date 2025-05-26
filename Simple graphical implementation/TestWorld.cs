@@ -145,7 +145,7 @@ public class TestWorld : World
     {
         //Check if within cube
         float cubeHalfSize = worldHalfSize;
-
+        
         if (MathF.Abs(position.X) >= cubeHalfSize)
             return false;
         if (MathF.Abs(position.Y) >= cubeHalfSize)

@@ -8,13 +8,16 @@ public class NewChunk3DFixedDataStructure : DataStructure
     private Chunk3D[,,] chunks;
     private Vector3 minPosition;
     private Vector3 chunkSize;
+    private int chunkCountX;
+    private int chunkCountY;
+    private int chunkCountZ;
     private float largestOrganismSize;
     
     public NewChunk3DFixedDataStructure(World world, Vector3 minPosition, Vector3 maxPosition, Vector3 chunkSize, float largestOrganismSize) : base(world)
     {
-        int chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize.X);
-        int chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize.Y);
-        int chunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize.Z);
+        chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize.X);
+        chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize.Y);
+        chunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize.Z);
         chunks = new Chunk3D[chunkCountX, chunkCountY, chunkCountZ];
         this.minPosition = minPosition;
         this.chunkSize = chunkSize;
@@ -54,19 +57,19 @@ public class NewChunk3DFixedDataStructure : DataStructure
         for (int x = -1; x <= 1; x++)
         {
             //Check bounds
-            if (chunkX + x < 0 || chunkX + x >= chunks.GetLength(0))
+            if (chunkX + x < 0 || chunkX + x >= chunkCountX)
                 continue;
             
             for (int y = -1; y <= 1; y++)
             {
                 //Check bounds
-                if (chunkY + y < 0 || chunkY + y >= chunks.GetLength(1))
+                if (chunkY + y < 0 || chunkY + y >= chunkCountY)
                     continue;
                 
                 for (int z = -1; z <= 1; z++)
                 {
                     //Check bounds
-                    if (chunkZ + z < 0 || chunkZ + z >= chunks.GetLength(2))
+                    if (chunkZ + z < 0 || chunkZ + z >= chunkCountZ)
                         continue;
 
                     //Don't add self
@@ -110,9 +113,10 @@ public class NewChunk3DFixedDataStructure : DataStructure
         int chunkX = (int)Math.Floor((position.X - minPosition.X) / chunkSize.X);
         int chunkY = (int)Math.Floor((position.Y - minPosition.Y) / chunkSize.Y);
         int chunkZ = (int)Math.Floor((position.Z - minPosition.Z) / chunkSize.Z);
-        chunkX = Math.Clamp(chunkX, 0, chunks.GetLength(0));
-        chunkY = Math.Clamp(chunkY, 0, chunks.GetLength(1));
-        chunkZ = Math.Clamp(chunkZ, 0, chunks.GetLength(2));
+        //Math.Min because otherwise can throw error if X,Y, or Z is exactly maxValue
+        chunkX = Math.Min(chunkX, chunkCountX - 1);
+        chunkY = Math.Min(chunkY, chunkCountY - 1);
+        chunkZ = Math.Min(chunkZ, chunkCountZ - 1);
         return (chunkX, chunkY, chunkZ);
     }
 
