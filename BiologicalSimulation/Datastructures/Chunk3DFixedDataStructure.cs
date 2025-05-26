@@ -7,16 +7,16 @@ public class Chunk3DFixedDataStructure : DataStructure
 {
     private Chunk3D[,,] chunks;
     private Vector3 minPosition;
-    private Vector3 chunkSize;
+    private float chunkSize;
     private int chunkCountX;
     private int chunkCountY;
     private int chunkCountZ;
     
-    public Chunk3DFixedDataStructure(World world, Vector3 minPosition, Vector3 maxPosition, Vector3 chunkSize, float largestOrganismSize) : base(world)
+    public Chunk3DFixedDataStructure(World world, Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize) : base(world)
     {
-        chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize.X);
-        chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize.Y);
-        chunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize.Z);
+        chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
+        chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
+        chunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize);
         chunks = new Chunk3D[chunkCountX, chunkCountY, chunkCountZ];
         this.minPosition = minPosition;
         this.chunkSize = chunkSize;
@@ -28,8 +28,8 @@ public class Chunk3DFixedDataStructure : DataStructure
             {
                 for (int k = 0; k < chunkCountZ; k++)
                 {
-                    Vector3 chunkCenter = minPosition + new Vector3(i, j, k) * chunkSize + chunkSize*0.5f;
-                    chunks[i, j, k] = new Chunk3D(chunkCenter, chunkSize.X, largestOrganismSize);
+                    Vector3 chunkCenter = minPosition + new Vector3(i, j, k) * chunkSize + new Vector3(chunkSize*0.5f);
+                    chunks[i, j, k] = new Chunk3D(chunkCenter, chunkSize, largestOrganismSize);
                 }
             }
         }
@@ -108,9 +108,9 @@ public class Chunk3DFixedDataStructure : DataStructure
     
     private (int, int, int) GetChunk(Vector3 position)
     {
-        int chunkX = (int)Math.Floor((position.X - minPosition.X) / chunkSize.X);
-        int chunkY = (int)Math.Floor((position.Y - minPosition.Y) / chunkSize.Y);
-        int chunkZ = (int)Math.Floor((position.Z - minPosition.Z) / chunkSize.Z);
+        int chunkX = (int)Math.Floor((position.X - minPosition.X) / chunkSize);
+        int chunkY = (int)Math.Floor((position.Y - minPosition.Y) / chunkSize);
+        int chunkZ = (int)Math.Floor((position.Z - minPosition.Z) / chunkSize);
         //Math.Min because otherwise can throw error if X,Y, or Z is exactly maxValue
         chunkX = Math.Min(chunkX, chunkCountX - 1);
         chunkY = Math.Min(chunkY, chunkCountY - 1);
