@@ -1,13 +1,13 @@
 using System.Diagnostics.Contracts;
 using System.Numerics;
 
-namespace BioSim.Datastructures.NewDSAttempt;
+namespace BioSim.Datastructures;
 
 public class Chunk3D
 {
     public Vector3 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
-    private float dimenstionExtensionForCheck = 0.5f; //TODO set dynamically later
+    private float dimenstionExtensionForCheck;
     public LinkedList<Organism> Organisms { get; }
     private LinkedList<Organism> extendedCheck;
     public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
@@ -20,7 +20,7 @@ public class Chunk3D
         Organisms = new LinkedList<Organism>();
         extendedCheck = new LinkedList<Organism>();
         CheckToBeAdded = new Queue<Organism>();
-        dimenstionExtensionForCheck = largestOrganismSize;
+        dimenstionExtensionForCheck = largestOrganismSize; //TODO is this correct?
     }
 
     public void Initialize(Chunk3D[] connectedChunks)
@@ -96,7 +96,7 @@ public class Chunk3D
     private void CheckPosition(Organism organism, LinkedListNode<Organism> organismNode)
     {
         //Set the largest of the distances per axis, that is enough to check if it should be within or not
-        float singleAxisDistance = Math.Max(Math.Max(Math.Abs(organism.Position.X - Center.X), Math.Abs(organism.Position.Y - Center.Y)), Math.Abs(organism.Position.Z - Center.Z));
+        float singleAxisDistance = SingleAxisDistance(organism);
         
         if (singleAxisDistance > HalfDimension)
         {
