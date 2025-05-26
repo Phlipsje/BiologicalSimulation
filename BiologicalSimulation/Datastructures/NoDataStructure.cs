@@ -43,19 +43,16 @@ public class NoDataStructure(World world) : DataStructure(world)
         return closestOrganism;
     }
 
-    public override bool CheckCollision(Organism organism, Vector3 position)
+    public override bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists)
     {
+        LinkedList<Organism> organisms = organismLists[0];
+        
         //If out of bounds, then there is a collision
         if (!World.IsInBounds(position))
             return true;
 
-        //Not using foreach but for loop, because organisms can be added while the loop is active
-        LinkedListNode<Organism> organismNode = World.Organisms.First!;
-        for (int i = 0; i < World.OrganismCount; i++)
+        foreach (Organism otherOrganism in organisms)
         {
-            Organism otherOrganism = organismNode.Value;
-            organismNode = organismNode.Next!;
-            
             //Cannot be a collision with itself
             if(otherOrganism == organism)
                 continue;
@@ -79,10 +76,5 @@ public class NoDataStructure(World world) : DataStructure(world)
     public override void AddOrganism(Organism organism)
     {
         
-    }
-
-    protected override IEnumerator<IOrganism> ToEnumerator()
-    {
-        return World.Organisms.GetEnumerator();
     }
 }

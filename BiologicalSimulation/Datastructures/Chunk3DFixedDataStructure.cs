@@ -90,22 +90,12 @@ public class Chunk3DFixedDataStructure : DataStructure
         }
     }
 
-    public override Organism ClosestNeighbour(Organism organism)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override bool CheckCollision(Organism organism, Vector3 position)
-    {
-        throw new NotImplementedException();
-    }
-
     public override void AddOrganism(Organism organism)
     {
         (int x, int y, int z) = GetChunk(organism.Position);
         chunks[x,y,z].CheckToBeAdded.Enqueue(organism);
     }
-    
+
     private (int, int, int) GetChunk(Vector3 position)
     {
         int chunkX = (int)Math.Floor((position.X - minPosition.X) / chunkSize);
@@ -117,8 +107,55 @@ public class Chunk3DFixedDataStructure : DataStructure
         chunkZ = Math.Min(chunkZ, chunkCountZ - 1);
         return (chunkX, chunkY, chunkZ);
     }
+    
+    public override bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists)
+    {
+        LinkedList<Organism> collideableOrganisms = organismLists[0];
+        LinkedList<Organism> collideableExtendedOrganisms = organismLists[1];
+        
+        if (!World.IsInBounds(position))
+            return true;
+        
+        //Check for organisms within the chunk
+        foreach (Organism otherOrganism in collideableOrganisms)
+        {
+            if (organism == otherOrganism)
+                continue;
+            
+            //Checks collision by checking distance between circles
+            float x = position.X - otherOrganism.Position.X;
+            float x2 = x * x;
+            float y = position.Y - otherOrganism.Position.Y;
+            float y2 = y * y;
+            float z = position.Z - otherOrganism.Position.Z;
+            float z2 = z * z;
+            float sizes = organism.Size + otherOrganism.Size;
+            if (x2 + y2 + z2 <= sizes * sizes)
+                return true;
+        }
+        
+        //Check for any organisms within neighbouring chunks that are within distance of possibly touching with this
+        foreach (Organism otherOrganism in collideableExtendedOrganisms)
+        {
+            if (organism == otherOrganism)
+                continue;
+            
+            //Checks collision by checking distance between circles
+            float x = position.X - otherOrganism.Position.X;
+            float x2 = x * x;
+            float y = position.Y - otherOrganism.Position.Y;
+            float y2 = y * y;
+            float z = position.Z - otherOrganism.Position.Z;
+            float z2 = z * z;
+            float sizes = organism.Size + otherOrganism.Size;
+            if (x2 + y2 + z2 <= sizes * sizes)
+                return true;
+        }
 
-    protected override IEnumerator<IOrganism> ToEnumerator()
+        return false;
+    }
+
+    public override Organism ClosestNeighbour(Organism organism)
     {
         throw new NotImplementedException();
     }

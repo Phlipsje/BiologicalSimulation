@@ -18,22 +18,9 @@ public abstract class World
         OrganismCount = Organisms.Count;
     }
 
-    public void Step()
+    public virtual void Step()
     {
-        return; //Currently disabled
         
-        //Not using foreach but for loop, because organisms can be added while the loop is active
-        LinkedListNode<Organism> organismNode = Organisms.First!;
-        for (int i = 0; i < OrganismCount; i++)
-        {
-            if (organismNode is null)
-                return;
-            
-            Organism organism = organismNode.Value;
-            organismNode = organismNode.Next!;
-            
-            organism.Step();
-        }
     }
 
     public void AddOrganism(Organism organism)

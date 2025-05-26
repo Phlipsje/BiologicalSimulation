@@ -41,7 +41,7 @@ public class Chunk2D
             Organism organism = organismNode.Value;
             
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
-            organism.Step(Organisms, extendedCheck);
+            organism.Step([Organisms, extendedCheck]);
         }
         
         //Update what should and should not be in this chunk

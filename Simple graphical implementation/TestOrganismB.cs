@@ -33,29 +33,18 @@ public class TestOrganismB : VisualOrganism
         return new TestOrganismB(startingPosition, Size, World, DataStructure, Random);
     }
     
-    public override void Step()
+    public override void Step(List<LinkedList<Organism>> organismLists)
     {
         //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
         //Also known as brownian motion
         Vector3 direction = new Vector3((float)(Random.NextDouble() * 0.02 - 0.01),
             (float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01));
-        Move(direction);
+        Move(direction, organismLists);
         
-        TempPartialStep();
+        Reproduction(organismLists);
     }
     
-    public override void Step(LinkedList<Organism> collideableOrganisms, LinkedList<Organism> collideableExtendedOrganisms)
-    {
-        //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
-        //Also known as brownian motion
-        Vector3 direction = new Vector3((float)(Random.NextDouble() * 0.02 - 0.01),
-            (float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01));
-        MoveWithSpecialCollisionCheck(direction, collideableOrganisms, collideableExtendedOrganisms);
-        
-        TempPartialStep(collideableOrganisms, collideableExtendedOrganisms);
-    }
-
-    private void TempPartialStep()
+    private void Reproduction(List<LinkedList<Organism>> organismLists)
     {
         GrowthRate = 0.02f;
         GridValues values = GrowthGrid.GetValues(Position);
@@ -83,48 +72,7 @@ public class TestOrganismB : VisualOrganism
 
         if (Biomass > 6)
         {
-            TestOrganismB child = Reproduce() as TestOrganismB;
-            if (child is null)
-                return;
-            
-            child.GrowthRate = GrowthRate;
-            child.Resources = Resources;
-            child.BB1 = BB1;
-            child.BB2 = BB2;
-            child.Biomass = Biomass / 2;
-            Biomass = Biomass / 2;
-        }
-    }
-    
-    private void TempPartialStep(LinkedList<Organism> collideableOrganisms, LinkedList<Organism> collideableExtendedOrganisms)
-    {
-        GrowthRate = 0.02f;
-        GridValues values = GrowthGrid.GetValues(Position);
-        float uptake = values.R * 0.01f * (1-Resources/(Resources+0.1f));
-        GrowthGrid.SetRValue(Position, values.R - uptake);
-        Resources += uptake;
-        
-        float fractConverted = 0.5f * Resources;
-        BB2 += fractConverted*150;
-        Resources -= fractConverted;
-
-        float leak = BB2 * 0.01f;
-        GrowthGrid.SetBB2Valus(Position, BB2 + leak);
-        BB2 -= leak;
-        
-        float upBB1 = values.BB1 / (BB1 + 1);
-        BB1 += upBB1;
-        GrowthGrid.SetBB1Valus(Position, BB1 - upBB1);
-        
-        GrowthRate += (BB1 * BB2 / (BB1 * BB2 + 1.0f)) * 0.99f;
-        
-        BB1 *= 1-GrowthRate;
-        BB2 *= 1-GrowthRate;
-        Biomass += GrowthRate;
-
-        if (Biomass > 6)
-        {
-            TestOrganismB child = ReproduceWithSpecialCollisionCheck(collideableOrganisms, collideableExtendedOrganisms) as TestOrganismB;
+            TestOrganismB child = Reproduce(organismLists) as TestOrganismB;
             if (child is null)
                 return;
             
