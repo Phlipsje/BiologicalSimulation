@@ -18,6 +18,7 @@ public abstract class DataStructure : IEnumerable<IOrganism>
     public abstract void Step();
     public abstract Organism ClosestNeighbour(Organism organism);
     public abstract bool CheckCollision(Organism organism, Vector3 position);
+    public abstract void AddOrganism(Organism organism);
     
     //Define this method to explain how the data structure can be accessed as something that is iterable, easiest is a List or array
     protected abstract IEnumerator<IOrganism> ToEnumerator();

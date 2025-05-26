@@ -20,6 +20,8 @@ public abstract class World
 
     public void Step()
     {
+        return; //Currently disabled
+        
         //Not using foreach but for loop, because organisms can be added while the loop is active
         LinkedListNode<Organism> organismNode = Organisms.First!;
         for (int i = 0; i < OrganismCount; i++)

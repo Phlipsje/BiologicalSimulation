@@ -100,6 +100,11 @@ public class Chunk2DFixedDataStructure : DataStructure
         return false;
     }
 
+    public override void AddOrganism(Organism organism)
+    {
+        
+    }
+
     protected override IEnumerator<IOrganism> ToEnumerator()
     {
         return World.Organisms.GetEnumerator();

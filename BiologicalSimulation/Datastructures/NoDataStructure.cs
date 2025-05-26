@@ -76,6 +76,11 @@ public class NoDataStructure(World world) : DataStructure(world)
         return false;
     }
 
+    public override void AddOrganism(Organism organism)
+    {
+        
+    }
+
     protected override IEnumerator<IOrganism> ToEnumerator()
     {
         return World.Organisms.GetEnumerator();

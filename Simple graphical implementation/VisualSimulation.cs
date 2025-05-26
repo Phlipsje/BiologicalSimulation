@@ -6,6 +6,7 @@ using BioSim.Datastructures;
 using BioSim.Simulation;
 using System.Numerics;
 using BiologicalSimulation;
+using BioSim.Datastructures.NewDSAttempt;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -90,11 +91,11 @@ public class VisualSimulation : Game
         
         simulation = new Simulation();
         Random random = new Random(); //Can enter seed here
-        float worldHalfSize = 10f;
+        float worldHalfSize = 12f;
         world = new TestWorld(simulation, worldHalfSize);
         float organismSize = 0.5f;
-        DataStructure dataStructure = new Chunk3DFixedDataStructure(world, new Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
-            new Vector3(worldHalfSize, worldHalfSize, worldHalfSize), new Vector3(1f, 1f, 1f), organismSize);
+        DataStructure dataStructure = new NewChunk3DFixedDataStructure(world, new Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
+            new Vector3(worldHalfSize, worldHalfSize, worldHalfSize), new Vector3(4f, 4f, 4f), organismSize);
         TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
         OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
         simulation.CreateSimulation(world, random);
@@ -103,7 +104,7 @@ public class VisualSimulation : Game
         simulation.SetDrawFrequency(1);
         
         //For saving to file
-        simulation.FileWritingEnabled = true;
+        simulation.FileWritingEnabled = false;
         simulation.WriteToSameFile = true;
         simulation.SetFileWriteFrequency(100);
         SimulationExporter.FileName = "Random-3D-1";

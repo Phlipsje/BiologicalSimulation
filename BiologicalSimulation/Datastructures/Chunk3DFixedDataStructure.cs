@@ -60,6 +60,11 @@ public class Chunk3DFixedDataStructure : DataStructure
         chunks[chunkX,chunkY, chunkZ].Insert(organism);
     }
 
+    public override void AddOrganism(Organism organism)
+    {
+       
+    }
+
     private (int, int, int) GetChunk(Vector3 position)
     {
         int chunkX = (int)Math.Ceiling((position.X - minPosition.X) / chunkSize.X);
