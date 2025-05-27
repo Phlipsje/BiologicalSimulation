@@ -11,6 +11,7 @@ public class Chunk2DFixedDataStructure : DataStructure
     private float chunkSize;
     private int chunkCountX;
     private int chunkCountY;
+    private int organismCount;
     
     public Chunk2DFixedDataStructure(World world, Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize) : base(world)
     {
@@ -19,6 +20,7 @@ public class Chunk2DFixedDataStructure : DataStructure
         chunks = new Chunk2D[chunkCountX, chunkCountY];
         this.minPosition = minPosition;
         this.chunkSize = chunkSize;
+        organismCount = 0;
 
         //Create all chunks
         for (int i = 0; i < chunkCountX; i++)
@@ -80,6 +82,28 @@ public class Chunk2DFixedDataStructure : DataStructure
     {
         (int x, int y) = GetChunk(organism.Position);
         chunks[x,y].CheckToBeAdded.Enqueue(organism);
+        organismCount++;
+    }
+
+    public override IEnumerable<Organism> GetOrganisms()
+    {
+        Organism[] organisms = new Organism[organismCount];
+        int i = 0;
+        foreach (Chunk2D chunk in chunks)
+        {
+            foreach (Organism organism in chunk.Organisms)
+            {
+                organisms[i] = organism;
+                i++;
+            }
+        }
+        
+        return organisms;
+    }
+
+    public override int GetOrganismCount()
+    {
+        return organismCount;
     }
 
     private (int, int) GetChunk(Vector3 position)

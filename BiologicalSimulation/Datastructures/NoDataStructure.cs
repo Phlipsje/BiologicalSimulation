@@ -8,6 +8,8 @@ namespace BioSim.Datastructures;
 /// </summary>
 public class NoDataStructure(World world) : DataStructure(world)
 {
+    public LinkedList<Organism> Organisms = new LinkedList<Organism>();
+    
     public override void Step()
     {
         //Nothing
@@ -75,6 +77,16 @@ public class NoDataStructure(World world) : DataStructure(world)
 
     public override void AddOrganism(Organism organism)
     {
-        
+        Organisms.AddFirst(organism);
+    }
+
+    public override IEnumerable<Organism> GetOrganisms()
+    {
+        return Organisms;
+    }
+    
+    public override int GetOrganismCount()
+    {
+        return Organisms.Count;
     }
 }

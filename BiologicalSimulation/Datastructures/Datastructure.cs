@@ -17,6 +17,8 @@ public abstract class DataStructure
     //Gets called every frame (before updating world)
     public abstract void Step();
     public abstract void AddOrganism(Organism organism);
+    public abstract IEnumerable<Organism> GetOrganisms();
+    public abstract int GetOrganismCount();
     public abstract bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists);
     public abstract Organism ClosestNeighbour(Organism organism);
 }
