@@ -37,7 +37,7 @@ public partial class Simulation
     {
         this.world = world;
         this.random = random;
-        dataStructure = new NoDataStructure(world); //Default data structure has no optimizations
+        dataStructure = new NoDataStructure(); //Default data structure has no optimizations
         abort = false;
         Tick = 0;
         DrawingEnabled = false;
@@ -53,7 +53,7 @@ public partial class Simulation
 
     public void StartSimulation()
     {
-        world.StartingDistribution(dataStructure, random);
+        world.StartingDistribution(random);
         world.Initialize();
         
         (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(world, this) : simulationExporter.SaveToSeparateFiles(world, this);

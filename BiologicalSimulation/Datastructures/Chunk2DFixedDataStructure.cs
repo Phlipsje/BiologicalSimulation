@@ -13,7 +13,7 @@ public class Chunk2DFixedDataStructure : DataStructure
     private int chunkCountY;
     private int organismCount;
     
-    public Chunk2DFixedDataStructure(World world, Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize) : base(world)
+    public Chunk2DFixedDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize)
     {
         chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
         chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
@@ -81,7 +81,7 @@ public class Chunk2DFixedDataStructure : DataStructure
     public override void AddOrganism(Organism organism)
     {
         (int x, int y) = GetChunk(organism.Position);
-        chunks[x,y].CheckToBeAdded.Enqueue(organism);
+        chunks[x,y].DirectlyInsertOrganism(organism);
         organismCount++;
     }
 

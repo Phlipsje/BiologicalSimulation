@@ -13,7 +13,7 @@ public class Chunk3DFixedDataStructure : DataStructure
     private int chunkCountZ;
     private int organismCount;
     
-    public Chunk3DFixedDataStructure(World world, Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize) : base(world)
+    public Chunk3DFixedDataStructure(Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize)
     {
         chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
         chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
@@ -95,7 +95,7 @@ public class Chunk3DFixedDataStructure : DataStructure
     public override void AddOrganism(Organism organism)
     {
         (int x, int y, int z) = GetChunk(organism.Position);
-        chunks[x,y,z].CheckToBeAdded.Enqueue(organism);
+        chunks[x,y,z].DirectlyInsertOrganism(organism);
         organismCount++;
     }
 

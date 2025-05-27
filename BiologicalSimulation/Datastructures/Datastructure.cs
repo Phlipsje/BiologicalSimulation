@@ -7,9 +7,13 @@ namespace BioSim.Datastructures;
 /// </summary>
 public abstract class DataStructure
 {
-    protected World World { get; }
+    protected World World { get; private set; }
 
-    public DataStructure(World world)
+    public DataStructure()
+    {
+    }
+
+    public void SetWorld(World world)
     {
         World = world;
     }

@@ -6,7 +6,7 @@ namespace BioSim.Datastructures;
 /// This implements DataStructure (because that is required), but isn't a data structure
 /// It simply stores all organisms in a list
 /// </summary>
-public class NoDataStructure(World world) : DataStructure(world)
+public class NoDataStructure : DataStructure
 {
     public LinkedList<Organism> Organisms = new LinkedList<Organism>();
     
@@ -25,7 +25,7 @@ public class NoDataStructure(World world) : DataStructure(world)
         //Tracking distance without the square root, because it is not needed to find the closest organism and would only take more compute
         float currentDistanceSquared = float.MaxValue;
         Organism closestOrganism = organism;
-        foreach (Organism otherOrganism in World.Organisms)
+        foreach (Organism otherOrganism in Organisms)
         {
             //If the organism is itself, we need to exclude it (because it's distance to itself is not what we want)
             if (otherOrganism == organism)

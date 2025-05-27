@@ -145,4 +145,13 @@ public class Chunk3D
     {
         return Math.Max(Math.Max(Math.Abs(organism.Position.X - Center.X), Math.Abs(organism.Position.Y - Center.Y)), Math.Abs(organism.Position.Z - Center.Z));
     }
+
+    /// <summary>
+    /// Only call this via AddOrganism in DataStructure, should not be used to communicate between chunks
+    /// </summary>
+    /// <param name="organism"></param>
+    public void DirectlyInsertOrganism(Organism organism)
+    {
+        Organisms.AddLast(organism);
+    }
 }
