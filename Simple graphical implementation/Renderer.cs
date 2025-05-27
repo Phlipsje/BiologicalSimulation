@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BioSim;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -68,7 +69,8 @@ public class Renderer
         //Start a new buffer to draw to
         spriteBatch.Begin();
 
-        foreach (Organism visualOrganism in world.Organisms)
+        IEnumerable<Organism> organisms = world.GetOrganisms();
+        foreach (Organism visualOrganism in organisms)
         {
             var organism = (VisualOrganism)visualOrganism;
             float posAxis0 = (organism.Position[axisIndex0] - viewingInformation.Position[axisIndex0] - organism.Size/2) * viewingInformation.Scale + viewingInformation.Width/2;

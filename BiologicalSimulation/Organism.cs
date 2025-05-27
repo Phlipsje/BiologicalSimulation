@@ -10,7 +10,7 @@ namespace BioSim;
 public abstract class Organism : IOrganism
 {
     public abstract string Key { get; } //Used to identify which organism it is in a file
-    public Vector3 Position { get; protected set; }
+    public Vector3 Position { get; set; }
     public float Size { get; } //Organism is a sphere, so this is the radius
     protected World World { get; } //Needs this to check if it is in bounds
     protected DataStructure DataStructure { get; } //Needs this to understand where other organisms are
@@ -18,30 +18,33 @@ public abstract class Organism : IOrganism
 
     public Organism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random)
     {
+        World = world;
         Position = startingPosition;
         Size = size;
-        World = world;
+        
         DataStructure = dataStructure;
         Random = random;
+        DataStructure.AddOrganism(this);
     }
 
     public abstract Organism CreateNewOrganism(Vector3 startingPosition);
-    public abstract void Step();
+    public abstract void Step(List<LinkedList<Organism>> organismLists);
     public new abstract string ToString();
     public abstract void FromString(string s);
 
-    public void Move(Vector3 direction)
+    public void Move(Vector3 direction, List<LinkedList<Organism>> organismLists)
     {
         //Simply add movement towards direction if there is no collision there
         Vector3 newPosition = Position + direction;
 
-        if (!CheckCollision(newPosition))
+        if (!CheckCollision(newPosition, organismLists))
         {
+            //Otherwise no collision, so update position
             Position = newPosition;
         }
     }
-    
-    public Organism Reproduce()
+
+    public Organism Reproduce(List<LinkedList<Organism>> organismLists)
     {
         //Will do a maximum of 5 attempts
         for (int i = 0; i < 5; i++)
@@ -61,7 +64,7 @@ public abstract class Organism : IOrganism
             Vector3 onlyNegativeNewPosition = Position - direction * 2 * Size;
 
             //Check if both positions are not within another organism
-            if (!CheckCollision(positiveNewPosition) && !CheckCollision(negativeNewPosition))
+            if (!CheckCollision(positiveNewPosition, organismLists) && !CheckCollision(negativeNewPosition, organismLists))
             {
                 //Create new organism 
                 Organism newOrganism = CreateNewOrganism(positiveNewPosition);
@@ -72,7 +75,7 @@ public abstract class Organism : IOrganism
             
                 return newOrganism;
             }
-            else if (!CheckCollision(onlyPositiveNewPosition))
+            else if (!CheckCollision(onlyPositiveNewPosition, organismLists))
             {
                 //Create new organism 
                 Organism newOrganism = CreateNewOrganism(onlyPositiveNewPosition);
@@ -80,7 +83,7 @@ public abstract class Organism : IOrganism
             
                 return newOrganism;
             }
-            else if (!CheckCollision(onlyNegativeNewPosition))
+            else if (!CheckCollision(onlyNegativeNewPosition, organismLists))
             {
                 //Create new organism 
                 Organism newOrganism = CreateNewOrganism(onlyNegativeNewPosition);
@@ -93,19 +96,9 @@ public abstract class Organism : IOrganism
         return null;
     }
 
-    public Organism ClosestNeighbour()
+    private bool CheckCollision(Vector3 position, List<LinkedList<Organism>> organismLists)
     {
-        return DataStructure.ClosestNeighbour(this);
-    }
-
-    private bool CheckCollision(Organism organism, Vector3 position)
-    {
-        return DataStructure.CheckCollision(organism, position);
-    }
-    
-    private bool CheckCollision(Vector3 position)
-    {
-        return DataStructure.CheckCollision(this, position);
+        return DataStructure.CheckCollision(this, position, organismLists);
     }
 }
 
@@ -115,7 +108,7 @@ public interface IOrganism
     public Vector3 Position { get; }
     public float Size { get; } //Organism is a sphere, so this is the radius
     
-    public void Step();
+    public void Step(List<LinkedList<Organism>> organismLists);
     public string ToString();
     public void FromString(string s);
 }
