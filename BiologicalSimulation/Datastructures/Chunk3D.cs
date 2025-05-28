@@ -12,7 +12,8 @@ public class Chunk3D
     private LinkedList<Organism> extendedCheck;
     public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     private Chunk3D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
-
+    private List<LinkedList<Organism>> listsToSend;
+    
     public Chunk3D(Vector3 center, float halfDimension, float largestOrganismSize)
     {
         Center = center;
@@ -21,6 +22,7 @@ public class Chunk3D
         extendedCheck = new LinkedList<Organism>();
         CheckToBeAdded = new Queue<Organism>();
         dimenstionExtensionForCheck = largestOrganismSize; //TODO is this correct?
+        listsToSend = [Organisms, extendedCheck];
     }
 
     public void Initialize(Chunk3D[] connectedChunks)
@@ -41,7 +43,7 @@ public class Chunk3D
             Organism organism = organismNode.Value;
             
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
-            organism.Step([Organisms, extendedCheck]);
+            organism.Step(listsToSend);
         }
         
         //Update what should and should not be in this chunk

@@ -4,15 +4,28 @@ namespace BioSim.Datastructures;
 
 /// <summary>
 /// This implements DataStructure (because that is required), but isn't a data structure
-/// It simply stores all organisms in a list
+/// It simply stores all organisms in a list, used as a fallback if no data structure is given
 /// </summary>
 public class NoDataStructure : DataStructure
 {
-    public LinkedList<Organism> Organisms = new LinkedList<Organism>();
+    public LinkedList<Organism> Organisms { get; }
+    private List<LinkedList<Organism>> listsToSend { get; }
+
+    public NoDataStructure()
+    {
+        Organisms = new LinkedList<Organism>();
+        listsToSend = [Organisms];
+    }
     
     public override void Step()
     {
-        //Nothing
+        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        {
+            Organism organism = organismNode.Value;
+            
+            //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
+            organism.Step(listsToSend);
+        }
     }
 
     /// <summary>
