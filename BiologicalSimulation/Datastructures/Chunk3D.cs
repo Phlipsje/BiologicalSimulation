@@ -28,7 +28,7 @@ public class Chunk3D
         Organisms = new LinkedList<Organism>();
         extendedCheck = new LinkedList<Organism>();
         CheckToBeAdded = new Queue<Organism>();
-        dimenstionExtensionForCheck = largestOrganismSize; //TODO is this correct?
+        dimenstionExtensionForCheck = largestOrganismSize * 2;
         listsToSend = [Organisms, extendedCheck];
     }
 
