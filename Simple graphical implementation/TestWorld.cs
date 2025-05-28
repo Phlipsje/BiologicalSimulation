@@ -14,11 +14,9 @@ namespace Simple_graphical_implementation;
 /// </summary>
 public class TestWorld : World
 {
-    private Simulation simulation;
     private float worldHalfSize;
-    public TestWorld(DataStructure dataStructure, Simulation simulation, float worldHalfSize) : base(dataStructure)
+    public TestWorld(Simulation simulation, DataStructure dataStructure, float worldHalfSize) : base(simulation, dataStructure)
     {
-        this.simulation = simulation;
         this.worldHalfSize = worldHalfSize;
     }
     public override void StartingDistribution(Random random)
@@ -165,7 +163,7 @@ public class TestWorld : World
 
     public override bool StopCondition()
     {
-        if (simulation.Tick > 3000)
+        if (Simulation.Tick > 3000)
             return true;
         
         //We only stop when program is forcefully halted

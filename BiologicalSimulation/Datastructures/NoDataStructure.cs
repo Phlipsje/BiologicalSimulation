@@ -8,11 +8,22 @@ namespace BioSim.Datastructures;
 /// </summary>
 public class NoDataStructure : DataStructure
 {
-    public LinkedList<Organism> Organisms = new LinkedList<Organism>();
+    public LinkedList<Organism> Organisms;
+    private List<LinkedList<Organism>> listsToSend;
+
+    public NoDataStructure()
+    {
+        Organisms = new LinkedList<Organism>();
+        listsToSend = new List<LinkedList<Organism>>(){Organisms};
+    }
     
     public override void Step()
     {
-        //Nothing
+        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        {
+            Organism organism = organismNode.Value;
+            organism.Step(listsToSend);
+        }
     }
 
     /// <summary>
