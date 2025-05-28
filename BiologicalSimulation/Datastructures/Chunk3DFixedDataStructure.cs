@@ -3,6 +3,12 @@ using System.Numerics;
 
 namespace BioSim.Datastructures;
 
+/// <summary>
+/// Uses chunks to separate distant Organisms from each other.
+/// Simple and fast, Organisms are stored not globally, but within the chunks themselves.
+/// Chunks stored in arrays to make access very quick.
+/// 2D version of this exists for groups of organisms that grow mostly in 2 dimensions, such as biofilms
+/// </summary>
 public class Chunk3DFixedDataStructure : DataStructure
 {
     private Chunk3D[,,] chunks;

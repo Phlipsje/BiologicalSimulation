@@ -3,6 +3,13 @@ using System.Numerics;
 
 namespace BioSim.Datastructures;
 
+/// <summary>
+/// Used by Chunk2DFixedDataStructure.cs
+/// A chunk is a square that stores all organisms within it.
+/// The chunk has 2 sizes, the smaller of the 2 sizes is its own size,
+/// the larger size is an extension overlapping with neighbouring chunks that is of minimal size to include all organisms in other chunks that are relevant for collision within this chunk.
+/// Organisms are checked for inclusion/removal every frame, but are only actually removed/inserted if it falls outside the boundaries.
+/// </summary>
 public class Chunk2D
 {
     public Vector2 Center { get; }
