@@ -6,13 +6,10 @@ namespace BioSim;
 
 public abstract class World
 {
-    protected Simulation.Simulation Simulation { get; }
     public DataStructure DataStructure { get; }
-    public int Tick => Simulation.Tick;
     
-    public World(Simulation.Simulation simulation, DataStructure dataStructure)
+    public World(DataStructure dataStructure)
     {
-        Simulation = simulation;
         DataStructure = dataStructure;
         dataStructure.SetWorld(this);
     }
