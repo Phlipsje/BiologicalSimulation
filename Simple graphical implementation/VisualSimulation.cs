@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using BioSim;
 using BioSim.Datastructures;
 using BioSim.Simulation;
+using System.Numerics;
 using BiologicalSimulation;
+using BioSim.Datastructures;
+using BioSim.Datastructures.Datastructures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -18,6 +22,7 @@ namespace Simple_graphical_implementation;
 /// </summary>
 public class VisualSimulation : Game
 {
+    private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
 
     private const int screenWidth = 1280;
@@ -33,8 +38,8 @@ public class VisualSimulation : Game
     public new int Tick => simulation.Tick;
 
     //Easiest way to implement global counter, not most safe way of doing it
-    public static int OrganismACount;
-    public static int OrganismBCount;
+    public static int OrganismACount = 0;
+    public static int OrganismBCount = 0;
     
     //For tracking fps performance
     public static float AverageFps { get; private set; }
@@ -45,7 +50,7 @@ public class VisualSimulation : Game
     
     public VisualSimulation()
     {
-        GraphicsDeviceManager graphics = new GraphicsDeviceManager(this);
+        graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         graphics.PreferredBackBufferWidth = screenWidth;
@@ -59,13 +64,11 @@ public class VisualSimulation : Game
     {
         base.Initialize();
 
-        viewingInformation = new ViewingInformation
-        {
-            Position = Vector3.Zero,
-            Scale = 50,
-            Width = screenWidth,
-            Height = screenHeight
-        };
+        viewingInformation = new ViewingInformation();
+        viewingInformation.Position = Vector3.Zero;
+        viewingInformation.Scale = 50;
+        viewingInformation.Width = screenWidth;
+        viewingInformation.Height = screenHeight;
     }
 
     protected override void LoadContent()
@@ -74,16 +77,15 @@ public class VisualSimulation : Game
 
         int sizeX = screenWidth / 2;
         int sizeY = screenHeight / 2;
-        renderManager = new RenderManager(this, GraphicsDevice, [
-            new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth, screenHeight),
+        renderManager = new RenderManager(this, GraphicsDevice, new List<Renderer>()
+        {
+            new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth, screenHeight), 
                 ViewDirection.XYPlane, new Rectangle(0, 0, sizeX, sizeY)),
-
             new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth, screenHeight),
                 ViewDirection.YZPlane, new Rectangle(sizeX, 0, sizeX, sizeY)),
-
             new Renderer(new RenderTarget2D(GraphicsDevice, screenWidth, screenHeight),
                 ViewDirection.XZPlane, new Rectangle(0, sizeY, sizeX, sizeY))
-        ]);
+        });
         renderManager.DrawBorders = true;
         renderManager.Draw = false;
         renderManager.LoadContent(Content);
@@ -93,10 +95,10 @@ public class VisualSimulation : Game
         float worldHalfSize = 12f;
         float organismSize = 0.5f;
         DataStructure dataStructure = new Chunk3DFixedDataStructure(new Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
-            new Vector3(worldHalfSize), 2f, organismSize);
+            new Vector3(worldHalfSize), 3f, organismSize);
         //DataStructure dataStructure = new Chunk2DFixedDataStructure(new Vector2(-worldHalfSize), 
         //    new Vector2(worldHalfSize), 2f, organismSize);
-        world = new TestWorld(simulation, dataStructure, worldHalfSize);
+        world = new TestWorld(dataStructure, simulation, worldHalfSize);
         TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
         OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
         simulation.CreateSimulation(world, random);
@@ -188,7 +190,7 @@ public class VisualSimulation : Game
 
 public class ViewingInformation
 {
-    public Vector3 Position { get; set; } //Where the center of the viewpoint is
+    public System.Numerics.Vector3 Position { get; set; } //Where the center of the viewpoint is
     public float Width { get; set; }
     public float Height { get; set; }
     public float Scale { get; set; } //How many pixels are equal to a unit of distance in the simulation
