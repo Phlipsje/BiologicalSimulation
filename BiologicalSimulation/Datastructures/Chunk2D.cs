@@ -11,7 +11,10 @@ public class Chunk2D
     public LinkedList<Organism> Organisms { get; }
     private LinkedList<Organism> extendedCheck;
     public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
+    private HashSet<ulong> containingOrganisms; //Used for Contains checks
+    private HashSet<ulong> extendedContainingOrganisms; //Used for Contains checks in extended linked list
     private Chunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
+    private List<LinkedList<Organism>> listsToCheck;
 
     public Chunk2D(Vector2 center, float halfDimension, float largestOrganismSize)
     {
@@ -20,7 +23,10 @@ public class Chunk2D
         Organisms = new LinkedList<Organism>();
         extendedCheck = new LinkedList<Organism>();
         CheckToBeAdded = new Queue<Organism>();
+        containingOrganisms = new HashSet<ulong>();
+        extendedContainingOrganisms = new HashSet<ulong>();
         dimenstionExtensionForCheck = largestOrganismSize;
+        listsToCheck = new List<LinkedList<Organism>>(){Organisms, extendedCheck};
     }
 
     public void Initialize(Chunk2D[] connectedChunks)
@@ -41,7 +47,7 @@ public class Chunk2D
             Organism organism = organismNode.Value;
             
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
-            organism.Step([Organisms, extendedCheck]);
+            organism.Step(listsToCheck);
         }
         
         //Update what should and should not be in this chunk
@@ -74,15 +80,17 @@ public class Chunk2D
             
             float singleAxisDistance = SingleAxisDistance(organism);
 
-            if (singleAxisDistance <= HalfDimension && !Organisms.Contains(organism))
+            if (singleAxisDistance <= HalfDimension && !containingOrganisms.Contains(organism.Id))
             {
                 Organisms.AddLast(organism);
+                containingOrganisms.Add(organism.Id);
                 continue;
             }
             
-            if (singleAxisDistance <= HalfDimension + dimenstionExtensionForCheck && !extendedCheck.Contains(organism))
+            if (singleAxisDistance <= HalfDimension + dimenstionExtensionForCheck && !extendedContainingOrganisms.Contains(organism.Id))
             {
                 extendedCheck.AddLast(organism);
+                extendedContainingOrganisms.Add(organism.Id);
             }
         }
     }
@@ -153,5 +161,6 @@ public class Chunk2D
     public void DirectlyInsertOrganism(Organism organism)
     {
         Organisms.AddLast(organism);
+        containingOrganisms.Add(organism.Id);
     }
 }

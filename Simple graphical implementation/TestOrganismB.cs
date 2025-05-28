@@ -27,10 +27,20 @@ public class TestOrganismB : VisualOrganism
         BB2 = 0;
         Biomass = 1;
     }
+    
+    public TestOrganismB(Vector3 startingPosition, float size, Organism parent) : base(startingPosition, size, parent)
+    {
+        VisualSimulation.OrganismBCount++;
+        GrowthRate = Random.NextSingle(); //Between 0 and 1
+        Resources = 0;
+        BB1 = 0;
+        BB2 = 0;
+        Biomass = 1;
+    }
 
     public override TestOrganismB CreateNewOrganism(Vector3 startingPosition)
     {
-        return new TestOrganismB(startingPosition, Size, World, DataStructure, Random);
+        return new TestOrganismB(startingPosition, Size, this);
     }
     
     public override void Step(List<LinkedList<Organism>> organismLists)
