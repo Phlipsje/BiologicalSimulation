@@ -5,30 +5,24 @@ namespace BioSim.Datastructures;
 /// <summary>
 /// An abstract class used to define an object that can help in more efficiently running position based queries
 /// </summary>
-public abstract class DataStructure : IEnumerable<IOrganism>
+public abstract class DataStructure
 {
-    protected World World { get; }
+    protected World World { get; private set; }
 
-    public DataStructure(World world)
+    public DataStructure()
+    {
+    }
+
+    public void SetWorld(World world)
     {
         World = world;
     }
 
     //Gets called every frame (before updating world)
     public abstract void Step();
+    public abstract void AddOrganism(Organism organism);
+    public abstract IEnumerable<Organism> GetOrganisms();
+    public abstract int GetOrganismCount();
+    public abstract bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists);
     public abstract Organism ClosestNeighbour(Organism organism);
-    public abstract bool CheckCollision(Organism organism, Vector3 position);
-    
-    //Define this method to explain how the data structure can be accessed as something that is iterable, easiest is a List or array
-    protected abstract IEnumerator<IOrganism> ToEnumerator();
-
-    IEnumerator<IOrganism> IEnumerable<IOrganism>.GetEnumerator()
-    {
-        return ToEnumerator();
-    }
-
-    public IEnumerator GetEnumerator()
-    {
-        return ToEnumerator();
-    }
 }

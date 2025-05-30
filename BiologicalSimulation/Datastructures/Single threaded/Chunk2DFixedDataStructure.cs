@@ -1,107 +1,197 @@
-using System.Drawing;
+using System.Collections;
+using System.Diagnostics.Contracts;
 using System.Numerics;
 
-namespace BioSim.Datastructures;
+namespace BioSim.Datastructures.Datastructures;
 
 /// <summary>
-/// A simple data structure that divides the world in chunks, Organisms only check collision within the chunk, and it's direct neighbouring chunks
-/// Organisms are re-inserted after every frame
-/// This version of this data structure has a maximum size so that the chunks can be stored in a grid (which is a lot faster),
-///  the program does not check if the position is supported before inserting.
-/// For a version that supports an infinitely sized continuous space, use Chunk2DDataStructure.cs
-/// 2D version is optimal for simulating system that mostly grow in two dimensions, such as biofilms.
+/// Uses chunks to separate distant Organisms from each other.
+/// Simple and fast, Organisms are stored not globally, but within the chunks themselves.
+/// Chunks stored in arrays to make access very quick.
+/// 3D version of this exists for more general usecase
 /// </summary>
 public class Chunk2DFixedDataStructure : DataStructure
 {
-    private Chunk[,] chunks;
+    private Chunk2D[,] chunks;
     private Vector2 minPosition;
-    private Vector2 chunkSize;
-    private float largestOrganismSize;
+    private float chunkSize;
+    private int chunkCountX;
+    private int chunkCountY;
     
-    public Chunk2DFixedDataStructure(World world, Vector2 minPosition, Vector2 maxPosition, Vector2 chunkSize, float largestOrganismSize) : base(world)
+    public Chunk2DFixedDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize)
     {
-        minPosition = minPosition - chunkSize*2;
-        maxPosition = maxPosition + chunkSize*2;
-        int chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize.X);
-        int chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize.Y);
-        chunks = new Chunk[chunkCountX, chunkCountY];
+        chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
+        chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
+        chunks = new Chunk2D[chunkCountX, chunkCountY];
         this.minPosition = minPosition;
         this.chunkSize = chunkSize;
-        this.largestOrganismSize = largestOrganismSize;
 
+        //Create all chunks
         for (int i = 0; i < chunkCountX; i++)
         {
             for (int j = 0; j < chunkCountY; j++)
             {
-                chunks[i, j] = new Chunk();
+                Vector2 chunkCenter = minPosition + new Vector2(i, j) * chunkSize + new Vector2(chunkSize*0.5f);
+                chunks[i, j] = new Chunk2D(chunkCenter, chunkSize, largestOrganismSize);
             }
         }
-    }
-
-    private void FillChunks()
-    {
-        foreach (Chunk chunk in chunks)
+        
+        //Get all connected chunks
+        for (int i = 0; i < chunkCountX; i++)
         {
-            chunk.Clear();
+            for (int j = 0; j < chunkCountY; j++)
+            {
+                chunks[i, j].Initialize(GetConnectedChunks(i, j));
+            }
         }
         
-        foreach (Organism organism in World.Organisms)
+        CheckWarnings(largestOrganismSize);
+        CheckErrors(largestOrganismSize);
+    }
+
+    [Pure]
+    private Chunk2D[] GetConnectedChunks(int chunkX, int chunkY)
+    {
+        List<Chunk2D> connectedChunks = new List<Chunk2D>(8);
+        
+        for (int x = -1; x <= 1; x++)
         {
-            InsertIntoChunk(organism);
+            //Check bounds
+            if (chunkX + x < 0 || chunkX + x >= chunkCountX)
+                continue;
+            
+            for (int y = -1; y <= 1; y++)
+            {
+                //Check bounds
+                if (chunkY + y < 0 || chunkY + y >= chunkCountY)
+                    continue;
+                
+                //Don't add self
+                if (x == 0 && y == 0)
+                    continue;
+                    
+                connectedChunks.Add(chunks[chunkX+x,chunkY+y]);
+            }
         }
-    }
-
-    private void InsertIntoChunk(Organism organism)
-    {
-        (int chunkX, int chunkY) = GetChunk(organism.Position);
-        chunks[chunkX,chunkY].Insert(organism);
-    }
-
-    private (int, int) GetChunk(Vector3 position)
-    {
-        int chunkX = (int)Math.Ceiling((position.X - minPosition.X) / chunkSize.X);
-        int chunkY = (int)Math.Ceiling((position.Y - minPosition.Y) / chunkSize.Y);
-        return (chunkX, chunkY);
+        
+        return connectedChunks.ToArray();
     }
 
     public override void Step()
     {
-        FillChunks();
+        foreach (Chunk2D chunk2D in chunks)
+        {
+            chunk2D.Step();
+        }
+    }
+
+    public override void AddOrganism(Organism organism)
+    {
+        (int x, int y) = GetChunk(organism.Position);
+        chunks[x,y].DirectlyInsertOrganism(organism);
+    }
+
+    public override IEnumerable<Organism> GetOrganisms()
+    {
+        Organism[] organisms = new Organism[GetOrganismCount()];
+        int i = 0;
+        foreach (Chunk2D chunk in chunks)
+        {
+            foreach (Organism organism in chunk.Organisms)
+            {
+                organisms[i] = organism;
+                i++;
+            }
+        }
+        
+        return organisms;
+    }
+
+    public override int GetOrganismCount()
+    {
+        int organismCount = 0;
+        foreach (Chunk2D chunk2D in chunks)
+        {
+            organismCount += chunk2D.OrganismCount;
+        }
+
+        return organismCount;
+    }
+
+    private (int, int) GetChunk(Vector3 position)
+    {
+        int chunkX = (int)Math.Floor((position.X - minPosition.X) / chunkSize);
+        int chunkY = (int)Math.Floor((position.Y - minPosition.Y) / chunkSize);
+        //Math.Min because otherwise can throw error if X,Y, or Z is exactly maxValue
+        chunkX = Math.Min(chunkX, chunkCountX - 1);
+        chunkY = Math.Min(chunkY, chunkCountY - 1);
+        return (chunkX, chunkY);
+    }
+    
+    public override bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists)
+    {
+        LinkedList<Organism> collideableOrganisms = organismLists[0];
+        LinkedList<Organism> collideableExtendedOrganisms = organismLists[1];
+        
+        if (!World.IsInBounds(position))
+            return true;
+        
+        //Check for organisms within the chunk
+        foreach (Organism otherOrganism in collideableOrganisms)
+        {
+            if (organism == otherOrganism)
+                continue;
+            
+            //Checks collision by checking distance between circles
+            float x = position.X - otherOrganism.Position.X;
+            float x2 = x * x;
+            float y = position.Y - otherOrganism.Position.Y;
+            float y2 = y * y;
+            float z = position.Z - otherOrganism.Position.Z;
+            float z2 = z * z;
+            float sizes = organism.Size + otherOrganism.Size;
+            if (x2 + y2 + z2 <= sizes * sizes)
+                return true;
+        }
+        
+        //Check for any organisms within neighbouring chunks that are within distance of possibly touching with this
+        foreach (Organism otherOrganism in collideableExtendedOrganisms)
+        {
+            if (organism == otherOrganism)
+                continue;
+            
+            //Checks collision by checking distance between circles
+            float x = position.X - otherOrganism.Position.X;
+            float x2 = x * x;
+            float y = position.Y - otherOrganism.Position.Y;
+            float y2 = y * y;
+            float z = position.Z - otherOrganism.Position.Z;
+            float z2 = z * z;
+            float sizes = organism.Size + otherOrganism.Size;
+            if (x2 + y2 + z2 <= sizes * sizes)
+                return true;
+        }
+
+        return false;
     }
 
     public override Organism ClosestNeighbour(Organism organism)
     {
         throw new NotImplementedException();
     }
+    
+    #region Warnings and errors
 
-    public override bool CheckCollision(Organism organism, Vector3 position)
+    private void CheckWarnings(float largestOrganismSize)
     {
-        if (!World.IsInBounds(position))
-            return true;
-        
-        (int chunkX, int chunkY) = GetChunk(position);
-        
-        if(chunks[chunkX, chunkY].CheckCollision(organism, position))
-            return true;
-        
-        //If no collision in the chunk the organism is in, then check surrounding possible chunks
-        for (int i = -1; i <= 1; i++)
-        {
-            for (int j = -1; j <= 1; j++)
-            {
-                if (i == 0 && j == 0)
-                    continue;
-                
-                if (chunks[chunkX+i, chunkY+j].CheckCollision(organism, position))
-                    return true;
-            }
-        }
-
-        return false;
+        if (chunkSize > largestOrganismSize * 10)
+            Console.WriteLine("Warning: Chunk size is rather large, smaller chunk size would improve performance");
     }
 
-    protected override IEnumerator<IOrganism> ToEnumerator()
+    private void CheckErrors(float largestOrganismSize)
     {
-        return World.Organisms.GetEnumerator();
+        if (chunkSize / 2f < largestOrganismSize)
+            throw new ArgumentException("Chunk size must be at least twice largest organism size");
     }
+    #endregion
 }

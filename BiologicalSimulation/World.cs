@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Numerics;
 using BioSim.Datastructures;
 
@@ -5,42 +6,40 @@ namespace BioSim;
 
 public abstract class World
 {
-    public LinkedList<Organism> Organisms { get; }
-    public int OrganismCount { get; private set; }
+    public DataStructure DataStructure { get; }
     
-    public World()
+    public World(DataStructure dataStructure)
     {
-        Organisms = new LinkedList<Organism>();
+        DataStructure = dataStructure;
+        dataStructure.SetWorld(this);
     }
 
-    public void Initialize()
+    public virtual void Initialize()
     {
-        OrganismCount = Organisms.Count;
+        
     }
 
-    public void Step()
+    public virtual void Step()
     {
-        //Not using foreach but for loop, because organisms can be added while the loop is active
-        LinkedListNode<Organism> organismNode = Organisms.First!;
-        for (int i = 0; i < OrganismCount; i++)
-        {
-            if (organismNode is null)
-                return;
-            
-            Organism organism = organismNode.Value;
-            organismNode = organismNode.Next!;
-            
-            organism.Step();
-        }
+        
     }
 
     public void AddOrganism(Organism organism)
     {
-        Organisms.AddLast(organism);
-        OrganismCount++;
+        DataStructure.AddOrganism(organism);
     }
 
-    public abstract void StartingDistribution(DataStructure dataStructure, Random random); //Where all organisms start
+    public IEnumerable<Organism> GetOrganisms()
+    {
+        return DataStructure.GetOrganisms();
+    }
+
+    public int GetOrganismCount()
+    {
+        return DataStructure.GetOrganismCount();
+    }
+
+    public abstract void StartingDistribution(Random random); //Where all organisms start
     public abstract bool IsInBounds(Vector3 position); //Use this to define the confines of space all organisms are in, if false, it can't move to that position
     public abstract bool StopCondition(); //If this is true, the program will halt
 }

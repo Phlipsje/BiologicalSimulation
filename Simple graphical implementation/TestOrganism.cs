@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BioSim;
 using BioSim.Datastructures;
 using Microsoft.Xna.Framework;
@@ -29,13 +30,20 @@ public class TestOrganism : VisualOrganism
     {
         return new TestOrganism(startingPosition, Size, World, DataStructure, Random);
     }
-    
-    public override void Step()
+
+    public override void Step(List<LinkedList<Organism>> organismLists)
     {
         //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
         //Also known as brownian motion
-        Move(new Vector3((float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01),(float)(Random.NextDouble() * 0.02 - 0.01)));
-
+        Vector3 direction = new Vector3((float)(Random.NextDouble() * 0.02 - 0.01),
+            (float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01));
+        Move(direction, organismLists);
+        
+        Reproduction(organismLists);
+    }
+    
+    private void Reproduction(List<LinkedList<Organism>> organismLists)
+    {
         GrowthRate = 0.02f;
         GridValues values = GrowthGrid.GetValues(Position);
         float uptake = values.R * 0.01f * (1-Resources/(Resources+0.1f));
@@ -62,7 +70,7 @@ public class TestOrganism : VisualOrganism
 
         if (Biomass > 6)
         {
-            TestOrganism child = Reproduce() as TestOrganism;
+            TestOrganism child = Reproduce(organismLists) as TestOrganism;
             if (child is null)
                 return;
             
