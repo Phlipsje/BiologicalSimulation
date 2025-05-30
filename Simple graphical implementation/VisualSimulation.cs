@@ -92,15 +92,15 @@ public class VisualSimulation : Game
         
         simulation = new Simulation();
         Random random = new Random(); //Can enter seed here
-        float worldHalfSize = 12.5f;
+        float worldHalfSize = 12f;
         float organismSize = 0.5f;
         DataStructure dataStructure = new Chunk3DFixedDataStructure(new Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
-            new Vector3(worldHalfSize), 2.5f, organismSize);
+            new Vector3(worldHalfSize), 4f, organismSize);
         //DataStructure dataStructure = new Chunk2DFixedDataStructure(new Vector2(-worldHalfSize), 
         //    new Vector2(worldHalfSize), 2.5f, organismSize);
         world = new TestWorld(dataStructure, simulation, worldHalfSize);
-        TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
-        OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
+        //TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
+        //OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
         simulation.CreateSimulation(world, random);
         simulation.SetDataStructure(dataStructure);
         simulation.DrawingEnabled = true;

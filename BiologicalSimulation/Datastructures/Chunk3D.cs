@@ -15,16 +15,17 @@ public class Chunk3D
     public Vector3 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
     private float dimenstionExtensionForCheck;
+    public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
     private LinkedList<Organism> extendedCheck;
     public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     private Chunk3D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     private List<LinkedList<Organism>> listsToSend;
     
-    public Chunk3D(Vector3 center, float halfDimension, float largestOrganismSize)
+    public Chunk3D(Vector3 center, float size, float largestOrganismSize)
     {
         Center = center;
-        HalfDimension = halfDimension;
+        HalfDimension = size/2f;
         Organisms = new LinkedList<Organism>();
         extendedCheck = new LinkedList<Organism>();
         CheckToBeAdded = new Queue<Organism>();
@@ -38,6 +39,9 @@ public class Chunk3D
         this.connectedChunks = connectedChunks;
     }
     
+    /// <summary>
+    /// Does logic for this frame
+    /// </summary>
     public void Step()
     {
         //Check what should be added to chunk
@@ -86,6 +90,7 @@ public class Chunk3D
             if (singleAxisDistance <= HalfDimension && !Organisms.Contains(organism))
             {
                 Organisms.AddLast(organism);
+                OrganismCount++;
                 continue;
             }
             
@@ -116,6 +121,7 @@ public class Chunk3D
             }
             //Removing via node if faster
             Organisms.Remove(organismNode);
+            OrganismCount--;
         }
         else //If a bit deeper within chunk, then only send for check, not for removal (so that neighbouring chunks can add to extended range)
         {
@@ -162,5 +168,6 @@ public class Chunk3D
     public void DirectlyInsertOrganism(Organism organism)
     {
         Organisms.AddLast(organism);
+        OrganismCount++;
     }
 }

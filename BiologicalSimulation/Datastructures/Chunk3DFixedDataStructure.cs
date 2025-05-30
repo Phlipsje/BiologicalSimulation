@@ -17,7 +17,6 @@ public class Chunk3DFixedDataStructure : DataStructure
     private int chunkCountX;
     private int chunkCountY;
     private int chunkCountZ;
-    private int organismCount;
     
     public Chunk3DFixedDataStructure(Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize)
     {
@@ -27,7 +26,6 @@ public class Chunk3DFixedDataStructure : DataStructure
         chunks = new Chunk3D[chunkCountX, chunkCountY, chunkCountZ];
         this.minPosition = minPosition;
         this.chunkSize = chunkSize;
-        organismCount = 0;
 
         //Create all chunks
         for (int i = 0; i < chunkCountX; i++)
@@ -102,12 +100,11 @@ public class Chunk3DFixedDataStructure : DataStructure
     {
         (int x, int y, int z) = GetChunk(organism.Position);
         chunks[x,y,z].DirectlyInsertOrganism(organism);
-        organismCount++;
     }
 
     public override IEnumerable<Organism> GetOrganisms()
     {
-        Organism[] organisms = new Organism[organismCount];
+        Organism[] organisms = new Organism[GetOrganismCount()];
         int i = 0;
         foreach (Chunk3D chunk in chunks)
         {
@@ -123,6 +120,12 @@ public class Chunk3DFixedDataStructure : DataStructure
 
     public override int GetOrganismCount()
     {
+        int organismCount = 0;
+        foreach (Chunk3D chunk3D in chunks)
+        {
+            organismCount += chunk3D.OrganismCount;
+        }
+
         return organismCount;
     }
 

@@ -15,16 +15,17 @@ public class Chunk2D
     public Vector2 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
     private float dimenstionExtensionForCheck;
+    public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
     private LinkedList<Organism> extendedCheck;
     public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     private Chunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     private List<LinkedList<Organism>> listsToSend;
 
-    public Chunk2D(Vector2 center, float halfDimension, float largestOrganismSize)
+    public Chunk2D(Vector2 center, float size, float largestOrganismSize)
     {
         Center = center;
-        HalfDimension = halfDimension;
+        HalfDimension = size/2f;
         Organisms = new LinkedList<Organism>();
         extendedCheck = new LinkedList<Organism>();
         CheckToBeAdded = new Queue<Organism>();
@@ -86,6 +87,7 @@ public class Chunk2D
             if (singleAxisDistance <= HalfDimension && !Organisms.Contains(organism))
             {
                 Organisms.AddLast(organism);
+                OrganismCount++;
                 continue;
             }
             
@@ -116,6 +118,7 @@ public class Chunk2D
             }
             //Removing via node if faster
             Organisms.Remove(organismNode);
+            OrganismCount--;
         }
         else //If a bit deeper within chunk, then only send for check, not for removal (so that neighbouring chunks can add to extended range)
         {
@@ -162,5 +165,6 @@ public class Chunk2D
     public void DirectlyInsertOrganism(Organism organism)
     {
         Organisms.AddLast(organism);
+        OrganismCount++;
     }
 }

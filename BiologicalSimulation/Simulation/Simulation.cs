@@ -55,9 +55,12 @@ public partial class Simulation
     {
         world.StartingDistribution(random);
         world.Initialize();
-        
-        (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(world, this) : simulationExporter.SaveToSeparateFiles(world, this);
-        OnFileWrite?.Invoke(filePath, fileContents);
+
+        if (FileWritingEnabled)
+        {
+            (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(world, this) : simulationExporter.SaveToSeparateFiles(world, this);
+            OnFileWrite?.Invoke(filePath, fileContents);
+        }
     }
 
     public void Step()
