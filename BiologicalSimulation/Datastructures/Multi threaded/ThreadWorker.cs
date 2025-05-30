@@ -46,5 +46,6 @@ public class ThreadWorker
         Active = true;
         AssignedChunkX = chunkX;
         AssignedChunkY = chunkY;
+        Thread.Start();
     }
 }

@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using System.Numerics;
 
@@ -18,7 +20,7 @@ public class Chunk2D
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
     private LinkedList<Organism> extendedCheck;
-    public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
+    public ConcurrentQueue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame TODO maybe have 2 versions, one with or without concurrent for with or without multithreading, because this one is definitely slower
     private Chunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     private List<LinkedList<Organism>> listsToSend;
 
@@ -28,7 +30,7 @@ public class Chunk2D
         HalfDimension = size/2f;
         Organisms = new LinkedList<Organism>();
         extendedCheck = new LinkedList<Organism>();
-        CheckToBeAdded = new Queue<Organism>();
+        CheckToBeAdded = new ConcurrentQueue<Organism>();
         dimenstionExtensionForCheck = largestOrganismSize * 2;
         listsToSend = [Organisms, extendedCheck];
     }
@@ -39,7 +41,7 @@ public class Chunk2D
         this.connectedChunks = connectedChunks;
     }
     
-    public void Step()
+    public Task Step()
     {
         //Check what should be added to chunk
         //No removals happen during this
@@ -70,6 +72,8 @@ public class Chunk2D
             
             CheckRemoveFromExtension(organism, organismNode);
         }
+        
+        return Task.CompletedTask;
     }
     
     /// <summary>
@@ -80,7 +84,9 @@ public class Chunk2D
     {
         while (CheckToBeAdded.Count > 0)
         {
-            Organism organism = CheckToBeAdded.Dequeue();
+            bool success = CheckToBeAdded.TryDequeue(out Organism organism);
+            if (!success)
+                continue;
             
             float singleAxisDistance = SingleAxisDistance(organism);
 
