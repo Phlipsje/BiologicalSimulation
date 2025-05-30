@@ -14,7 +14,7 @@ public partial class Simulation
     {
         if (ticksPerDrawCall <= 0)
         {
-            throw new Exception("Ticks per draw call must be greater than zero.");
+            throw new ArgumentException("Ticks per draw call must be greater than zero.");
         }
         
         this.ticksPerDrawCall = ticksPerDrawCall;
@@ -24,7 +24,7 @@ public partial class Simulation
     {
         if (ticksPerFileWrite <= 0)
         {
-            throw new Exception("Ticks per draw call must be greater than zero.");
+            throw new ArgumentException("Ticks per draw call must be greater than zero.");
         }
         
         this.ticksPerFileWrite = ticksPerFileWrite;

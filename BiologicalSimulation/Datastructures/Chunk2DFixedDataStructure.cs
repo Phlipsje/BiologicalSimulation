@@ -44,6 +44,9 @@ public class Chunk2DFixedDataStructure : DataStructure
                 chunks[i, j].Initialize(GetConnectedChunks(i, j));
             }
         }
+        
+        CheckWarnings(largestOrganismSize);
+        CheckErrors(largestOrganismSize);
     }
 
     [Pure]
@@ -176,4 +179,19 @@ public class Chunk2DFixedDataStructure : DataStructure
     {
         throw new NotImplementedException();
     }
+    
+    #region Warnings and errors
+
+    private void CheckWarnings(float largestOrganismSize)
+    {
+        if (chunkSize > largestOrganismSize * 10)
+            Console.WriteLine("Warning: Chunk size is rather large, smaller chunk size would improve performance");
+    }
+
+    private void CheckErrors(float largestOrganismSize)
+    {
+        if (chunkSize / 2f < largestOrganismSize)
+            throw new ArgumentException("Chunk size must be at least twice largest organism size");
+    }
+    #endregion
 }

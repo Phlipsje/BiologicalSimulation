@@ -55,6 +55,9 @@ public partial class Simulation
     {
         world.StartingDistribution(random);
         world.Initialize();
+        
+        CheckWarnings();
+        CheckErrors();
 
         if (FileWritingEnabled)
         {
@@ -107,4 +110,20 @@ public partial class Simulation
         //Tell the user that the simulation is over
         OnEnd?.Invoke(world);
     }
+
+    #region Warnings and errors
+
+    private void CheckWarnings()
+    {
+        if(dataStructure is NoDataStructure)
+            Console.WriteLine("Warning: no data structure is being used");
+    }
+
+    private void CheckErrors()
+    {
+        
+    }
+    
+
+    #endregion
 }
