@@ -10,22 +10,59 @@ public class RTree<T> where T : IMinimumBoundable
     }
 }
 
-public abstract class RNode<T> : IMinimumBoundable where T : IMinimumBoundable
-{    
+public abstract class RNode<T>(int m, int M) : IMinimumBoundable where T : IMinimumBoundable
+{
+    protected int _m = m;
+    protected int _M = M;
+    public RNode<T> Parent = null;
     public Mbb Mbb;
     public Mbb GetMbb() { return Mbb; }
     public abstract void Search(Mbb searchArea, ref List<T> results);
-    public abstract void Insert(T entry);
+    public abstract void Insert(T entry, ref RNode<T> root);
+    public void AdjustTree(RNode<T> L, RNode<T>? LL, ref RNode<T> root)
+    {
+        if (L.Equals(root)) //stop condition
+        {
+            if(LL == null)//Then root can stay the way it is
+                return;
+            //This means the root was split into L and LL
+            RNonLeafNode<T> newRoot = new RNonLeafNode<T>(_m, _M);
+            newRoot.Children = [L, LL];
+            newRoot.Mbb = L.Mbb.Enlarged(LL.Mbb);
+            L.Parent = newRoot;
+            LL.Parent = newRoot;
+            root = newRoot;
+            return;
+        }
+
+        RNonLeafNode<T> P = (RNonLeafNode<T>)L.Parent; //a parent of a node should never be a leaf node.
+        P.Mbb = P.Mbb.Enlarged(L.Mbb);
+        if (LL == null)
+        {
+            P.AdjustTree(P, null, ref root);
+            return;
+        }
+        if (P.Count < M)
+        {
+            P.Children.Add(LL);
+            P.Mbb = P.Mbb.Enlarged(LL.Mbb);
+            LL.Parent = P;
+            P.AdjustTree(P, null, ref root);
+            return;
+        }
+        (_, RNode<T> PP) = P.SplitNode(LL);
+        AdjustTree(P, PP, ref root);
+    }
+    
     public abstract RLeafNode<T> ChooseLeaf(T entry);
     public abstract (RNode<T>, RNode<T>) SplitNode(RNode<T> entry);
 }
 
-public class RLeafNode<T>(int m, int M) : RNode<T>
+public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
     where T : IMinimumBoundable
 {
     public int Count => LeafEntries.Count;
     public List<T> LeafEntries = new (M);
-    private int _m = m, _M = M;
 
     public override void Search(Mbb searchArea, ref List<T> results)
     {
@@ -40,7 +77,7 @@ public class RLeafNode<T>(int m, int M) : RNode<T>
         return this;
     }
 
-    public override void Insert(T entry)
+    public override void Insert(T entry, ref RNode<T> root)
     {
         if (Count < M)
         {
@@ -68,7 +105,7 @@ public class RLeafNode<T>(int m, int M) : RNode<T>
         (T e1, T e2) = LinearPickSeeds(entries);
         entries.Remove(e1);
         entries.Remove(e2);
-        RLeafNode<T> group1 = new RLeafNode<T>(_m, _M);
+        RLeafNode<T> group1 = this;
         RLeafNode<T> group2 = new RLeafNode<T>(_m, _M);
         group1.LeafEntries = new List<T>(M) { e1 };
         group1.Mbb = e1.GetMbb();
@@ -202,11 +239,10 @@ public class RLeafNode<T>(int m, int M) : RNode<T>
     }
 }
 
-public class RNonLeafNode<T>(int m, int M) : RNode<T> where T : IMinimumBoundable
+public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBoundable
 {
     public List<RNode<T>> Children = new (M);
     public int Count => Children.Count;
-    private int _m = m, _M = M;
 
     public override void Search(Mbb searchArea, ref List<T> results)
     {
@@ -217,12 +253,11 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T> where T : IMinimumBoundabl
         }
     }
 
-    public override void Insert(T entry)
+    public override void Insert(T entry, ref RNode<T> root)
     {
         RLeafNode<T> leaf = ChooseLeaf(entry);
-        leaf.Insert(entry);
+        leaf.Insert(entry, ref root);
     }
-
     public override RLeafNode<T> ChooseLeaf(T entry)
     {
         RNode<T> best = Children[0];
@@ -246,7 +281,7 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T> where T : IMinimumBoundabl
         (RNode<T> e1, RNode<T> e2) = LinearPickSeeds(entries);
         entries.Remove(e1);
         entries.Remove(e2);
-        RNonLeafNode<T> group1 = new RNonLeafNode<T>(_m, _M);
+        RNonLeafNode<T> group1 = this;
         RNonLeafNode<T> group2 = new RNonLeafNode<T>(_m, _M);
         group1.Children = new List<RNode<T>>(M) { e1 };
         group1.Mbb = e1.GetMbb();
