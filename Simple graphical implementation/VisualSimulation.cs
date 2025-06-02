@@ -46,7 +46,6 @@ public class VisualSimulation : Game
     private float tallyFps;
     private int fpsCounter;
     private const int ticksPerUpdate = 15;
-    private float secondsCount = 0f;
     
     public VisualSimulation()
     {
@@ -151,13 +150,6 @@ public class VisualSimulation : Game
 
         simulation.Step();
         GrowthGrid.Step();
-
-        secondsCount += (float)gameTime.ElapsedGameTime.TotalSeconds;
-        if (simulation.Tick == 4000)
-        {
-            Console.WriteLine("Simulation reached 4000 ticks in:");
-            Console.WriteLine(secondsCount + " seconds"); //Elapsed seconds
-        }
         
         base.Update(gameTime);
     }
