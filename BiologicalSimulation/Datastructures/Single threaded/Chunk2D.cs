@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using System.Numerics;
+using BiologicalSimulation.Datastructures;
 
 namespace BioSim.Datastructures;
 
@@ -20,17 +21,17 @@ public class Chunk2D
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
     private LinkedList<Organism> extendedCheck;
-    public ConcurrentQueue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame TODO maybe have 2 versions, one with or without concurrent for with or without multithreading, because this one is definitely slower
+    public QueueWrapper<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     private Chunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     private List<LinkedList<Organism>> listsToSend;
 
-    public Chunk2D(Vector2 center, float size, float largestOrganismSize)
+    public Chunk2D(bool multithreaded, Vector2 center, float size, float largestOrganismSize)
     {
         Center = center;
         HalfDimension = size/2f;
         Organisms = new LinkedList<Organism>();
         extendedCheck = new LinkedList<Organism>();
-        CheckToBeAdded = new ConcurrentQueue<Organism>();
+        CheckToBeAdded = new QueueWrapper<Organism>(multithreaded);
         dimenstionExtensionForCheck = largestOrganismSize * 2;
         listsToSend = [Organisms, extendedCheck];
     }
@@ -84,7 +85,7 @@ public class Chunk2D
     {
         while (CheckToBeAdded.Count > 0)
         {
-            bool success = CheckToBeAdded.TryDequeue(out Organism organism);
+            bool success = CheckToBeAdded.Dequeue(out Organism organism);
             if (!success)
                 continue;
             
@@ -122,6 +123,10 @@ public class Chunk2D
             {
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
+            
+            if (organismNode.Previous == null && organismNode.Next == null)
+                return;
+            
             //Removing via node if faster
             Organisms.Remove(organismNode);
             OrganismCount--;

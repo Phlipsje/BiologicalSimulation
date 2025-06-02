@@ -12,7 +12,7 @@ public class Multithreaded2DFixedDataStructure : Chunk2DFixedDataStructure
     private int threadCount;
     private Chunk2D[][] chunkGroups;
     
-    public Multithreaded2DFixedDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize) : base(minPosition, maxPosition, chunkSize, largestOrganismSize)
+    public Multithreaded2DFixedDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize) : base(minPosition, maxPosition, chunkSize, largestOrganismSize, true)
     {
         //TODO this only works if exactly set of 4, change later
         threadCount = ChunkCountX * ChunkCountY / 4;
