@@ -11,43 +11,43 @@ namespace BioSim.Datastructures;
 /// </summary>
 public class Chunk3DFixedDataStructure : DataStructure
 {
-    private Chunk3D[,,] chunks;
-    private Vector3 minPosition;
-    private float chunkSize;
-    private int chunkCountX;
-    private int chunkCountY;
-    private int chunkCountZ;
+    protected Chunk3D[,,] Chunks;
+    protected Vector3 MinPosition;
+    protected float ChunkSize;
+    protected int ChunkCountX;
+    protected int ChunkCountY;
+    protected int ChunkCountZ;
     
-    public Chunk3DFixedDataStructure(Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize)
+    public Chunk3DFixedDataStructure(Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize, bool multithreaded = false)
     {
-        chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
-        chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
-        chunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize);
-        chunks = new Chunk3D[chunkCountX, chunkCountY, chunkCountZ];
-        this.minPosition = minPosition;
-        this.chunkSize = chunkSize;
+        ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
+        ChunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
+        ChunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize);
+        Chunks = new Chunk3D[ChunkCountX, ChunkCountY, ChunkCountZ];
+        MinPosition = minPosition;
+        ChunkSize = chunkSize;
 
         //Create all chunks
-        for (int i = 0; i < chunkCountX; i++)
+        for (int i = 0; i < ChunkCountX; i++)
         {
-            for (int j = 0; j < chunkCountY; j++)
+            for (int j = 0; j < ChunkCountY; j++)
             {
-                for (int k = 0; k < chunkCountZ; k++)
+                for (int k = 0; k < ChunkCountZ; k++)
                 {
                     Vector3 chunkCenter = minPosition + new Vector3(i, j, k) * chunkSize + new Vector3(chunkSize*0.5f);
-                    chunks[i, j, k] = new Chunk3D(chunkCenter, chunkSize, largestOrganismSize);
+                    Chunks[i, j, k] = new Chunk3D(multithreaded, chunkCenter, chunkSize, largestOrganismSize);
                 }
             }
         }
         
         //Get all connected chunks
-        for (int i = 0; i < chunkCountX; i++)
+        for (int i = 0; i < ChunkCountX; i++)
         {
-            for (int j = 0; j < chunkCountY; j++)
+            for (int j = 0; j < ChunkCountY; j++)
             {
-                for (int k = 0; k < chunkCountZ; k++)
+                for (int k = 0; k < ChunkCountZ; k++)
                 {
-                    chunks[i, j, k].Initialize(GetConnectedChunks(i, j, k));
+                    Chunks[i, j, k].Initialize(GetConnectedChunks(i, j, k));
                 }
             }
         }
@@ -64,26 +64,26 @@ public class Chunk3DFixedDataStructure : DataStructure
         for (int x = -1; x <= 1; x++)
         {
             //Check bounds
-            if (chunkX + x < 0 || chunkX + x >= chunkCountX)
+            if (chunkX + x < 0 || chunkX + x >= ChunkCountX)
                 continue;
             
             for (int y = -1; y <= 1; y++)
             {
                 //Check bounds
-                if (chunkY + y < 0 || chunkY + y >= chunkCountY)
+                if (chunkY + y < 0 || chunkY + y >= ChunkCountY)
                     continue;
                 
                 for (int z = -1; z <= 1; z++)
                 {
                     //Check bounds
-                    if (chunkZ + z < 0 || chunkZ + z >= chunkCountZ)
+                    if (chunkZ + z < 0 || chunkZ + z >= ChunkCountZ)
                         continue;
 
                     //Don't add self
                     if (x == 0 && y == 0 && z == 0)
                         continue;
                     
-                    connectedChunks.Add(chunks[chunkX+x,chunkY+y,chunkZ+z]);
+                    connectedChunks.Add(Chunks[chunkX+x,chunkY+y,chunkZ+z]);
                 }
             }
         }
@@ -93,7 +93,7 @@ public class Chunk3DFixedDataStructure : DataStructure
 
     public override void Step()
     {
-        foreach (Chunk3D chunk3D in chunks)
+        foreach (Chunk3D chunk3D in Chunks)
         {
             chunk3D.Step();
         }
@@ -102,14 +102,14 @@ public class Chunk3DFixedDataStructure : DataStructure
     public override void AddOrganism(Organism organism)
     {
         (int x, int y, int z) = GetChunk(organism.Position);
-        chunks[x,y,z].DirectlyInsertOrganism(organism);
+        Chunks[x,y,z].DirectlyInsertOrganism(organism);
     }
 
     public override IEnumerable<Organism> GetOrganisms()
     {
         Organism[] organisms = new Organism[GetOrganismCount()];
         int i = 0;
-        foreach (Chunk3D chunk in chunks)
+        foreach (Chunk3D chunk in Chunks)
         {
             foreach (Organism organism in chunk.Organisms)
             {
@@ -124,7 +124,7 @@ public class Chunk3DFixedDataStructure : DataStructure
     public override int GetOrganismCount()
     {
         int organismCount = 0;
-        foreach (Chunk3D chunk3D in chunks)
+        foreach (Chunk3D chunk3D in Chunks)
         {
             organismCount += chunk3D.OrganismCount;
         }
@@ -134,13 +134,13 @@ public class Chunk3DFixedDataStructure : DataStructure
 
     private (int, int, int) GetChunk(Vector3 position)
     {
-        int chunkX = (int)Math.Floor((position.X - minPosition.X) / chunkSize);
-        int chunkY = (int)Math.Floor((position.Y - minPosition.Y) / chunkSize);
-        int chunkZ = (int)Math.Floor((position.Z - minPosition.Z) / chunkSize);
+        int chunkX = (int)Math.Floor((position.X - MinPosition.X) / ChunkSize);
+        int chunkY = (int)Math.Floor((position.Y - MinPosition.Y) / ChunkSize);
+        int chunkZ = (int)Math.Floor((position.Z - MinPosition.Z) / ChunkSize);
         //Math.Min because otherwise can throw error if X,Y, or Z is exactly maxValue
-        chunkX = Math.Min(chunkX, chunkCountX - 1);
-        chunkY = Math.Min(chunkY, chunkCountY - 1);
-        chunkZ = Math.Min(chunkZ, chunkCountZ - 1);
+        chunkX = Math.Min(chunkX, ChunkCountX - 1);
+        chunkY = Math.Min(chunkY, ChunkCountY - 1);
+        chunkZ = Math.Min(chunkZ, ChunkCountZ - 1);
         return (chunkX, chunkY, chunkZ);
     }
     
@@ -153,8 +153,10 @@ public class Chunk3DFixedDataStructure : DataStructure
             return true;
         
         //Check for organisms within the chunk
-        foreach (Organism otherOrganism in collideableOrganisms)
+        for (LinkedListNode<Organism> node = collideableOrganisms.First!; node != null; node = node.Next!)
         {
+            Organism otherOrganism = node.Value;
+
             if (organism == otherOrganism)
                 continue;
             
@@ -171,8 +173,10 @@ public class Chunk3DFixedDataStructure : DataStructure
         }
         
         //Check for any organisms within neighbouring chunks that are within distance of possibly touching with this
-        foreach (Organism otherOrganism in collideableExtendedOrganisms)
+        for (LinkedListNode<Organism> node = collideableExtendedOrganisms.First!; node != null; node = node.Next!)
         {
+            Organism otherOrganism = node.Value;
+
             if (organism == otherOrganism)
                 continue;
             
@@ -200,13 +204,13 @@ public class Chunk3DFixedDataStructure : DataStructure
 
     private void CheckWarnings(float largestOrganismSize)
     {
-        if (chunkSize > largestOrganismSize * 10)
+        if (ChunkSize > largestOrganismSize * 10)
             Console.WriteLine("Warning: Chunk size is rather large, smaller chunk size would improve performance");
     }
 
     private void CheckErrors(float largestOrganismSize)
     {
-        if (chunkSize / 2f < largestOrganismSize)
+        if (ChunkSize / 2f < largestOrganismSize)
             throw new ArgumentException("Chunk size must be at least twice largest organism size");
     }
     #endregion

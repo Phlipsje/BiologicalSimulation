@@ -1,5 +1,6 @@
 using System.Diagnostics.Contracts;
 using System.Numerics;
+using BiologicalSimulation.Datastructures;
 
 namespace BioSim.Datastructures;
 
@@ -18,17 +19,17 @@ public class Chunk3D
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
     private LinkedList<Organism> extendedCheck;
-    public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
+    public QueueWrapper<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     private Chunk3D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     private List<LinkedList<Organism>> listsToSend;
     
-    public Chunk3D(Vector3 center, float size, float largestOrganismSize)
+    public Chunk3D(bool multithreaded, Vector3 center, float size, float largestOrganismSize)
     {
         Center = center;
         HalfDimension = size/2f;
         Organisms = new LinkedList<Organism>();
         extendedCheck = new LinkedList<Organism>();
-        CheckToBeAdded = new Queue<Organism>();
+        CheckToBeAdded = new QueueWrapper<Organism>(multithreaded);
         dimenstionExtensionForCheck = largestOrganismSize * 2;
         listsToSend = [Organisms, extendedCheck];
     }
@@ -49,7 +50,7 @@ public class Chunk3D
         CheckNewPossibleAdditions();
         
         //Run update loop
-        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             Organism organism = organismNode.Value;
             
@@ -59,14 +60,14 @@ public class Chunk3D
         
         //Update what should and should not be in this chunk
         //No additions happen during this (to this chunk)
-        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             //Get organism at this index
             Organism organism = organismNode.Value;
             
             CheckPosition(organism, organismNode);
         }
-        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             //Get organism at this index
             Organism organism = organismNode.Value;
@@ -83,7 +84,9 @@ public class Chunk3D
     {
         while (CheckToBeAdded.Count > 0)
         {
-            Organism organism = CheckToBeAdded.Dequeue();
+            bool success = CheckToBeAdded.Dequeue(out Organism organism);
+            if (!success)
+                continue;
             
             float singleAxisDistance = SingleAxisDistance(organism);
 
@@ -119,6 +122,10 @@ public class Chunk3D
             {
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
+            
+            if (organismNode.Previous == null && organismNode.Next == null)
+                return;
+            
             //Removing via node if faster
             Organisms.Remove(organismNode);
             OrganismCount--;
