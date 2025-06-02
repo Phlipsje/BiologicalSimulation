@@ -14,7 +14,6 @@ public class Chunk2D
     public LinkedList<Organism> Organisms { get; }
     public ConcurrentQueue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     private ExtendedChunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
-    private List<LinkedList<Organism>> listsToSend;
 
     public Chunk2D(Vector2 center, float size, float largestOrganismSize)
     {
@@ -23,7 +22,6 @@ public class Chunk2D
         Organisms = new LinkedList<Organism>();
         CheckToBeAdded = new ConcurrentQueue<Organism>();
         dimenstionExtensionForCheck = largestOrganismSize * 2;
-        listsToSend = [Organisms];
     }
     
     public void Initialize(ExtendedChunk2D[] connectedChunks)
@@ -44,7 +42,7 @@ public class Chunk2D
             Organism organism = organismNode.Value;
             
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
-            organism.Step(listsToSend);
+            organism.Step();
         }
         
         //Update what should and should not be in this chunk
@@ -88,9 +86,9 @@ public class Chunk2D
                 continue;
             }
             
-            if (singleAxisDistance <= HalfDimension + dimenstionExtensionForCheck && !extendedCheck.Contains(organism))
+            if (singleAxisDistance <= HalfDimension + dimenstionExtensionForCheck && !ExtendedCheck.Contains(organism))
             {
-                extendedCheck.AddLast(organism);
+                ExtendedCheck.AddLast(organism);
             }
         }
     }
@@ -149,7 +147,7 @@ public class Chunk2D
         if (singleAxisDistance > HalfDimension + dimenstionExtensionForCheck)
         {
             //Removing via node if faster
-            extendedCheck.Remove(organismNode);
+            ExtendedCheck.Remove(organismNode);
         }
     }
 

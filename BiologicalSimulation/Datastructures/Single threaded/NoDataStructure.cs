@@ -9,12 +9,10 @@ namespace BioSim.Datastructures;
 public class NoDataStructure : DataStructure
 {
     public LinkedList<Organism> Organisms { get; }
-    private List<LinkedList<Organism>> listsToSend { get; }
 
     public NoDataStructure()
     {
         Organisms = new LinkedList<Organism>();
-        listsToSend = [Organisms];
     }
     
     public override void Step()
@@ -24,7 +22,7 @@ public class NoDataStructure : DataStructure
             Organism organism = organismNode.Value;
             
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
-            organism.Step(listsToSend);
+            organism.Step();
         }
     }
 
@@ -58,15 +56,13 @@ public class NoDataStructure : DataStructure
         return closestOrganism;
     }
 
-    public override bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists)
+    public override bool CheckCollision(Organism organism, Vector3 position)
     {
-        LinkedList<Organism> organisms = organismLists[0];
-        
         //If out of bounds, then there is a collision
         if (!World.IsInBounds(position))
             return true;
 
-        foreach (Organism otherOrganism in organisms)
+        foreach (Organism otherOrganism in Organisms)
         {
             //Cannot be a collision with itself
             if(otherOrganism == organism)

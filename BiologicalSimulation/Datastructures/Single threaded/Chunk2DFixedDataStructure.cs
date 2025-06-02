@@ -128,16 +128,16 @@ public class Chunk2DFixedDataStructure : DataStructure
         return (chunkX, chunkY);
     }
     
-    public override bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists)
+    public override bool CheckCollision(Organism organism, Vector3 position)
     {
-        LinkedList<Organism> collideableOrganisms = organismLists[0];
-        LinkedList<Organism> collideableExtendedOrganisms = organismLists[1];
+        (int cX, int cY) = GetChunk(position);
+        Chunk2D chunk = Chunks[cX, cY];
         
         if (!World.IsInBounds(position))
             return true;
         
         //Check for organisms within the chunk
-        for (LinkedListNode<Organism> node = collideableOrganisms.First!; node != null; node = node.Next!)
+        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
         {
             Organism otherOrganism = node.Value;
             
@@ -157,7 +157,7 @@ public class Chunk2DFixedDataStructure : DataStructure
         }
         
         //Check for any organisms within neighbouring chunks that are within distance of possibly touching with this
-        for (LinkedListNode<Organism> node = collideableExtendedOrganisms.First!; node != null; node = node.Next!)
+        for (LinkedListNode<Organism> node = chunk.ExtendedCheck.First!; node != null; node = node.Next!)
         {
             Organism otherOrganism = node.Value;
             

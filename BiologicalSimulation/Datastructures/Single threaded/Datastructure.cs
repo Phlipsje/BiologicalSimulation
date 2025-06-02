@@ -23,6 +23,6 @@ public abstract class DataStructure
     public abstract void AddOrganism(Organism organism);
     public abstract IEnumerable<Organism> GetOrganisms();
     public abstract int GetOrganismCount();
-    public abstract bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists);
+    public abstract bool CheckCollision(Organism organism, Vector3 position);
     public abstract Organism ClosestNeighbour(Organism organism);
 }
