@@ -48,7 +48,7 @@ public class Chunk2D
         CheckNewPossibleAdditions();
         
         //Run update loop
-        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             Organism organism = organismNode.Value;
             
@@ -58,14 +58,14 @@ public class Chunk2D
         
         //Update what should and should not be in this chunk
         //No additions happen during this (to this chunk)
-        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             //Get organism at this index
             Organism organism = organismNode.Value;
             
             CheckPosition(organism, organismNode);
         }
-        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             //Get organism at this index
             Organism organism = organismNode.Value;

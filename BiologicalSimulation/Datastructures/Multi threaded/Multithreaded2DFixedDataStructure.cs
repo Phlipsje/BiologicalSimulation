@@ -47,19 +47,19 @@ public class Multithreaded2DFixedDataStructure : Chunk2DFixedDataStructure
     
     public override async void Step()
     {
-        for (int i = 0; i < 4; i++)
-        {
-            Parallel.ForEach(chunkGroups[i], chunk =>
-            {
-                chunk.Step();
-            });
-        }
+        //Slower version
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     Parallel.ForEach(chunkGroups[i], chunk =>
+        //     {
+        //         chunk.Step();
+        //     });
+        // }
+        //
+        //
+        // return;
         
-        
-        return;
-        
-        //TODO Version below not working yet, but does seem quicker
-        
+        //Quicker version, but sometimes seems to not work
         (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
         for (int quadrant = 0; quadrant < 4; quadrant++)
         {

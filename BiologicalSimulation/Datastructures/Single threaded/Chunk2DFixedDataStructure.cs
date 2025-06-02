@@ -137,8 +137,10 @@ public class Chunk2DFixedDataStructure : DataStructure
             return true;
         
         //Check for organisms within the chunk
-        foreach (Organism otherOrganism in collideableOrganisms)
+        for (LinkedListNode<Organism> node = collideableOrganisms.First!; node != null; node = node.Next!)
         {
+            Organism otherOrganism = node.Value;
+            
             if (organism == otherOrganism)
                 continue;
             
@@ -155,8 +157,10 @@ public class Chunk2DFixedDataStructure : DataStructure
         }
         
         //Check for any organisms within neighbouring chunks that are within distance of possibly touching with this
-        foreach (Organism otherOrganism in collideableExtendedOrganisms)
+        for (LinkedListNode<Organism> node = collideableExtendedOrganisms.First!; node != null; node = node.Next!)
         {
+            Organism otherOrganism = node.Value;
+            
             if (organism == otherOrganism)
                 continue;
             
