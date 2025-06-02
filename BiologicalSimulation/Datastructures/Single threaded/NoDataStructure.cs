@@ -9,12 +9,10 @@ namespace BioSim.Datastructures;
 public class NoDataStructure : DataStructure
 {
     public LinkedList<Organism> Organisms { get; }
-    private List<LinkedList<Organism>> listsToSend { get; }
 
     public NoDataStructure()
     {
         Organisms = new LinkedList<Organism>();
-        listsToSend = [Organisms];
     }
     
     public override void Step()
