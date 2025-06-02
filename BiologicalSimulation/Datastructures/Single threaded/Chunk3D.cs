@@ -18,20 +18,18 @@ public class Chunk3D
     private float dimenstionExtensionForCheck;
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
-    private LinkedList<Organism> extendedCheck;
+    public LinkedList<Organism> ExtendedCheck;
     public QueueWrapper<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     private Chunk3D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
-    private List<LinkedList<Organism>> listsToSend;
-    
+
     public Chunk3D(bool multithreaded, Vector3 center, float size, float largestOrganismSize)
     {
         Center = center;
         HalfDimension = size/2f;
         Organisms = new LinkedList<Organism>();
-        extendedCheck = new LinkedList<Organism>();
+        ExtendedCheck = new LinkedList<Organism>();
         CheckToBeAdded = new QueueWrapper<Organism>(multithreaded);
         dimenstionExtensionForCheck = largestOrganismSize * 2;
-        listsToSend = [Organisms, extendedCheck];
     }
 
     public void Initialize(Chunk3D[] connectedChunks)
@@ -55,7 +53,7 @@ public class Chunk3D
             Organism organism = organismNode.Value;
             
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
-            organism.Step(listsToSend);
+            organism.Step();
         }
         
         //Update what should and should not be in this chunk
@@ -97,9 +95,9 @@ public class Chunk3D
                 continue;
             }
             
-            if (singleAxisDistance <= HalfDimension + dimenstionExtensionForCheck && !extendedCheck.Contains(organism))
+            if (singleAxisDistance <= HalfDimension + dimenstionExtensionForCheck && !ExtendedCheck.Contains(organism))
             {
-                extendedCheck.AddLast(organism);
+                ExtendedCheck.AddLast(organism);
             }
         }
     }
@@ -158,7 +156,7 @@ public class Chunk3D
         if (singleAxisDistance > HalfDimension + dimenstionExtensionForCheck)
         {
             //Removing via node if faster
-            extendedCheck.Remove(organismNode);
+            ExtendedCheck.Remove(organismNode);
         }
     }
 

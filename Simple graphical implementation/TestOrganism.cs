@@ -31,18 +31,18 @@ public class TestOrganism : VisualOrganism
         return new TestOrganism(startingPosition, Size, World, DataStructure, Random);
     }
 
-    public override void Step(List<LinkedList<Organism>> organismLists)
+    public override void Step()
     {
         //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
         //Also known as brownian motion
         Vector3 direction = new Vector3((float)(Random.NextDouble() * 0.02 - 0.01),
             (float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01));
-        Move(direction, organismLists);
+        Move(direction);
         
-        Reproduction(organismLists);
+        Reproduction();
     }
     
-    private void Reproduction(List<LinkedList<Organism>> organismLists)
+    private void Reproduction()
     {
         GrowthRate = 0.02f;
         GridValues values = GrowthGrid.GetValues(Position);
@@ -70,7 +70,7 @@ public class TestOrganism : VisualOrganism
 
         if (Biomass > 6)
         {
-            TestOrganism child = Reproduce(organismLists) as TestOrganism;
+            TestOrganism child = Reproduce() as TestOrganism;
             if (child is null)
                 return;
             
