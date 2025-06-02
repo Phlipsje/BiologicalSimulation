@@ -86,8 +86,7 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
             return;
         }
         (RNode<T> L, RNode<T> LL) = SplitNode(entry);
-        
-        throw new NotImplementedException();
+        AdjustTree(L,LL, ref root);
     }
     
     public override (RNode<T>, RNode<T>) SplitNode(RNode<T> entry)
