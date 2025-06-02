@@ -9,21 +9,21 @@ namespace BioSim.Datastructures;
 //TODO write explanation here
 public class Multithreaded2DFixedDataStructure : Chunk2DFixedDataStructure
 {
-    private int threadCount;
+    private int taskCount;
     private Chunk2D[][] chunkGroups;
     
     public Multithreaded2DFixedDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize) : base(minPosition, maxPosition, chunkSize, largestOrganismSize, true)
     {
         //TODO this only works if exactly set of 4, change later
-        threadCount = ChunkCountX * ChunkCountY / 4;
+        taskCount = ChunkCountX * ChunkCountY / 4;
         
         chunkGroups = new Chunk2D[4][];
-        chunkGroups[0] = new Chunk2D[threadCount];
+        chunkGroups[0] = new Chunk2D[taskCount];
         
         (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
         for (int quadrant = 0; quadrant < 4; quadrant++)
         {
-            chunkGroups[quadrant] = new Chunk2D[threadCount];
+            chunkGroups[quadrant] = new Chunk2D[taskCount];
             (int offsetX, int offsetY) = offset[quadrant];
             
             int threadId = 0;
@@ -63,7 +63,7 @@ public class Multithreaded2DFixedDataStructure : Chunk2DFixedDataStructure
         (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
         for (int quadrant = 0; quadrant < 4; quadrant++)
         {
-            (int, int)[] taskCoords = new (int, int)[threadCount];
+            (int, int)[] taskCoords = new (int, int)[taskCount];
             (int offsetX, int offsetY) = offset[quadrant];
             int threadId = 0;
             //All workers are assigned a chunk where every chunk has no direct neighbour that is currently working, meaning we get a grid pattern
