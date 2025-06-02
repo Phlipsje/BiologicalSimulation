@@ -11,7 +11,7 @@ namespace BioSim.Datastructures;
 /// </summary>
 public class Chunk3DFixedDataStructure : DataStructure
 {
-    protected Chunk3D[,,] Chunks;
+    protected ExtendedChunk3D[,,] Chunks;
     protected Vector3 MinPosition;
     protected float ChunkSize;
     protected int ChunkCountX;
@@ -23,7 +23,7 @@ public class Chunk3DFixedDataStructure : DataStructure
         ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
         ChunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
         ChunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize);
-        Chunks = new Chunk3D[ChunkCountX, ChunkCountY, ChunkCountZ];
+        Chunks = new ExtendedChunk3D[ChunkCountX, ChunkCountY, ChunkCountZ];
         MinPosition = minPosition;
         ChunkSize = chunkSize;
 
@@ -35,7 +35,7 @@ public class Chunk3DFixedDataStructure : DataStructure
                 for (int k = 0; k < ChunkCountZ; k++)
                 {
                     Vector3 chunkCenter = minPosition + new Vector3(i, j, k) * chunkSize + new Vector3(chunkSize*0.5f);
-                    Chunks[i, j, k] = new Chunk3D(multithreaded, chunkCenter, chunkSize, largestOrganismSize);
+                    Chunks[i, j, k] = new ExtendedChunk3D(multithreaded, chunkCenter, chunkSize, largestOrganismSize);
                 }
             }
         }
@@ -57,9 +57,9 @@ public class Chunk3DFixedDataStructure : DataStructure
     }
 
     [Pure]
-    private Chunk3D[] GetConnectedChunks(int chunkX, int chunkY, int chunkZ)
+    private ExtendedChunk3D[] GetConnectedChunks(int chunkX, int chunkY, int chunkZ)
     {
-        List<Chunk3D> connectedChunks = new List<Chunk3D>(26);
+        List<ExtendedChunk3D> connectedChunks = new List<ExtendedChunk3D>(26);
         
         for (int x = -1; x <= 1; x++)
         {
@@ -93,7 +93,7 @@ public class Chunk3DFixedDataStructure : DataStructure
 
     public override void Step()
     {
-        foreach (Chunk3D chunk3D in Chunks)
+        foreach (ExtendedChunk3D chunk3D in Chunks)
         {
             chunk3D.Step();
         }
@@ -109,7 +109,7 @@ public class Chunk3DFixedDataStructure : DataStructure
     {
         Organism[] organisms = new Organism[GetOrganismCount()];
         int i = 0;
-        foreach (Chunk3D chunk in Chunks)
+        foreach (ExtendedChunk3D chunk in Chunks)
         {
             foreach (Organism organism in chunk.Organisms)
             {
@@ -124,7 +124,7 @@ public class Chunk3DFixedDataStructure : DataStructure
     public override int GetOrganismCount()
     {
         int organismCount = 0;
-        foreach (Chunk3D chunk3D in Chunks)
+        foreach (ExtendedChunk3D chunk3D in Chunks)
         {
             organismCount += chunk3D.OrganismCount;
         }

@@ -5,20 +5,20 @@ namespace BioSim.Datastructures;
 public class Multithreaded3DFixedDataStructure : Chunk3DFixedDataStructure
 {
     private int taskCount;
-    private Chunk3D[][] chunkGroups;
+    private ExtendedChunk3D[][] chunkGroups;
     
     public Multithreaded3DFixedDataStructure(Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize) : base(minPosition, maxPosition, chunkSize, largestOrganismSize, true)
     {
         //TODO this only works if exactly set of 4, change later
         taskCount = ChunkCountX * ChunkCountY * ChunkCountZ / 4;
         
-        chunkGroups = new Chunk3D[4][];
-        chunkGroups[0] = new Chunk3D[taskCount];
+        chunkGroups = new ExtendedChunk3D[4][];
+        chunkGroups[0] = new ExtendedChunk3D[taskCount];
         
         (int, int, int)[] offset = [(0, 0, 0), (0, 1, 0), (1, 0, 0), (1, 1, 0), (0, 0, 1), (0, 1, 1), (1, 0, 1), (1, 1, 1)];
         for (int quadrant = 0; quadrant < 4; quadrant++)
         {
-            chunkGroups[quadrant] = new Chunk3D[taskCount];
+            chunkGroups[quadrant] = new ExtendedChunk3D[taskCount];
             (int offsetX, int offsetY, int offsetZ) = offset[quadrant];
             
             int threadId = 0;

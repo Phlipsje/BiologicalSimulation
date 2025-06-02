@@ -11,7 +11,7 @@ namespace BioSim.Datastructures;
 /// the larger size is an extension overlapping with neighbouring chunks that is of minimal size to include all organisms in other chunks that are relevant for collision within this chunk.
 /// Organisms are checked for inclusion/removal every frame, but are only actually removed/inserted if it falls outside the boundaries.
 /// </summary>
-public class Chunk3D
+public class ExtendedChunk3D
 {
     public Vector3 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
@@ -20,10 +20,10 @@ public class Chunk3D
     public LinkedList<Organism> Organisms { get; }
     private LinkedList<Organism> extendedCheck;
     public QueueWrapper<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
-    private Chunk3D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
+    private ExtendedChunk3D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     private List<LinkedList<Organism>> listsToSend;
     
-    public Chunk3D(bool multithreaded, Vector3 center, float size, float largestOrganismSize)
+    public ExtendedChunk3D(bool multithreaded, Vector3 center, float size, float largestOrganismSize)
     {
         Center = center;
         HalfDimension = size/2f;
@@ -34,7 +34,7 @@ public class Chunk3D
         listsToSend = [Organisms, extendedCheck];
     }
 
-    public void Initialize(Chunk3D[] connectedChunks)
+    public void Initialize(ExtendedChunk3D[] connectedChunks)
     {
         //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
         this.connectedChunks = connectedChunks;
@@ -118,7 +118,7 @@ public class Chunk3D
         if (singleAxisDistance > HalfDimension)
         {
             //Send to neighbouring chunk for checking
-            foreach (Chunk3D chunk in connectedChunks)
+            foreach (ExtendedChunk3D chunk in connectedChunks)
             {
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
@@ -135,7 +135,7 @@ public class Chunk3D
             //Send to neighbouring chunks for checking
             if (singleAxisDistance > HalfDimension - dimenstionExtensionForCheck)
             {
-                foreach (Chunk3D chunk in connectedChunks)
+                foreach (ExtendedChunk3D chunk in connectedChunks)
                 {
                     chunk.CheckToBeAdded.Enqueue(organism);
                 }

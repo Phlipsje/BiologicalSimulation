@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using System.Numerics;
@@ -6,13 +5,6 @@ using BiologicalSimulation.Datastructures;
 
 namespace BioSim.Datastructures;
 
-/// <summary>
-/// Used by Chunk2DFixedDataStructure.cs
-/// A chunk is a square that stores all organisms within it.
-/// The chunk has 2 sizes, the smaller of the 2 sizes is its own size,
-/// the larger size is an extension overlapping with neighbouring chunks that is of minimal size to include all organisms in other chunks that are relevant for collision within this chunk.
-/// Organisms are checked for inclusion/removal every frame, but are only actually removed/inserted if it falls outside the boundaries.
-/// </summary>
 public class Chunk2D
 {
     public Vector2 Center { get; }
@@ -20,23 +12,21 @@ public class Chunk2D
     private float dimenstionExtensionForCheck;
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
-    private LinkedList<Organism> extendedCheck;
-    public QueueWrapper<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
-    private Chunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
+    public ConcurrentQueue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
+    private ExtendedChunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     private List<LinkedList<Organism>> listsToSend;
 
-    public Chunk2D(bool multithreaded, Vector2 center, float size, float largestOrganismSize)
+    public Chunk2D(Vector2 center, float size, float largestOrganismSize)
     {
         Center = center;
         HalfDimension = size/2f;
         Organisms = new LinkedList<Organism>();
-        extendedCheck = new LinkedList<Organism>();
-        CheckToBeAdded = new QueueWrapper<Organism>(multithreaded);
+        CheckToBeAdded = new ConcurrentQueue<Organism>();
         dimenstionExtensionForCheck = largestOrganismSize * 2;
-        listsToSend = [Organisms, extendedCheck];
+        listsToSend = [Organisms];
     }
-
-    public void Initialize(Chunk2D[] connectedChunks)
+    
+    public void Initialize(ExtendedChunk2D[] connectedChunks)
     {
         //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
         this.connectedChunks = connectedChunks;
@@ -119,7 +109,7 @@ public class Chunk2D
         if (singleAxisDistance > HalfDimension)
         {
             //Send to neighbouring chunk for checking
-            foreach (Chunk2D chunk in connectedChunks)
+            foreach (ExtendedChunk2D chunk in connectedChunks)
             {
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
@@ -136,7 +126,7 @@ public class Chunk2D
             //Send to neighbouring chunks for checking
             if (singleAxisDistance > HalfDimension - dimenstionExtensionForCheck)
             {
-                foreach (Chunk2D chunk in connectedChunks)
+                foreach (ExtendedChunk2D chunk in connectedChunks)
                 {
                     chunk.CheckToBeAdded.Enqueue(organism);
                 }

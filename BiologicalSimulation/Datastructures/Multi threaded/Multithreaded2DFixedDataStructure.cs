@@ -10,20 +10,20 @@ namespace BioSim.Datastructures;
 public class Multithreaded2DFixedDataStructure : Chunk2DFixedDataStructure
 {
     private int taskCount;
-    private Chunk2D[][] chunkGroups;
+    private ExtendedChunk2D[][] chunkGroups;
     
     public Multithreaded2DFixedDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize) : base(minPosition, maxPosition, chunkSize, largestOrganismSize, true)
     {
         //TODO this only works if exactly set of 4, change later
         taskCount = ChunkCountX * ChunkCountY / 4;
         
-        chunkGroups = new Chunk2D[4][];
-        chunkGroups[0] = new Chunk2D[taskCount];
+        chunkGroups = new ExtendedChunk2D[4][];
+        chunkGroups[0] = new ExtendedChunk2D[taskCount];
         
         (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
         for (int quadrant = 0; quadrant < 4; quadrant++)
         {
-            chunkGroups[quadrant] = new Chunk2D[taskCount];
+            chunkGroups[quadrant] = new ExtendedChunk2D[taskCount];
             (int offsetX, int offsetY) = offset[quadrant];
             
             int threadId = 0;

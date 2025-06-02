@@ -12,7 +12,7 @@ namespace BioSim.Datastructures.Datastructures;
 /// </summary>
 public class Chunk2DFixedDataStructure : DataStructure
 {
-    protected Chunk2D[,] Chunks;
+    protected ExtendedChunk2D[,] Chunks;
     protected Vector2 MinPosition;
     protected float ChunkSize;
     protected int ChunkCountX;
@@ -22,9 +22,9 @@ public class Chunk2DFixedDataStructure : DataStructure
     {
         ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
         ChunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
-        Chunks = new Chunk2D[ChunkCountX, ChunkCountY];
-        this.MinPosition = minPosition;
-        this.ChunkSize = chunkSize;
+        Chunks = new ExtendedChunk2D[ChunkCountX, ChunkCountY];
+        MinPosition = minPosition;
+        ChunkSize = chunkSize;
 
         //Create all chunks
         for (int i = 0; i < ChunkCountX; i++)
@@ -32,7 +32,7 @@ public class Chunk2DFixedDataStructure : DataStructure
             for (int j = 0; j < ChunkCountY; j++)
             {
                 Vector2 chunkCenter = minPosition + new Vector2(i, j) * chunkSize + new Vector2(chunkSize*0.5f);
-                Chunks[i, j] = new Chunk2D(multithreaded, chunkCenter, chunkSize, largestOrganismSize);
+                Chunks[i, j] = new ExtendedChunk2D(multithreaded, chunkCenter, chunkSize, largestOrganismSize);
             }
         }
         
@@ -50,9 +50,9 @@ public class Chunk2DFixedDataStructure : DataStructure
     }
 
     [Pure]
-    protected Chunk2D[] GetConnectedChunks(int chunkX, int chunkY)
+    protected ExtendedChunk2D[] GetConnectedChunks(int chunkX, int chunkY)
     {
-        List<Chunk2D> connectedChunks = new List<Chunk2D>(8);
+        List<ExtendedChunk2D> connectedChunks = new List<ExtendedChunk2D>(8);
         
         for (int x = -1; x <= 1; x++)
         {
@@ -79,7 +79,7 @@ public class Chunk2DFixedDataStructure : DataStructure
 
     public override void Step()
     {
-        foreach (Chunk2D chunk2D in Chunks)
+        foreach (ExtendedChunk2D chunk2D in Chunks)
         {
             chunk2D.Step();
         }
@@ -95,7 +95,7 @@ public class Chunk2DFixedDataStructure : DataStructure
     {
         Organism[] organisms = new Organism[GetOrganismCount()];
         int i = 0;
-        foreach (Chunk2D chunk in Chunks)
+        foreach (ExtendedChunk2D chunk in Chunks)
         {
             foreach (Organism organism in chunk.Organisms)
             {
@@ -110,7 +110,7 @@ public class Chunk2DFixedDataStructure : DataStructure
     public override int GetOrganismCount()
     {
         int organismCount = 0;
-        foreach (Chunk2D chunk2D in Chunks)
+        foreach (ExtendedChunk2D chunk2D in Chunks)
         {
             organismCount += chunk2D.OrganismCount;
         }
