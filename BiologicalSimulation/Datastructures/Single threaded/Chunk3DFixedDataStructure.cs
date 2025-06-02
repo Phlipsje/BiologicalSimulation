@@ -147,7 +147,7 @@ public class Chunk3DFixedDataStructure : DataStructure
     public override bool CheckCollision(Organism organism, Vector3 position)
     {
         (int cX, int cY, int cZ) = GetChunk(position);
-        Chunk3D chunk = Chunks[cX, cY, cZ];
+        ExtendedChunk3D chunk = Chunks[cX, cY, cZ];
         
         if (!World.IsInBounds(position))
             return true;

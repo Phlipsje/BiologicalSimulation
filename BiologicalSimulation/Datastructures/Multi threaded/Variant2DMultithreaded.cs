@@ -1,3 +1,4 @@
+using System.Diagnostics.Contracts;
 using System.Numerics;
 
 namespace BioSim.Datastructures;
@@ -43,6 +44,34 @@ public class Variant2DMultithreaded : DataStructure
         CheckErrors(largestOrganismSize);
     }
     
+    [Pure]
+    protected Chunk2D[] GetConnectedChunks(int chunkX, int chunkY)
+    {
+        List<Chunk2D> connectedChunks = new List<Chunk2D>(8);
+        
+        for (int x = -1; x <= 1; x++)
+        {
+            //Check bounds
+            if (chunkX + x < 0 || chunkX + x >= ChunkCountX)
+                continue;
+            
+            for (int y = -1; y <= 1; y++)
+            {
+                //Check bounds
+                if (chunkY + y < 0 || chunkY + y >= ChunkCountY)
+                    continue;
+                
+                //Don't add self
+                if (x == 0 && y == 0)
+                    continue;
+                    
+                connectedChunks.Add(Chunks[chunkX+x,chunkY+y]);
+            }
+        }
+        
+        return connectedChunks.ToArray();
+    }
+    
     public override void Step()
     {
         throw new NotImplementedException();
@@ -63,7 +92,7 @@ public class Variant2DMultithreaded : DataStructure
         throw new NotImplementedException();
     }
 
-    public override bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists)
+    public override bool CheckCollision(Organism organism, Vector3 position)
     {
         throw new NotImplementedException();
     }

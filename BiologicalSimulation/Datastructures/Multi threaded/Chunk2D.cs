@@ -13,7 +13,7 @@ public class Chunk2D
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
     public ConcurrentQueue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
-    private ExtendedChunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
+    private Chunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
 
     public Chunk2D(Vector2 center, float size, float largestOrganismSize)
     {
@@ -24,7 +24,7 @@ public class Chunk2D
         dimenstionExtensionForCheck = largestOrganismSize * 2;
     }
     
-    public void Initialize(ExtendedChunk2D[] connectedChunks)
+    public void Initialize(Chunk2D[] connectedChunks)
     {
         //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
         this.connectedChunks = connectedChunks;
@@ -73,7 +73,7 @@ public class Chunk2D
     {
         while (CheckToBeAdded.Count > 0)
         {
-            bool success = CheckToBeAdded.Dequeue(out Organism organism);
+            bool success = CheckToBeAdded.TryDequeue(out Organism organism);
             if (!success)
                 continue;
             
@@ -107,7 +107,7 @@ public class Chunk2D
         if (singleAxisDistance > HalfDimension)
         {
             //Send to neighbouring chunk for checking
-            foreach (ExtendedChunk2D chunk in connectedChunks)
+            foreach (Chunk2D chunk in connectedChunks)
             {
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
@@ -124,7 +124,7 @@ public class Chunk2D
             //Send to neighbouring chunks for checking
             if (singleAxisDistance > HalfDimension - dimenstionExtensionForCheck)
             {
-                foreach (ExtendedChunk2D chunk in connectedChunks)
+                foreach (Chunk2D chunk in connectedChunks)
                 {
                     chunk.CheckToBeAdded.Enqueue(organism);
                 }
