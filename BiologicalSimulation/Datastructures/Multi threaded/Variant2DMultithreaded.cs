@@ -11,7 +11,8 @@ public class Variant2DMultithreaded : DataStructure
     protected int ChunkCountX;
     protected int ChunkCountY;
     private int taskCount;
-    private Chunk2D[][] chunkGroups;
+    private (int,int)[][] chunkGroups;
+    private bool stepping = false;
     
     public Variant2DMultithreaded(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize)
     {
@@ -45,13 +46,13 @@ public class Variant2DMultithreaded : DataStructure
         //TODO this only works if exactly set of 4, change later
         taskCount = ChunkCountX * ChunkCountY / 4;
         
-        chunkGroups = new Chunk2D[4][];
-        chunkGroups[0] = new Chunk2D[taskCount];
+        chunkGroups = new (int,int)[4][];
+        chunkGroups[0] = new (int,int)[taskCount];
         
         (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
         for (int quadrant = 0; quadrant < 4; quadrant++)
         {
-            chunkGroups[quadrant] = new Chunk2D[taskCount];
+            chunkGroups[quadrant] = new (int,int)[taskCount];
             (int offsetX, int offsetY) = offset[quadrant];
             
             int threadId = 0;
@@ -61,7 +62,7 @@ public class Variant2DMultithreaded : DataStructure
             {
                 for (int y = 0; y < ChunkCountY; y += 2)
                 {
-                    chunkGroups[quadrant][threadId] = Chunks[x + offsetX, y + offsetY];
+                    chunkGroups[quadrant][threadId] = (x + offsetX, y + offsetY);
                     threadId++;
                 }
             }
@@ -101,33 +102,28 @@ public class Variant2DMultithreaded : DataStructure
     
     public override async void Step()
     {
-        (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
+        //Apparently some frameworks are fucking funny (looking at you Monogame/XNA) and can break with multithreading,
+        //so this check insures no update loop has been called twice in the same frame
+        //Context for bug: Once every 5000 frames or so Step() would be called twice
+        if (stepping)
+            return;
+
+        stepping = true;
+        
         for (int quadrant = 0; quadrant < 4; quadrant++)
         {
-            (int, int)[] taskCoords = new (int, int)[taskCount];
-            (int offsetX, int offsetY) = offset[quadrant];
-            int threadId = 0;
-            //All workers are assigned a chunk where every chunk has no direct neighbour that is currently working, meaning we get a grid pattern
-            //Note that x and y grow by 2 each loop
-            for (int x = 0; x < ChunkCountX; x+=2)
-            {
-                for (int y = 0; y < ChunkCountY; y+=2)
-                {
-                    taskCoords[threadId] = (x+offsetX, y+offsetY);
-                    threadId++;
-                }
-            }
-            
-            List<Func<Task>> tasks = taskCoords
+            List<Func<Task>> tasks = chunkGroups[quadrant]
                 .Select(coords => (Func<Task>)(() => ChunkStepTask(coords.Item1,coords.Item2)))
                 .ToList();
 
             await RunTasks(tasks);
         }
+
+        stepping = false;
     }
     
     private async Task ChunkStepTask(int x, int y)
-    { 
+    {
         await Task.Run(Chunks[x,y].Step);
     }
     

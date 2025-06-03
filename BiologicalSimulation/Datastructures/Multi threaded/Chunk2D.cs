@@ -10,7 +10,6 @@ public class Chunk2D
 {
     public Vector2 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
-    private float dimenstionExtensionForCheck;
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
     public ConcurrentQueue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
@@ -22,7 +21,6 @@ public class Chunk2D
         HalfDimension = size/2f;
         Organisms = new LinkedList<Organism>();
         CheckToBeAdded = new ConcurrentQueue<Organism>();
-        dimenstionExtensionForCheck = largestOrganismSize * 2;
     }
     
     public void Initialize(Chunk2D[] connectedChunks)
@@ -56,7 +54,7 @@ public class Chunk2D
             
             CheckPosition(organism, organismNode, toRemove);
         }
-
+        
         while (toRemove.Count > 0)
         {
             var organismNode = toRemove.Dequeue();
@@ -109,22 +107,11 @@ public class Chunk2D
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
             
-            if (organismNode.Previous == null && organismNode.Next == null)
+            if ((organismNode.Previous == null && organismNode.Next == null))
                 return;
             
             //Removing via node if faster
             toRemove.Enqueue(organismNode);
-        }
-        else //If a bit deeper within chunk, then only send for check, not for removal (so that neighbouring chunks can add to extended range)
-        {
-            //Send to neighbouring chunks for checking
-            if (singleAxisDistance > HalfDimension - dimenstionExtensionForCheck)
-            {
-                foreach (Chunk2D chunk in ConnectedChunks)
-                {
-                    chunk.CheckToBeAdded.Enqueue(organism);
-                }
-            }
         }
     }
 
