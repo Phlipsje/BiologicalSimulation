@@ -11,10 +11,11 @@ public class Variant2DMultithreaded : DataStructure
     protected int ChunkCountX;
     protected int ChunkCountY;
     private int taskCount;
-    private ExtendedChunk2D[][] chunkGroups;
+    private Chunk2D[][] chunkGroups;
     
-    public Variant2DMultithreaded(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize, bool multithreaded = false)
+    public Variant2DMultithreaded(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize)
     {
+        //Chunk setup
         ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
         ChunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
         Chunks = new Chunk2D[ChunkCountX, ChunkCountY];
@@ -37,6 +38,32 @@ public class Variant2DMultithreaded : DataStructure
             for (int j = 0; j < ChunkCountY; j++)
             {
                 Chunks[i, j].Initialize(GetConnectedChunks(i, j));
+            }
+        }
+        
+        //Multithreading setup
+        //TODO this only works if exactly set of 4, change later
+        taskCount = ChunkCountX * ChunkCountY / 4;
+        
+        chunkGroups = new Chunk2D[4][];
+        chunkGroups[0] = new Chunk2D[taskCount];
+        
+        (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
+        for (int quadrant = 0; quadrant < 4; quadrant++)
+        {
+            chunkGroups[quadrant] = new Chunk2D[taskCount];
+            (int offsetX, int offsetY) = offset[quadrant];
+            
+            int threadId = 0;
+            //All workers are assigned a chunk where every chunk has no direct neighbour that is currently working, meaning we get a grid pattern
+            //Note that x and y grow by 2 each loop
+            for (int x = 0; x < ChunkCountX; x += 2)
+            {
+                for (int y = 0; y < ChunkCountY; y += 2)
+                {
+                    chunkGroups[quadrant][threadId] = Chunks[x + offsetX, y + offsetY];
+                    threadId++;
+                }
             }
         }
         
@@ -72,29 +99,139 @@ public class Variant2DMultithreaded : DataStructure
         return connectedChunks.ToArray();
     }
     
-    public override void Step()
+    public override async void Step()
     {
-        throw new NotImplementedException();
+        (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
+        for (int quadrant = 0; quadrant < 4; quadrant++)
+        {
+            (int, int)[] taskCoords = new (int, int)[taskCount];
+            (int offsetX, int offsetY) = offset[quadrant];
+            int threadId = 0;
+            //All workers are assigned a chunk where every chunk has no direct neighbour that is currently working, meaning we get a grid pattern
+            //Note that x and y grow by 2 each loop
+            for (int x = 0; x < ChunkCountX; x+=2)
+            {
+                for (int y = 0; y < ChunkCountY; y+=2)
+                {
+                    taskCoords[threadId] = (x+offsetX, y+offsetY);
+                    threadId++;
+                }
+            }
+            
+            List<Func<Task>> tasks = taskCoords
+                .Select(coords => (Func<Task>)(() => ChunkStepTask(coords.Item1,coords.Item2)))
+                .ToList();
+
+            await RunTasks(tasks);
+        }
+    }
+    
+    private async Task ChunkStepTask(int x, int y)
+    { 
+        await Task.Run(Chunks[x,y].Step);
+    }
+    
+    private async Task RunTasks(List<Func<Task>> taskFuncs)
+    {
+        var tasks = taskFuncs.Select(f => f()).ToArray();
+        await Task.WhenAll(tasks);
     }
 
     public override void AddOrganism(Organism organism)
     {
-        throw new NotImplementedException();
+        (int x, int y) = GetChunk(organism.Position);
+        Chunks[x,y].DirectlyInsertOrganism(organism);
     }
 
     public override IEnumerable<Organism> GetOrganisms()
     {
-        throw new NotImplementedException();
+        Organism[] organisms = new Organism[GetOrganismCount()];
+        int i = 0;
+        foreach (Chunk2D chunk in Chunks)
+        {
+            foreach (Organism organism in chunk.Organisms)
+            {
+                organisms[i] = organism;
+                i++;
+            }
+        }
+        
+        return organisms;
     }
 
     public override int GetOrganismCount()
     {
-        throw new NotImplementedException();
+        int organismCount = 0;
+        foreach (Chunk2D chunk2D in Chunks)
+        {
+            organismCount += chunk2D.OrganismCount;
+        }
+
+        return organismCount;
+    }
+
+    private (int, int) GetChunk(Vector3 position)
+    {
+        int chunkX = (int)Math.Floor((position.X - MinPosition.X) / ChunkSize);
+        int chunkY = (int)Math.Floor((position.Y - MinPosition.Y) / ChunkSize);
+        //Math.Min because otherwise can throw error if X,Y, or Z is exactly maxValue
+        chunkX = Math.Min(chunkX, ChunkCountX - 1);
+        chunkY = Math.Min(chunkY, ChunkCountY - 1);
+        return (chunkX, chunkY);
     }
 
     public override bool CheckCollision(Organism organism, Vector3 position)
     {
-        throw new NotImplementedException();
+        (int cX, int cY) = GetChunk(organism.Position);
+        Chunk2D chunk = Chunks[cX, cY];
+        
+        if (!World.IsInBounds(position))
+            return true;
+        
+        //Check for organisms within the chunk
+        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
+        {
+            Organism otherOrganism = node.Value;
+            
+            if (organism == otherOrganism)
+                continue;
+            
+            //Checks collision by checking distance between circles
+            float x = position.X - otherOrganism.Position.X;
+            float x2 = x * x;
+            float y = position.Y - otherOrganism.Position.Y;
+            float y2 = y * y;
+            float z = position.Z - otherOrganism.Position.Z;
+            float z2 = z * z;
+            float sizes = organism.Size + otherOrganism.Size;
+            if (x2 + y2 + z2 <= sizes * sizes)
+                return true;
+        }
+
+        //Check all organisms in neighbouring chunks
+        foreach (Chunk2D neighbouringChunk in chunk.ConnectedChunks)
+        {
+            for (LinkedListNode<Organism> node = neighbouringChunk.Organisms.First!; node != null; node = node.Next!)
+            {
+                Organism otherOrganism = node.Value;
+            
+                if (organism == otherOrganism)
+                    continue;
+            
+                //Checks collision by checking distance between circles
+                float x = position.X - otherOrganism.Position.X;
+                float x2 = x * x;
+                float y = position.Y - otherOrganism.Position.Y;
+                float y2 = y * y;
+                float z = position.Z - otherOrganism.Position.Z;
+                float z2 = z * z;
+                float sizes = organism.Size + otherOrganism.Size;
+                if (x2 + y2 + z2 <= sizes * sizes)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     public override Organism ClosestNeighbour(Organism organism)

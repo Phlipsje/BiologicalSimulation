@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using System.Numerics;
@@ -13,7 +14,7 @@ public class Chunk2D
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
     public ConcurrentQueue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
-    private Chunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
+    public Chunk2D[] ConnectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
 
     public Chunk2D(Vector2 center, float size, float largestOrganismSize)
     {
@@ -27,7 +28,7 @@ public class Chunk2D
     public void Initialize(Chunk2D[] connectedChunks)
     {
         //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
-        this.connectedChunks = connectedChunks;
+        this.ConnectedChunks = connectedChunks;
     }
     
     public Task Step()
@@ -47,19 +48,20 @@ public class Chunk2D
         
         //Update what should and should not be in this chunk
         //No additions happen during this (to this chunk)
+        Queue<LinkedListNode<Organism>> toRemove = new Queue<LinkedListNode<Organism>>();
         for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             //Get organism at this index
             Organism organism = organismNode.Value;
             
-            CheckPosition(organism, organismNode);
+            CheckPosition(organism, organismNode, toRemove);
         }
-        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
+
+        while (toRemove.Count > 0)
         {
-            //Get organism at this index
-            Organism organism = organismNode.Value;
-            
-            CheckRemoveFromExtension(organism, organismNode);
+            var organismNode = toRemove.Dequeue();
+            Organisms.Remove(organismNode);
+            OrganismCount--;
         }
         
         return Task.CompletedTask;
@@ -79,16 +81,11 @@ public class Chunk2D
             
             float singleAxisDistance = SingleAxisDistance(organism);
 
+            //Might not even need the contains, but keeping it for now to be safe
             if (singleAxisDistance <= HalfDimension && !Organisms.Contains(organism))
             {
                 Organisms.AddLast(organism);
                 OrganismCount++;
-                continue;
-            }
-            
-            if (singleAxisDistance <= HalfDimension + dimenstionExtensionForCheck && !ExtendedCheck.Contains(organism))
-            {
-                ExtendedCheck.AddLast(organism);
             }
         }
     }
@@ -99,7 +96,7 @@ public class Chunk2D
     /// </summary>
     /// <param name="organism"></param>
     /// <param name="organismNode"></param>
-    private void CheckPosition(Organism organism, LinkedListNode<Organism> organismNode)
+    private void CheckPosition(Organism organism, LinkedListNode<Organism> organismNode, Queue<LinkedListNode<Organism>> toRemove)
     {
         //Set the largest of the distances per axis, that is enough to check if it should be within or not
         float singleAxisDistance = SingleAxisDistance(organism);
@@ -107,7 +104,7 @@ public class Chunk2D
         if (singleAxisDistance > HalfDimension)
         {
             //Send to neighbouring chunk for checking
-            foreach (Chunk2D chunk in connectedChunks)
+            foreach (Chunk2D chunk in ConnectedChunks)
             {
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
@@ -116,38 +113,18 @@ public class Chunk2D
                 return;
             
             //Removing via node if faster
-            Organisms.Remove(organismNode);
-            OrganismCount--;
+            toRemove.Enqueue(organismNode);
         }
         else //If a bit deeper within chunk, then only send for check, not for removal (so that neighbouring chunks can add to extended range)
         {
             //Send to neighbouring chunks for checking
             if (singleAxisDistance > HalfDimension - dimenstionExtensionForCheck)
             {
-                foreach (Chunk2D chunk in connectedChunks)
+                foreach (Chunk2D chunk in ConnectedChunks)
                 {
                     chunk.CheckToBeAdded.Enqueue(organism);
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// Checks if an organism should be removed from extended list in this chunk based off of it's recently updated position
-    /// O(1)
-    /// </summary>
-    /// <param name="organism"></param>
-    /// <param name="organismNode"></param>
-    private void CheckRemoveFromExtension(Organism organism, LinkedListNode<Organism> organismNode)
-    {
-        //Set the largest of the distances per axis, that is enough to check if it should be within or not
-        float singleAxisDistance = Math.Max(Math.Abs(organism.Position.X - Center.X), Math.Abs(organism.Position.Y - Center.Y));
-        
-        //Remove if too far gone, don't try to add to neighbours because they already have it
-        if (singleAxisDistance > HalfDimension + dimenstionExtensionForCheck)
-        {
-            //Removing via node if faster
-            ExtendedCheck.Remove(organismNode);
         }
     }
 
