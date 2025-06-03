@@ -15,7 +15,7 @@ public class Chunk2D
     public ConcurrentQueue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     public Chunk2D[] ConnectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
 
-    public Chunk2D(Vector2 center, float size, float largestOrganismSize)
+    public Chunk2D(Vector2 center, float size)
     {
         Center = center;
         HalfDimension = size/2f;
@@ -52,14 +52,7 @@ public class Chunk2D
             //Get organism at this index
             Organism organism = organismNode.Value;
             
-            CheckPosition(organism, organismNode, toRemove);
-        }
-        
-        while (toRemove.Count > 0)
-        {
-            var organismNode = toRemove.Dequeue();
-            Organisms.Remove(organismNode);
-            OrganismCount--;
+            CheckPosition(organism, organismNode);
         }
         
         return Task.CompletedTask;
@@ -94,7 +87,7 @@ public class Chunk2D
     /// </summary>
     /// <param name="organism"></param>
     /// <param name="organismNode"></param>
-    private void CheckPosition(Organism organism, LinkedListNode<Organism> organismNode, Queue<LinkedListNode<Organism>> toRemove)
+    private void CheckPosition(Organism organism, LinkedListNode<Organism> organismNode)
     {
         //Set the largest of the distances per axis, that is enough to check if it should be within or not
         float singleAxisDistance = SingleAxisDistance(organism);
@@ -107,11 +100,9 @@ public class Chunk2D
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
             
-            if ((organismNode.Previous == null && organismNode.Next == null))
-                return;
-            
             //Removing via node if faster
-            toRemove.Enqueue(organismNode);
+            Organisms.Remove(organismNode);
+            OrganismCount--;
         }
     }
 

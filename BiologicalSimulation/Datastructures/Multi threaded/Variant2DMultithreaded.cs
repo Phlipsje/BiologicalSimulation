@@ -29,7 +29,7 @@ public class Variant2DMultithreaded : DataStructure
             for (int j = 0; j < ChunkCountY; j++)
             {
                 Vector2 chunkCenter = minPosition + new Vector2(i, j) * chunkSize + new Vector2(chunkSize*0.5f);
-                Chunks[i, j] = new Chunk2D(chunkCenter, chunkSize, largestOrganismSize);
+                Chunks[i, j] = new Chunk2D(chunkCenter, chunkSize);
             }
         }
         
