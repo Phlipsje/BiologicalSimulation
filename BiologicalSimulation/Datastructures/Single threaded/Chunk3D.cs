@@ -121,9 +121,6 @@ public class Chunk3D
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
             
-            if (organismNode.Previous == null && organismNode.Next == null)
-                return;
-            
             //Removing via node if faster
             Organisms.Remove(organismNode);
             OrganismCount--;

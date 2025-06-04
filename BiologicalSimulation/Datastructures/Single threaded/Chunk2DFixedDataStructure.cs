@@ -23,8 +23,8 @@ public class Chunk2DFixedDataStructure : DataStructure
         ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
         ChunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
         Chunks = new Chunk2D[ChunkCountX, ChunkCountY];
-        this.MinPosition = minPosition;
-        this.ChunkSize = chunkSize;
+        MinPosition = minPosition;
+        ChunkSize = chunkSize;
 
         //Create all chunks
         for (int i = 0; i < ChunkCountX; i++)
@@ -93,14 +93,14 @@ public class Chunk2DFixedDataStructure : DataStructure
 
     public override IEnumerable<Organism> GetOrganisms()
     {
-        Organism[] organisms = new Organism[GetOrganismCount()];
-        int i = 0;
+        LinkedList<Organism> organisms = new LinkedList<Organism>();
         foreach (Chunk2D chunk in Chunks)
         {
-            foreach (Organism organism in chunk.Organisms)
+            for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
             {
-                organisms[i] = organism;
-                i++;
+                Organism organism = node.Value;
+
+                organisms.AddLast(organism);
             }
         }
         
@@ -130,7 +130,7 @@ public class Chunk2DFixedDataStructure : DataStructure
     
     public override bool CheckCollision(Organism organism, Vector3 position)
     {
-        (int cX, int cY) = GetChunk(position);
+        (int cX, int cY) = GetChunk(organism.Position);
         Chunk2D chunk = Chunks[cX, cY];
         
         if (!World.IsInBounds(position))

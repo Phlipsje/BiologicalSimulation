@@ -107,14 +107,14 @@ public class Chunk3DFixedDataStructure : DataStructure
 
     public override IEnumerable<Organism> GetOrganisms()
     {
-        Organism[] organisms = new Organism[GetOrganismCount()];
-        int i = 0;
+        LinkedList<Organism> organisms = new LinkedList<Organism>();
         foreach (Chunk3D chunk in Chunks)
         {
-            foreach (Organism organism in chunk.Organisms)
+            for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
             {
-                organisms[i] = organism;
-                i++;
+                Organism organism = node.Value;
+
+                organisms.AddLast(organism);
             }
         }
         
@@ -146,7 +146,7 @@ public class Chunk3DFixedDataStructure : DataStructure
     
     public override bool CheckCollision(Organism organism, Vector3 position)
     {
-        (int cX, int cY, int cZ) = GetChunk(position);
+        (int cX, int cY, int cZ) = GetChunk(organism.Position);
         Chunk3D chunk = Chunks[cX, cY, cZ];
         
         if (!World.IsInBounds(position))

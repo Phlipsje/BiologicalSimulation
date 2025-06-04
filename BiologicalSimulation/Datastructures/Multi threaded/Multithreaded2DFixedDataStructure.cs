@@ -5,26 +5,26 @@ using BioSim.Datastructures.Datastructures;
 
 namespace BioSim.Datastructures;
 
-//TODO currently just copy pasted, still need to actually implement
-//TODO write explanation here
 public class Multithreaded2DFixedDataStructure : Chunk2DFixedDataStructure
 {
     private int taskCount;
-    private Chunk2D[][] chunkGroups;
+    private (int, int)[][] chunkGroups;
+    private int groupCount;
+    private bool stepping = false;
     
     public Multithreaded2DFixedDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize) : base(minPosition, maxPosition, chunkSize, largestOrganismSize, true)
     {
         //TODO this only works if exactly set of 4, change later
         taskCount = ChunkCountX * ChunkCountY / 4;
         
-        chunkGroups = new Chunk2D[4][];
-        chunkGroups[0] = new Chunk2D[taskCount];
-        
         (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
-        for (int quadrant = 0; quadrant < 4; quadrant++)
+        groupCount = offset.Length;
+        chunkGroups = new (int, int)[groupCount][];
+        
+        for (int group = 0; group < groupCount; group++)
         {
-            chunkGroups[quadrant] = new Chunk2D[taskCount];
-            (int offsetX, int offsetY) = offset[quadrant];
+            chunkGroups[group] = new (int, int)[taskCount];
+            (int offsetX, int offsetY) = offset[group];
             
             int threadId = 0;
             //All workers are assigned a chunk where every chunk has no direct neighbour that is currently working, meaning we get a grid pattern
@@ -33,7 +33,7 @@ public class Multithreaded2DFixedDataStructure : Chunk2DFixedDataStructure
             {
                 for (int y = 0; y < ChunkCountY; y += 2)
                 {
-                    chunkGroups[quadrant][threadId] = Chunks[x + offsetX, y + offsetY];
+                    chunkGroups[group][threadId] = (x + offsetX, y + offsetY);
                     threadId++;
                 }
             }
@@ -47,42 +47,24 @@ public class Multithreaded2DFixedDataStructure : Chunk2DFixedDataStructure
     
     public override async void Step()
     {
-        //Slower version
-        // for (int i = 0; i < 4; i++)
-        // {
-        //     Parallel.ForEach(chunkGroups[i], chunk =>
-        //     {
-        //         chunk.Step();
-        //     });
-        // }
-        //
-        //
-        // return;
+        //Apparently some frameworks are fucking funny (looking at you Monogame/XNA) and can break with multithreading,
+        //so this check insures no update loop has been called twice in the same frame
+        //Context for bug: Once every 5000 frames or so Step() would be called twice
+        if (stepping)
+            return;
+
+        stepping = true;
         
-        //Quicker version, but sometimes seems to not work
-        (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
-        for (int quadrant = 0; quadrant < 4; quadrant++)
+        for (int group = 0; group < groupCount; group++)
         {
-            (int, int)[] taskCoords = new (int, int)[taskCount];
-            (int offsetX, int offsetY) = offset[quadrant];
-            int threadId = 0;
-            //All workers are assigned a chunk where every chunk has no direct neighbour that is currently working, meaning we get a grid pattern
-            //Note that x and y grow by 2 each loop
-            for (int x = 0; x < ChunkCountX; x+=2)
-            {
-                for (int y = 0; y < ChunkCountY; y+=2)
-                {
-                    taskCoords[threadId] = (x+offsetX, y+offsetY);
-                    threadId++;
-                }
-            }
-            
-            List<Func<Task>> tasks = taskCoords
+            List<Func<Task>> tasks = chunkGroups[group]
                 .Select(coords => (Func<Task>)(() => ChunkStepTask(coords.Item1,coords.Item2)))
                 .ToList();
 
             await RunTasks(tasks);
         }
+
+        stepping = false;
     }
     
     static async Task RunTasks(List<Func<Task>> taskFuncs)

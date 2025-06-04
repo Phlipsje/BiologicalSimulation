@@ -68,7 +68,6 @@ public abstract class Organism
             {
                 //Create new organism 
                 Organism newOrganism = CreateNewOrganism(positiveNewPosition);
-                World.AddOrganism(newOrganism);
             
                 //Push the original organism away in the other direction
                 Position = negativeNewPosition;
@@ -79,7 +78,6 @@ public abstract class Organism
             {
                 //Create new organism 
                 Organism newOrganism = CreateNewOrganism(onlyPositiveNewPosition);
-                World.AddOrganism(newOrganism);
             
                 return newOrganism;
             }
@@ -87,7 +85,6 @@ public abstract class Organism
             {
                 //Create new organism 
                 Organism newOrganism = CreateNewOrganism(onlyNegativeNewPosition);
-                World.AddOrganism(newOrganism);
             
                 return newOrganism;
             }
