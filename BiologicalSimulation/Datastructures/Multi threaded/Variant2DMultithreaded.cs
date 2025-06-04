@@ -141,14 +141,13 @@ public class Variant2DMultithreaded : DataStructure
 
     public override IEnumerable<Organism> GetOrganisms()
     {
-        Organism[] organisms = new Organism[GetOrganismCount()];
-        int i = 0;
+        LinkedList<Organism> organisms = new LinkedList<Organism>();
         foreach (Chunk2D chunk in Chunks)
         {
-            foreach (Organism organism in chunk.Organisms)
+            for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
             {
-                organisms[i] = organism;
-                i++;
+                Organism organism = node.Value;
+                organisms.AddLast(organism);
             }
         }
         
