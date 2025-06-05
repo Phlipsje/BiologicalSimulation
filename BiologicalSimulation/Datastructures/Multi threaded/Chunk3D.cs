@@ -6,17 +6,17 @@ using BiologicalSimulation.Datastructures;
 
 namespace BioSim.Datastructures;
 
-public class Chunk2D
+public class Chunk3D
 {
-    public Vector2 Center { get; }
+    public Vector3 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
     public ConcurrentQueue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
-    public Chunk2D[] ConnectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
+    public Chunk3D[] ConnectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     private bool stepping = false;
-
-    public Chunk2D(Vector2 center, float size)
+    
+    public Chunk3D(Vector3 center, float size)
     {
         Center = center;
         HalfDimension = size/2f;
@@ -24,7 +24,7 @@ public class Chunk2D
         CheckToBeAdded = new ConcurrentQueue<Organism>();
     }
     
-    public void Initialize(Chunk2D[] connectedChunks)
+    public void Initialize(Chunk3D[] connectedChunks)
     {
         //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
         this.ConnectedChunks = connectedChunks;
@@ -55,7 +55,6 @@ public class Chunk2D
         
         //Update what should and should not be in this chunk
         //No additions happen during this (to this chunk)
-        Queue<LinkedListNode<Organism>> toRemove = new Queue<LinkedListNode<Organism>>();
         for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             //Get organism at this index
@@ -106,7 +105,7 @@ public class Chunk2D
         if (singleAxisDistance > HalfDimension)
         {
             //Send to neighbouring chunk for checking
-            foreach (Chunk2D chunk in ConnectedChunks)
+            foreach (Chunk3D chunk in ConnectedChunks)
             {
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
@@ -120,7 +119,7 @@ public class Chunk2D
     [Pure]
     private float SingleAxisDistance(Organism organism)
     {
-        return Math.Max(Math.Abs(organism.Position.X - Center.X), Math.Abs(organism.Position.Y - Center.Y));
+        return Math.Max(Math.Max(Math.Abs(organism.Position.X - Center.X), Math.Abs(organism.Position.Y - Center.Y)), Math.Abs(organism.Position.Z - Center.Z));
     }
     
     /// <summary>

@@ -3,24 +3,26 @@ using System.Numerics;
 
 namespace BioSim.Datastructures;
 
-public class Variant2DMultithreaded : DataStructure
+public class Variant3DMultithreaded : DataStructure
 {
-    protected Chunk2D[,] Chunks;
-    protected Vector2 MinPosition;
+    protected Chunk3D[,,] Chunks;
+    protected Vector3 MinPosition;
     protected float ChunkSize;
     protected int ChunkCountX;
     protected int ChunkCountY;
+    protected int ChunkCountZ;
     private int taskCount;
-    private (int,int)[][] chunkGroups;
+    private (int,int, int)[][] chunkGroups;
     private int groupCount;
     private bool stepping = false;
     
-    public Variant2DMultithreaded(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize)
+    public Variant3DMultithreaded(Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize)
     {
         //Chunk setup
         ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
         ChunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
-        Chunks = new Chunk2D[ChunkCountX, ChunkCountY];
+        ChunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize);
+        Chunks = new Chunk3D[ChunkCountX, ChunkCountY, ChunkCountZ];
         MinPosition = minPosition;
         ChunkSize = chunkSize;
 
@@ -29,8 +31,11 @@ public class Variant2DMultithreaded : DataStructure
         {
             for (int j = 0; j < ChunkCountY; j++)
             {
-                Vector2 chunkCenter = minPosition + new Vector2(i, j) * chunkSize + new Vector2(chunkSize*0.5f);
-                Chunks[i, j] = new Chunk2D(chunkCenter, chunkSize);
+                for (int k = 0; k < ChunkCountZ; k++)
+                {
+                    Vector3 chunkCenter = minPosition + new Vector3(i, j, k) * chunkSize + new Vector3(chunkSize * 0.5f);
+                    Chunks[i, j, k] = new Chunk3D(chunkCenter, chunkSize);
+                }
             }
         }
         
@@ -39,24 +44,27 @@ public class Variant2DMultithreaded : DataStructure
         {
             for (int j = 0; j < ChunkCountY; j++)
             {
-                Chunks[i, j].Initialize(GetConnectedChunks(i, j));
+                for (int k = 0; k < ChunkCountZ; k++)
+                {
+                    Chunks[i, j, k].Initialize(GetConnectedChunks(i, j, k));
+                }
             }
         }
         
         //Multithreading setup
-        (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
+        (int, int, int)[] offset = [(0, 0, 0), (0, 1, 0), (1, 0, 0), (1, 1, 0), (0, 0, 1), (0, 1, 1), (1, 0, 1), (1, 1, 1)];
         groupCount = offset.Length;
         
         //TODO this only works if exactly set of 4, change later
-        taskCount = ChunkCountX * ChunkCountY / groupCount;
+        taskCount = ChunkCountX * ChunkCountY * ChunkCountZ / groupCount;
         
-        chunkGroups = new (int,int)[groupCount][];
-        chunkGroups[0] = new (int,int)[taskCount];
+        chunkGroups = new (int,int, int)[groupCount][];
+        chunkGroups[0] = new (int,int, int)[taskCount];
         
         for (int group = 0; group < groupCount; group++)
         {
-            chunkGroups[group] = new (int,int)[taskCount];
-            (int offsetX, int offsetY) = offset[group];
+            chunkGroups[group] = new (int,int, int)[taskCount];
+            (int offsetX, int offsetY, int offsetZ) = offset[group];
             
             int threadId = 0;
             //All workers are assigned a chunk where every chunk has no direct neighbour that is currently working, meaning we get a grid pattern
@@ -65,8 +73,11 @@ public class Variant2DMultithreaded : DataStructure
             {
                 for (int y = 0; y < ChunkCountY; y += 2)
                 {
-                    chunkGroups[group][threadId] = (x + offsetX, y + offsetY);
-                    threadId++;
+                    for (int z = 0; z < ChunkCountZ; z += 2)
+                    {
+                        chunkGroups[group][threadId] = (x + offsetX, y + offsetY, z + offsetZ);
+                        threadId++;
+                    }
                 }
             }
         }
@@ -76,9 +87,9 @@ public class Variant2DMultithreaded : DataStructure
     }
     
     [Pure]
-    protected Chunk2D[] GetConnectedChunks(int chunkX, int chunkY)
+    protected Chunk3D[] GetConnectedChunks(int chunkX, int chunkY, int chunkZ)
     {
-        List<Chunk2D> connectedChunks = new List<Chunk2D>(8);
+        List<Chunk3D> connectedChunks = new List<Chunk3D>(26);
         
         for (int x = -1; x <= 1; x++)
         {
@@ -91,12 +102,18 @@ public class Variant2DMultithreaded : DataStructure
                 //Check bounds
                 if (chunkY + y < 0 || chunkY + y >= ChunkCountY)
                     continue;
-                
-                //Don't add self
-                if (x == 0 && y == 0)
-                    continue;
+                for (int z = -1; z <= 1; z++)
+                {
+                    //Check bounds
+                    if (chunkZ + z < 0 || chunkZ + z >= ChunkCountZ)
+                        continue;
                     
-                connectedChunks.Add(Chunks[chunkX+x,chunkY+y]);
+                    //Don't add self
+                    if (x == 0 && y == 0 && z == 0)
+                        continue;
+                    
+                    connectedChunks.Add(Chunks[chunkX+x,chunkY+y, chunkZ+z]);
+                }
             }
         }
         
@@ -116,7 +133,7 @@ public class Variant2DMultithreaded : DataStructure
         for (int group = 0; group < groupCount; group++)
         {
             List<Func<Task>> tasks = chunkGroups[group]
-                .Select(coords => (Func<Task>)(() => ChunkStepTask(coords.Item1,coords.Item2)))
+                .Select(coords => (Func<Task>)(() => ChunkStepTask(coords.Item1,coords.Item2, coords.Item3)))
                 .ToList();
 
             await RunTasks(tasks);
@@ -125,9 +142,9 @@ public class Variant2DMultithreaded : DataStructure
         stepping = false;
     }
     
-    private async Task ChunkStepTask(int x, int y)
+    private async Task ChunkStepTask(int x, int y, int z)
     {
-        await Task.Run(Chunks[x,y].Step);
+        await Task.Run(Chunks[x,y,z].Step);
     }
     
     private async Task RunTasks(List<Func<Task>> taskFuncs)
@@ -138,14 +155,14 @@ public class Variant2DMultithreaded : DataStructure
 
     public override void AddOrganism(Organism organism)
     {
-        (int x, int y) = GetChunk(organism.Position);
-        Chunks[x,y].DirectlyInsertOrganism(organism);
+        (int x, int y, int z) = GetChunk(organism.Position);
+        Chunks[x,y,z].DirectlyInsertOrganism(organism);
     }
 
     public override IEnumerable<Organism> GetOrganisms()
     {
         LinkedList<Organism> organisms = new LinkedList<Organism>();
-        foreach (Chunk2D chunk in Chunks)
+        foreach (Chunk3D chunk in Chunks)
         {
             for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
             {
@@ -160,28 +177,30 @@ public class Variant2DMultithreaded : DataStructure
     public override int GetOrganismCount()
     {
         int organismCount = 0;
-        foreach (Chunk2D chunk2D in Chunks)
+        foreach (Chunk3D chunk in Chunks)
         {
-            organismCount += chunk2D.OrganismCount;
+            organismCount += chunk.OrganismCount;
         }
 
         return organismCount;
     }
 
-    private (int, int) GetChunk(Vector3 position)
+    private (int, int, int) GetChunk(Vector3 position)
     {
         int chunkX = (int)Math.Floor((position.X - MinPosition.X) / ChunkSize);
         int chunkY = (int)Math.Floor((position.Y - MinPosition.Y) / ChunkSize);
+        int chunkZ = (int)Math.Floor((position.Z - MinPosition.Z) / ChunkSize);
         //Math.Min because otherwise can throw error if X,Y, or Z is exactly maxValue
         chunkX = Math.Min(chunkX, ChunkCountX - 1);
         chunkY = Math.Min(chunkY, ChunkCountY - 1);
-        return (chunkX, chunkY);
+        chunkZ = Math.Min(chunkZ, ChunkCountZ - 1);
+        return (chunkX, chunkY, chunkZ);
     }
 
     public override bool CheckCollision(Organism organism, Vector3 position)
     {
-        (int cX, int cY) = GetChunk(organism.Position);
-        Chunk2D chunk = Chunks[cX, cY];
+        (int cX, int cY, int cZ) = GetChunk(organism.Position);
+        Chunk3D chunk = Chunks[cX, cY, cZ];
         
         if (!World.IsInBounds(position))
             return true;
@@ -207,7 +226,7 @@ public class Variant2DMultithreaded : DataStructure
         }
 
         //Check all organisms in neighbouring chunks
-        foreach (Chunk2D neighbouringChunk in chunk.ConnectedChunks)
+        foreach (Chunk3D neighbouringChunk in chunk.ConnectedChunks)
         {
             for (LinkedListNode<Organism> node = neighbouringChunk.Organisms.First!; node != null; node = node.Next!)
             {
