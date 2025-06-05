@@ -6,7 +6,18 @@ public class RTree<T> where T : IMinimumBoundable
     private RNode<T> root;
     public List<T> Search(Mbb searchArea)
     {
-        throw new NotImplementedException();
+        List<T> results = [];
+        root.Search(searchArea, ref results);
+        return results;
+    }
+    public void Insert(T entry)
+    {
+        root.Insert(entry, ref root);
+    }
+
+    public void Delete(T entry)
+    {
+        root.Delete(entry, ref root);
     }
 }
 
@@ -19,7 +30,17 @@ public abstract class RNode<T>(int m, int M) : IMinimumBoundable where T : IMini
     public Mbb GetMbb() { return Mbb; }
     public abstract void Search(Mbb searchArea, ref List<T> results);
     public abstract void Insert(T entry, ref RNode<T> root);
-    public void AdjustTree(RNode<T> L, RNode<T>? LL, ref RNode<T> root)
+    public abstract void ReInsert(RNonLeafNode<T> node, ref RNode<T> root);
+    public abstract void Delete(T entry, ref RNode<T> root);
+    public abstract void CondenseTree(ref RNode<T> root, List<RNode<T>> eliminatedNodes);
+    public abstract RLeafNode<T>? FindLeaf(T entry);
+    public int GetLevel(RNode<T> root)
+    {
+        if (this.Equals(root))
+            return 0;
+        return 1 + Parent.GetLevel(root);
+    }
+    protected void AdjustTree(RNode<T> L, RNode<T>? LL, ref RNode<T> root)
     {
         if (L.Equals(root)) //stop condition
         {
@@ -42,7 +63,7 @@ public abstract class RNode<T>(int m, int M) : IMinimumBoundable where T : IMini
             P.AdjustTree(P, null, ref root);
             return;
         }
-        if (P.Count < M)
+        if (P.Count < _M)
         {
             P.Children.Add(LL);
             P.Mbb = P.Mbb.Enlarged(LL.Mbb);
@@ -64,6 +85,12 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
     public int Count => LeafEntries.Count;
     public List<T> LeafEntries = new (M);
 
+    public override void DebugDraw(int axis0, int axis1)
+    {
+        //draw self and leaf entries
+        
+        
+    }
     public override void Search(Mbb searchArea, ref List<T> results)
     {
         for (int i = 0; i < Count; i++)
@@ -88,7 +115,76 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
         (RNode<T> L, RNode<T> LL) = SplitNode(entry);
         AdjustTree(L,LL, ref root);
     }
-    
+
+    public override void ReInsert(RNonLeafNode<T> node, ref RNode<T> root)
+    {
+        throw new Exception("Can't insert node in a leaf node. Reinsert should not be able to reach this far down");
+    }
+
+    public override void Delete(T entry, ref RNode<T> root)
+    {
+        LeafEntries.Remove(entry);
+        CondenseTree(ref root, []);
+    }
+
+    public override void CondenseTree(ref RNode<T> root, List<RNode<T>> eliminatedNodes)
+    {
+        if (this.Equals(root)) //Stop and reinsert, when at root
+        {
+            RecalculateMbb();
+            //Since the root is at leaf level it should not be possible for there to be eliminated nodes
+            if (eliminatedNodes.Count > 0)
+                throw new Exception(
+                    "Unintended behaviour, eliminatedNodes should be empty when condensing a leafNode root");
+            return;
+        }
+        RNonLeafNode<T> P = (RNonLeafNode<T>)Parent; //parent can't be a leaf
+        if (Count < _m)
+        {
+            P.Children.Remove(this);
+            eliminatedNodes.Add(this);
+        }
+        else
+        {
+            //adjust mbb of node
+            RecalculateMbb();
+        }
+        P.CondenseTree(ref root, eliminatedNodes);
+    }
+
+    private void RecalculateMbb()
+    {
+        float minX = Mbb.Minimum.X;
+        float minY = Mbb.Minimum.Y;
+        float minZ = Mbb.Minimum.Z;
+        float maxX = Mbb.Minimum.X;
+        float maxY = Mbb.Maximum.Y;
+        float maxZ = Mbb.Maximum.Z;
+        for (int i = 0; i < Count; i++)
+        {
+            Vector3 min = LeafEntries[i].GetMbb().Minimum;
+            Vector3 max = LeafEntries[i].GetMbb().Maximum;
+            if (min.X < minX)
+                minX = min.X;
+            if (min.Y < minY)
+                minY = min.Y;
+            if (min.Z < minZ)
+                minZ = min.Z;
+            if (max.X > maxX)
+                maxX = max.X;
+            if (max.Y > maxY)
+                maxY = max.Y;
+            if (max.Z > maxZ)
+                maxZ = max.Z;
+            Mbb = new Mbb(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ));
+        }
+    }
+    public override RLeafNode<T>? FindLeaf(T entry)
+    {
+        if (LeafEntries.Contains(entry))
+            return this;
+        return null;
+    }
     public override (RNode<T>, RNode<T>) SplitNode(RNode<T> entry)
     {
         if (entry is RLeafNode<T> && ((RLeafNode<T>)entry).LeafEntries.Count == 1)
@@ -257,6 +353,122 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBou
         RLeafNode<T> leaf = ChooseLeaf(entry);
         leaf.Insert(entry, ref root);
     }
+
+    public override void ReInsert(RNonLeafNode<T> node, ref RNode<T> root)
+    {
+        if (this.GetLevel(root) == node.GetLevel(root) - 1)
+        {
+            if (Count < _M)
+            {
+                Children.Add(node);
+                Mbb = Mbb.Enlarged(node.Mbb);
+                node.Parent = this;   
+            }
+            else
+            {
+                (RNode<T> L, RNode<T> LL) = SplitNode(node);
+                AdjustTree(L,LL, ref root);
+            }
+            return;
+        }
+        RNode<T> best = Children[0];
+        float leastOverlap = best.Mbb.Enlarged(node.Mbb).Area;
+        for (int i = 1; i < Count; i++)
+        {
+            float overlap = Children[i].Mbb.Enlarged(node.Mbb).Area;
+            if (overlap < leastOverlap)
+            {
+                best = Children[i];
+                leastOverlap = overlap;
+            }
+        }
+        best.ReInsert(node, ref root);
+    }
+
+    public override void Delete(T entry, ref RNode<T> root)
+    {
+        RLeafNode<T>? leaf = FindLeaf(entry);
+        if (leaf == null)
+            throw new Exception("Attempted deletion of non existent entry");
+        leaf.Delete(entry, ref root);
+    }
+
+    public override void CondenseTree(ref RNode<T> root, List<RNode<T>> eliminatedNodes)
+    {
+        //Stop and reinsert, when root is reached
+        if (this.Equals(root))
+        {
+            foreach (RNode<T> node in eliminatedNodes)
+            {
+                if (node is RLeafNode<T>)
+                {
+                    foreach (T entry in ((RLeafNode<T>)node).LeafEntries)
+                    {
+                        Insert(entry, ref root);
+                    }
+                }
+                else
+                {
+                    ReInsert((RNonLeafNode<T>)node, ref root);
+                }
+            }
+            return;
+        }
+        RNonLeafNode<T> P = (RNonLeafNode<T>)Parent; //parent can't be a leaf
+        if (Count < _m)
+        {
+            P.Children.Remove(this);
+            eliminatedNodes.Add(this);
+        }
+        else
+        {
+            //adjust mbb of node
+            RecalculateMbb();
+        }
+        P.CondenseTree(ref root, eliminatedNodes);
+    }
+    private void RecalculateMbb()
+    {
+        float minX = Mbb.Minimum.X;
+        float minY = Mbb.Minimum.Y;
+        float minZ = Mbb.Minimum.Z;
+        float maxX = Mbb.Minimum.X;
+        float maxY = Mbb.Maximum.Y;
+        float maxZ = Mbb.Maximum.Z;
+        for (int i = 0; i < Count; i++)
+        {
+            Vector3 min = Children[i].Mbb.Minimum;
+            Vector3 max = Children[i].Mbb.Maximum;
+            if (min.X < minX)
+                minX = min.X;
+            if (min.Y < minY)
+                minY = min.Y;   
+            if (min.Z < minZ)
+                minZ = min.Z;
+            if (max.X > maxX)
+                maxX = max.X;
+            if (max.Y > maxY)
+                maxY = max.Y;
+            if (max.Z > maxZ)
+                maxZ = max.Z;
+            Mbb = new Mbb(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ));
+        }
+    }
+    
+    public override RLeafNode<T>? FindLeaf(T entry)
+    {
+        for (int i = 0; i < Count; i++)
+        {
+            if (Children[i].Mbb.Contains(entry.GetMbb()))
+            {
+                RLeafNode<T>? result = Children[i].FindLeaf(entry);
+                if (result != null)
+                    return result;
+            }
+        }
+        return null;
+    }
+
     public override RLeafNode<T> ChooseLeaf(T entry)
     {
         RNode<T> best = Children[0];
@@ -393,12 +605,6 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBou
             return (highLowY, lowHighY);
         return (highLowZ, lowHighZ);
     }
-}
-
-public struct LeafEntry<T>(Mbb mbb, T item)
-{
-    public T Item = item;
-    public Mbb Mbb = mbb;
 }
 
 public struct Mbb(Vector3 minimum, Vector3 maximum)
