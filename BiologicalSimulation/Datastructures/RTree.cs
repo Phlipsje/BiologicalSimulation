@@ -1,23 +1,43 @@
 ﻿namespace BioSim.Datastructures;
 using System.Numerics;
 
-public class RTree<T> where T : IMinimumBoundable
+public class RTree<T>(int m, int M)
+    where T : IMinimumBoundable
 {
-    private RNode<T> root;
+    private int _m = m, _M = M;
+    private RNode<T>? root = null;
     public List<T> Search(Mbb searchArea)
     {
+        if (root == null)
+            throw new Exception("Tree is empty");
         List<T> results = [];
         root.Search(searchArea, ref results);
         return results;
     }
     public void Insert(T entry)
     {
+        if (root == null)
+        {
+            RLeafNode<T> newRoot = new RLeafNode<T>(_m, M);
+            newRoot.LeafEntries.Add(entry);
+            newRoot.Mbb = entry.GetMbb();
+            root = newRoot;
+            return;
+        }
         root.Insert(entry, ref root);
     }
 
     public void Delete(T entry)
     {
         root.Delete(entry, ref root);
+    }
+
+    public List<(Mbb,int)> GetMbbsWithLevel()
+    {
+        List<(Mbb, int)> list = [];
+        if (root != null)
+            root.GetMbbsWithLevel(list, root);
+        return list;
     }
 }
 
@@ -34,6 +54,8 @@ public abstract class RNode<T>(int m, int M) : IMinimumBoundable where T : IMini
     public abstract void Delete(T entry, ref RNode<T> root);
     public abstract void CondenseTree(ref RNode<T> root, List<RNode<T>> eliminatedNodes);
     public abstract RLeafNode<T>? FindLeaf(T entry);
+    public abstract void GetMbbsWithLevel(List<(Mbb, int)> list, RNode<T> root);
+    public abstract void RecalculateMbb();
     public int GetLevel(RNode<T> root)
     {
         if (this.Equals(root))
@@ -57,7 +79,7 @@ public abstract class RNode<T>(int m, int M) : IMinimumBoundable where T : IMini
         }
 
         RNonLeafNode<T> P = (RNonLeafNode<T>)L.Parent; //a parent of a node should never be a leaf node.
-        P.Mbb = P.Mbb.Enlarged(L.Mbb);
+        P.Mbb = P.Mbb.Enlarged(L.Mbb); 
         if (LL == null)
         {
             P.AdjustTree(P, null, ref root);
@@ -71,8 +93,8 @@ public abstract class RNode<T>(int m, int M) : IMinimumBoundable where T : IMini
             P.AdjustTree(P, null, ref root);
             return;
         }
-        (_, RNode<T> PP) = P.SplitNode(LL);
-        AdjustTree(P, PP, ref root);
+        (RNode<T> N, RNode<T> NN) = P.SplitNode(LL);
+        AdjustTree(N, NN, ref root);
     }
     
     public abstract RLeafNode<T> ChooseLeaf(T entry);
@@ -84,13 +106,6 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
 {
     public int Count => LeafEntries.Count;
     public List<T> LeafEntries = new (M);
-
-    public override void DebugDraw(int axis0, int axis1)
-    {
-        //draw self and leaf entries
-        
-        
-    }
     public override void Search(Mbb searchArea, ref List<T> results)
     {
         for (int i = 0; i < Count; i++)
@@ -110,6 +125,7 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
         {
             LeafEntries.Add(entry);
             Mbb = Mbb.Enlarged(entry.GetMbb());
+            AdjustTree(this, null, ref root);
             return;
         }
         (RNode<T> L, RNode<T> LL) = SplitNode(entry);
@@ -151,8 +167,7 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
         }
         P.CondenseTree(ref root, eliminatedNodes);
     }
-
-    private void RecalculateMbb()
+    public override void RecalculateMbb()
     {
         float minX = Mbb.Minimum.X;
         float minY = Mbb.Minimum.Y;
@@ -185,6 +200,17 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
             return this;
         return null;
     }
+
+    public override void GetMbbsWithLevel(List<(Mbb,int)> list, RNode<T> root)
+    {
+        int level = GetLevel(root);
+        list.Add((Mbb, level));
+        for (int i = 0; i < Count; i++)
+        {
+            list.Add((LeafEntries[i].GetMbb(), level + 1));
+        }
+    }
+
     public override (RNode<T>, RNode<T>) SplitNode(RNode<T> entry)
     {
         if (entry is RLeafNode<T> && ((RLeafNode<T>)entry).LeafEntries.Count == 1)
@@ -211,7 +237,7 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
             T currentEntry = entries[i];
             
             //if it is required to put all remaining entries into a group to ensure that group is filled to size m do so
-            RLeafNode<T> groupToFill = null;
+            RLeafNode<T>? groupToFill = null;
             if (group1.Count + (entries.Count - i) <= group1._m)
                 groupToFill = group1;
             if (group2.Count + (entries.Count - i) <= group2._m)
@@ -226,9 +252,8 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
                 }
                 break;
             }
-
             Mbb group1Enlarged = group1.Mbb.Enlarged(currentEntry.GetMbb());
-            Mbb group2Enlarged = group1.Mbb.Enlarged(currentEntry.GetMbb());
+            Mbb group2Enlarged = group2.Mbb.Enlarged(currentEntry.GetMbb());
             if (group1Enlarged.Area < group2Enlarged.Area)
             {
                 group1.LeafEntries.Add(currentEntry);
@@ -347,7 +372,15 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBou
                 Children[i].Search(searchArea, ref results);
         }
     }
-
+    public override void GetMbbsWithLevel(List<(Mbb,int)> list, RNode<T> root)
+    {
+        int level = GetLevel(root);
+        list.Add((Mbb, level));
+        for (int i = 0; i < Count; i++)
+        {
+            Children[i].GetMbbsWithLevel(list, root);
+        }
+    }
     public override void Insert(T entry, ref RNode<T> root)
     {
         RLeafNode<T> leaf = ChooseLeaf(entry);
@@ -427,7 +460,7 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBou
         }
         P.CondenseTree(ref root, eliminatedNodes);
     }
-    private void RecalculateMbb()
+    public override void RecalculateMbb()
     {
         float minX = Mbb.Minimum.X;
         float minY = Mbb.Minimum.Y;
@@ -495,8 +528,10 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBou
         RNonLeafNode<T> group1 = this;
         RNonLeafNode<T> group2 = new RNonLeafNode<T>(_m, _M);
         group1.Children = new List<RNode<T>>(M) { e1 };
+        e1.Parent = group1;
         group1.Mbb = e1.GetMbb();
         group2.Children = new List<RNode<T>>(M) { e2 };
+        e2.Parent = group2;
         group2.Mbb = e2.GetMbb();
         for (int i = 0; i < entries.Count; i++)
         {
@@ -514,16 +549,18 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBou
                 {
                     currentEntry = entries[j];
                     groupToFill.Children.Add(currentEntry);
+                    currentEntry.Parent = groupToFill;
                     groupToFill.Mbb = groupToFill.Mbb.Enlarged(currentEntry.GetMbb());
                 }
                 break;
             }
 
             Mbb group1Enlarged = group1.Mbb.Enlarged(currentEntry.GetMbb());
-            Mbb group2Enlarged = group1.Mbb.Enlarged(currentEntry.GetMbb());
+            Mbb group2Enlarged = group2.Mbb.Enlarged(currentEntry.GetMbb());
             if (group1Enlarged.Area < group2Enlarged.Area)
             {
                 group1.Children.Add(currentEntry);
+                currentEntry.Parent = group1;
                 group1.Mbb = group1Enlarged;
                 continue;
             }
@@ -532,16 +569,19 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBou
                 if (group1.Count < group2.Count)
                 {
                     group1.Children.Add(currentEntry);
+                    currentEntry.Parent = group1;
                     group1.Mbb = group1Enlarged;
                 }
                 else
                 {
                     group2.Children.Add(currentEntry);
+                    currentEntry.Parent = group2;
                     group2.Mbb = group2Enlarged;
                 }
                 continue;
             }
             group2.Children.Add(currentEntry);
+            currentEntry.Parent = group2;
             group2.Mbb = group2Enlarged;
         }
         return (group1, group2);
