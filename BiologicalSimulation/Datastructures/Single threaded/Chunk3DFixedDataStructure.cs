@@ -35,7 +35,7 @@ public class Chunk3DFixedDataStructure : DataStructure
                 for (int k = 0; k < ChunkCountZ; k++)
                 {
                     Vector3 chunkCenter = minPosition + new Vector3(i, j, k) * chunkSize + new Vector3(chunkSize*0.5f);
-                    Chunks[i, j, k] = new ExtendedChunk3D(multithreaded, chunkCenter, chunkSize, largestOrganismSize);
+                    Chunks[i, j, k] = new ExtendedChunk3D(chunkCenter, chunkSize, largestOrganismSize);
                 }
             }
         }

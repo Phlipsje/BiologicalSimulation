@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace BioSim.Datastructures;
 
-public class Variant2DMultithreaded : DataStructure
+public class MultithreadedChunk2DFixedDataStructure : DataStructure
 {
     protected Chunk2D[,] Chunks;
     protected Vector2 MinPosition;
@@ -16,7 +16,7 @@ public class Variant2DMultithreaded : DataStructure
     private int groupCount;
     private bool stepping = false;
     
-    public Variant2DMultithreaded(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize, int amountOfLogicalCoresToUse = 0)
+    public MultithreadedChunk2DFixedDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize, int amountOfLogicalCoresToUse = 0)
     {
         //Chunk setup
         ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);

@@ -19,16 +19,16 @@ public class ExtendedChunk3D
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
     public LinkedList<Organism> ExtendedCheck;
-    public QueueWrapper<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
+    public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     private ExtendedChunk3D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     
-    public ExtendedChunk3D(bool multithreaded, Vector3 center, float size, float largestOrganismSize)
+    public ExtendedChunk3D(Vector3 center, float size, float largestOrganismSize)
     {
         Center = center;
         HalfDimension = size/2f;
         Organisms = new LinkedList<Organism>();
         ExtendedCheck = new LinkedList<Organism>();
-        CheckToBeAdded = new QueueWrapper<Organism>(multithreaded);
+        CheckToBeAdded = new Queue<Organism>();
         dimenstionExtensionForCheck = largestOrganismSize * 2;
     }
 
@@ -82,9 +82,7 @@ public class ExtendedChunk3D
     {
         while (CheckToBeAdded.Count > 0)
         {
-            bool success = CheckToBeAdded.Dequeue(out Organism organism);
-            if (!success)
-                continue;
+            Organism organism = CheckToBeAdded.Dequeue();
             
             float singleAxisDistance = SingleAxisDistance(organism);
 

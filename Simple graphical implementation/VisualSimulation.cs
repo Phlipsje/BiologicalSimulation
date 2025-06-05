@@ -93,7 +93,7 @@ public class VisualSimulation : Game
         Random random = new Random(); //Can enter seed here
         float worldHalfSize = 12f;
         float organismSize = 0.5f;
-        DataStructure dataStructure = new Variant3DMultithreaded(new Vector3(-worldHalfSize), 
+        DataStructure dataStructure = new MultithreadedChunk3DFixedDataStructure(new Vector3(-worldHalfSize), 
             new Vector3(worldHalfSize), 4f, organismSize);
         world = new TestWorld(dataStructure, simulation, worldHalfSize);
         //TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);

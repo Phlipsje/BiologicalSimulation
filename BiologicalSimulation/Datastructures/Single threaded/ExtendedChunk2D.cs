@@ -21,17 +21,17 @@ public class ExtendedChunk2D
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
     public LinkedList<Organism> ExtendedCheck;
-    public QueueWrapper<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
+    public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     private ExtendedChunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     private List<LinkedList<Organism>> listsToSend;
 
-    public ExtendedChunk2D(bool multithreaded, Vector2 center, float size, float largestOrganismSize)
+    public ExtendedChunk2D(Vector2 center, float size, float largestOrganismSize)
     {
         Center = center;
         HalfDimension = size/2f;
         Organisms = new LinkedList<Organism>();
         ExtendedCheck = new LinkedList<Organism>();
-        CheckToBeAdded = new QueueWrapper<Organism>(multithreaded);
+        CheckToBeAdded = new Queue<Organism>();
         dimenstionExtensionForCheck = largestOrganismSize * 2;
         listsToSend = [Organisms, ExtendedCheck];
     }
@@ -42,7 +42,7 @@ public class ExtendedChunk2D
         this.connectedChunks = connectedChunks;
     }
     
-    public Task Step()
+    public void Step()
     {
         //Check what should be added to chunk
         //No removals happen during this
@@ -73,8 +73,6 @@ public class ExtendedChunk2D
             
             CheckRemoveFromExtension(organism, organismNode);
         }
-        
-        return Task.CompletedTask;
     }
     
     /// <summary>
@@ -85,9 +83,7 @@ public class ExtendedChunk2D
     {
         while (CheckToBeAdded.Count > 0)
         {
-            bool success = CheckToBeAdded.Dequeue(out Organism organism);
-            if (!success)
-                continue;
+            Organism organism = CheckToBeAdded.Dequeue();
             
             float singleAxisDistance = SingleAxisDistance(organism);
 

@@ -18,7 +18,7 @@ public class Chunk2DFixedDataStructure : DataStructure
     protected int ChunkCountX;
     protected int ChunkCountY;
     
-    public Chunk2DFixedDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize, bool multithreaded = false)
+    public Chunk2DFixedDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize)
     {
         ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
         ChunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
@@ -32,7 +32,7 @@ public class Chunk2DFixedDataStructure : DataStructure
             for (int j = 0; j < ChunkCountY; j++)
             {
                 Vector2 chunkCenter = minPosition + new Vector2(i, j) * chunkSize + new Vector2(chunkSize*0.5f);
-                Chunks[i, j] = new ExtendedChunk2D(multithreaded, chunkCenter, chunkSize, largestOrganismSize);
+                Chunks[i, j] = new ExtendedChunk2D(chunkCenter, chunkSize, largestOrganismSize);
             }
         }
         
