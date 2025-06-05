@@ -10,8 +10,9 @@ public class Variant2DMultithreaded : DataStructure
     protected float ChunkSize;
     protected int ChunkCountX;
     protected int ChunkCountY;
-    private int taskCount;
-    private (int,int)[][] chunkGroups;
+    //First array stores the differing groups needed to have sets of chunks that never directly touch eachother,
+    // second array stores logical cores that can do tasks, third is the actual chunks that are run
+    private Chunk2D[][][] chunkGroupBatches;
     private int groupCount;
     private bool stepping = false;
     
@@ -47,26 +48,50 @@ public class Variant2DMultithreaded : DataStructure
         (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
         groupCount = offset.Length;
         
-        //TODO this only works if exactly set of 4, change later
-        taskCount = ChunkCountX * ChunkCountY / groupCount;
+        //Round downwards for uneven task counts
+        int lowestTaskCount = (int)Math.Floor(ChunkCountX * ChunkCountY / (float)groupCount);
         
-        chunkGroups = new (int,int)[groupCount][];
-        chunkGroups[0] = new (int,int)[taskCount];
+        List<Chunk2D>[] chunkGroups = new List<Chunk2D>[groupCount+1];
         
+        //First we find all the chunks in a group
         for (int group = 0; group < groupCount; group++)
         {
-            chunkGroups[group] = new (int,int)[taskCount];
+            chunkGroups[group] = new List<Chunk2D>(lowestTaskCount);
             (int offsetX, int offsetY) = offset[group];
             
-            int threadId = 0;
             //All workers are assigned a chunk where every chunk has no direct neighbour that is currently working, meaning we get a grid pattern
             //Note that x and y grow by 2 each loop
             for (int x = 0; x < ChunkCountX; x += 2)
             {
                 for (int y = 0; y < ChunkCountY; y += 2)
                 {
-                    chunkGroups[group][threadId] = (x + offsetX, y + offsetY);
-                    threadId++;
+                    chunkGroups[group].Add(Chunks[x + offsetX, y + offsetY]);
+                }
+            }
+        } 
+        
+        //Next we assign them to every logical core
+        chunkGroupBatches = new Chunk2D[groupCount][][];
+        for (int group = 0; group < groupCount; group++)
+        {
+            int index = 0;
+            int chunkGroupCount = chunkGroups[group].Count;
+            //Note: most physical cores have multiple logical cores (want rounded down task count, so that there is always at least 1 task per logical core)
+            int logicalCores = Math.Min(Environment.ProcessorCount, chunkGroupCount);
+            chunkGroupBatches[group] = new Chunk2D[logicalCores][];
+            for (int core = 0; core < Math.Min(logicalCores, chunkGroupCount); core++)
+            {
+                //Divide all assigned chunks to a group to different logical cores
+                int chunksPerCore = (int)Math.Floor(chunkGroups[group].Count / (float)logicalCores); //Rounded down
+                int batchesWithExtraChunk = chunkGroups[group].Count % logicalCores;
+                bool extraChunk = batchesWithExtraChunk > core;
+                int batchSize = chunksPerCore + (extraChunk ? 1: 0);
+                chunkGroupBatches[group][core] = new Chunk2D[batchSize];
+
+                for (int i = 0; i < batchSize; i++)
+                {
+                    chunkGroupBatches[group][core][i] = chunkGroups[group][index];
+                    index++;
                 }
             }
         }
@@ -115,8 +140,8 @@ public class Variant2DMultithreaded : DataStructure
         
         for (int group = 0; group < groupCount; group++)
         {
-            List<Func<Task>> tasks = chunkGroups[group]
-                .Select(coords => (Func<Task>)(() => ChunkStepTask(coords.Item1,coords.Item2)))
+            List<Func<Task>> tasks = chunkGroupBatches[group]
+                .Select(chunkBatch => (Func<Task>)(() => ChunkStepTask(chunkBatch)))
                 .ToList();
 
             await RunTasks(tasks);
@@ -125,9 +150,15 @@ public class Variant2DMultithreaded : DataStructure
         stepping = false;
     }
     
-    private async Task ChunkStepTask(int x, int y)
+    private Task ChunkStepTask(Chunk2D[] coordBatch)
     {
-        await Task.Run(Chunks[x,y].Step);
+        return Task.Run(() =>
+        {
+            foreach (Chunk2D chunk in coordBatch)
+            {
+                chunk.Step();
+            }
+        });
     }
     
     private async Task RunTasks(List<Func<Task>> taskFuncs)

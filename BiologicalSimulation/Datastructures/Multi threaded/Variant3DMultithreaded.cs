@@ -11,7 +11,6 @@ public class Variant3DMultithreaded : DataStructure
     protected int ChunkCountX;
     protected int ChunkCountY;
     protected int ChunkCountZ;
-    private int taskCount;
     //First array stores the differing groups needed to have sets of chunks that never directly touch eachother,
     // second array stores logical cores that can do tasks, third is the actual chunks that are run
     private Chunk3D[][][] chunkGroupBatches;
@@ -57,19 +56,17 @@ public class Variant3DMultithreaded : DataStructure
         (int, int, int)[] offset = [(0, 0, 0), (0, 1, 0), (1, 0, 0), (1, 1, 0), (0, 0, 1), (0, 1, 1), (1, 0, 1), (1, 1, 1)];
         groupCount = offset.Length;
         
-        //TODO this only works if exactly set of 4, change later
-        taskCount = ChunkCountX * ChunkCountY * ChunkCountZ / groupCount;
+        //Round downwards for uneven task counts
+        int lowestTaskCount = (int)Math.Floor(ChunkCountX * ChunkCountY * ChunkCountZ / (float)groupCount);
         
-        Chunk3D[][] chunkGroups = new Chunk3D[groupCount][];
-        chunkGroups[0] = new Chunk3D[taskCount];
+        List<Chunk3D>[] chunkGroups = new List<Chunk3D>[groupCount+1];
         
         //First we find all the chunks in a group
         for (int group = 0; group < groupCount; group++)
         {
-            chunkGroups[group] = new Chunk3D[taskCount];
+            chunkGroups[group] = new List<Chunk3D>(lowestTaskCount);
             (int offsetX, int offsetY, int offsetZ) = offset[group];
             
-            int threadId = 0;
             //All workers are assigned a chunk where every chunk has no direct neighbour that is currently working, meaning we get a grid pattern
             //Note that x and y grow by 2 each loop
             for (int x = 0; x < ChunkCountX; x += 2)
@@ -78,27 +75,27 @@ public class Variant3DMultithreaded : DataStructure
                 {
                     for (int z = 0; z < ChunkCountZ; z += 2)
                     {
-                        chunkGroups[group][threadId] = Chunks[x + offsetX, y + offsetY, z + offsetZ];
-                        threadId++;
+                        chunkGroups[group].Add(Chunks[x + offsetX, y + offsetY, z + offsetZ]);
                     }
                 }
             }
         } 
-        
-        //Note: most physical cores have multiple logical cores
-        int logicalCores = Environment.ProcessorCount;
-        int chunksPerCore = (int)Math.Floor(taskCount / (float)logicalCores); //Rounded down
-        int coresWithExtraChunk = taskCount % logicalCores;
         
         //Next we assign them to every logical core
         chunkGroupBatches = new Chunk3D[groupCount][][];
         for (int group = 0; group < groupCount; group++)
         {
             int index = 0;
+            int chunkGroupCount = chunkGroups[group].Count;
+            //Note: most physical cores have multiple logical cores (want rounded down task count, so that there is always at least 1 task per logical core)
+            int logicalCores = Math.Min(Environment.ProcessorCount, chunkGroupCount);
             chunkGroupBatches[group] = new Chunk3D[logicalCores][];
-            for (int core = 0; core < logicalCores; core++)
+            for (int core = 0; core < Math.Min(logicalCores, chunkGroupCount); core++)
             {
-                bool extraChunk = coresWithExtraChunk > core;
+                //Divide all assigned chunks to a group to different logical cores
+                int chunksPerCore = (int)Math.Floor(chunkGroups[group].Count / (float)logicalCores); //Rounded down
+                int batchesWithExtraChunk = chunkGroups[group].Count % logicalCores;
+                bool extraChunk = batchesWithExtraChunk > core;
                 int batchSize = chunksPerCore + (extraChunk ? 1: 0);
                 chunkGroupBatches[group][core] = new Chunk3D[batchSize];
 
