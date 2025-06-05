@@ -30,6 +30,8 @@ public class RTree<T>(int m, int M)
     public void Delete(T entry)
     {
         root.Delete(entry, ref root);
+        if (root.Count == 0)
+            root = null;
     }
 
     public List<(Mbb,int)> GetMbbsWithLevel()
@@ -46,6 +48,7 @@ public abstract class RNode<T>(int m, int M) : IMinimumBoundable where T : IMini
     protected int _m = m;
     protected int _M = M;
     public RNode<T> Parent = null;
+    public abstract int Count { get; }
     public Mbb Mbb;
     public Mbb GetMbb() { return Mbb; }
     public abstract void Search(Mbb searchArea, ref List<T> results);
@@ -77,19 +80,19 @@ public abstract class RNode<T>(int m, int M) : IMinimumBoundable where T : IMini
             root = newRoot;
             return;
         }
-
         RNonLeafNode<T> P = (RNonLeafNode<T>)L.Parent; //a parent of a node should never be a leaf node.
-        P.Mbb = P.Mbb.Enlarged(L.Mbb); 
         if (LL == null)
         {
+            P.Mbb = P.Mbb.Enlarged(L.Mbb); 
             P.AdjustTree(P, null, ref root);
             return;
         }
         if (P.Count < _M)
-        {
+        { 
+            P.Mbb = P.Mbb.Enlarged(L.Mbb); 
             P.Children.Add(LL);
-            P.Mbb = P.Mbb.Enlarged(LL.Mbb);
             LL.Parent = P;
+            P.Mbb = P.Mbb.Enlarged(LL.Mbb);
             P.AdjustTree(P, null, ref root);
             return;
         }
@@ -104,7 +107,7 @@ public abstract class RNode<T>(int m, int M) : IMinimumBoundable where T : IMini
 public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
     where T : IMinimumBoundable
 {
-    public int Count => LeafEntries.Count;
+    public override int Count => LeafEntries.Count;
     public List<T> LeafEntries = new (M);
     public override void Search(Mbb searchArea, ref List<T> results)
     {
@@ -169,12 +172,12 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
     }
     public override void RecalculateMbb()
     {
-        float minX = Mbb.Minimum.X;
-        float minY = Mbb.Minimum.Y;
-        float minZ = Mbb.Minimum.Z;
-        float maxX = Mbb.Minimum.X;
-        float maxY = Mbb.Maximum.Y;
-        float maxZ = Mbb.Maximum.Z;
+        float minX = float.MaxValue;
+        float minY = float.MaxValue;
+        float minZ = float.MaxValue;
+        float maxX = float.MinValue;
+        float maxY = float.MinValue;
+        float maxZ = float.MinValue;
         for (int i = 0; i < Count; i++)
         {
             Vector3 min = LeafEntries[i].GetMbb().Minimum;
@@ -362,7 +365,7 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
 public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBoundable
 {
     public List<RNode<T>> Children = new (M);
-    public int Count => Children.Count;
+    public override int Count => Children.Count;
 
     public override void Search(Mbb searchArea, ref List<T> results)
     {
@@ -462,12 +465,12 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBou
     }
     public override void RecalculateMbb()
     {
-        float minX = Mbb.Minimum.X;
-        float minY = Mbb.Minimum.Y;
-        float minZ = Mbb.Minimum.Z;
-        float maxX = Mbb.Minimum.X;
-        float maxY = Mbb.Maximum.Y;
-        float maxZ = Mbb.Maximum.Z;
+        float minX = float.MaxValue;
+        float minY = float.MaxValue;
+        float minZ = float.MaxValue;
+        float maxX = float.MinValue;
+        float maxY = float.MinValue;
+        float maxZ = float.MinValue;
         for (int i = 0; i < Count; i++)
         {
             Vector3 min = Children[i].Mbb.Minimum;
@@ -484,8 +487,8 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBou
                 maxY = max.Y;
             if (max.Z > maxZ)
                 maxZ = max.Z;
-            Mbb = new Mbb(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ));
         }
+        Mbb = new Mbb(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ));
     }
     
     public override RLeafNode<T>? FindLeaf(T entry)
