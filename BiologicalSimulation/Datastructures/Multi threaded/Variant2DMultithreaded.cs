@@ -16,7 +16,7 @@ public class Variant2DMultithreaded : DataStructure
     private int groupCount;
     private bool stepping = false;
     
-    public Variant2DMultithreaded(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize)
+    public Variant2DMultithreaded(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize, int amountOfLogicalCoresToUse = 0)
     {
         //Chunk setup
         ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
@@ -71,13 +71,15 @@ public class Variant2DMultithreaded : DataStructure
         } 
         
         //Next we assign them to every logical core
+        //Next we assign them to every logical core (and respect defined amount of cores if done)
+        int allowedCores = amountOfLogicalCoresToUse == 0 ? Environment.ProcessorCount : amountOfLogicalCoresToUse;
         chunkGroupBatches = new Chunk2D[groupCount][][];
         for (int group = 0; group < groupCount; group++)
         {
             int index = 0;
             int chunkGroupCount = chunkGroups[group].Count;
             //Note: most physical cores have multiple logical cores (want rounded down task count, so that there is always at least 1 task per logical core)
-            int logicalCores = Math.Min(Environment.ProcessorCount, chunkGroupCount);
+            int logicalCores = Math.Min(allowedCores, chunkGroupCount);
             chunkGroupBatches[group] = new Chunk2D[logicalCores][];
             for (int core = 0; core < Math.Min(logicalCores, chunkGroupCount); core++)
             {
@@ -96,7 +98,7 @@ public class Variant2DMultithreaded : DataStructure
             }
         }
         
-        CheckWarnings(largestOrganismSize);
+        CheckWarnings(largestOrganismSize, allowedCores);
         CheckErrors(largestOrganismSize);
     }
     
@@ -270,10 +272,16 @@ public class Variant2DMultithreaded : DataStructure
     
     #region Warnings and errors
 
-    private void CheckWarnings(float largestOrganismSize)
+    private void CheckWarnings(float largestOrganismSize, int amountOfCoresBeingUsed)
     {
         if (ChunkSize > largestOrganismSize * 10)
             Console.WriteLine("Warning: Chunk size is rather large, smaller chunk size would improve performance");
+        
+        if(amountOfCoresBeingUsed == 1)
+            Console.WriteLine("Warning: Only 1 logical core in use while using multithreading! Switch to single-threaded datastructure for better performance");
+        
+        if(Environment.ProcessorCount < amountOfCoresBeingUsed)
+            Console.WriteLine($"Warning: More logical cores assigned then available: Requested: {amountOfCoresBeingUsed}, Available: {Environment.ProcessorCount}");
     }
 
     private void CheckErrors(float largestOrganismSize)
