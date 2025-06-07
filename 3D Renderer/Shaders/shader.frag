@@ -6,10 +6,13 @@ uniform vec3 cameraPos;
 uniform vec3 cameraFront;
 uniform vec3 cameraUp;
 uniform vec3 cameraRight;
+uniform float aspect;
 
 struct Sphere {
     vec3 center;
     float radius;
+    vec3 color;
+    float padding;
 };
 
 layout(std430, binding = 0) buffer SpheresBuffer {
@@ -31,7 +34,6 @@ float RaySphereIntersect(vec3 ro, vec3 rd, vec3 center, float radius)
 void main()
 {
     vec2 screenPos = uv * 2.0 - 1.0;
-    float aspect = 800.0 / 600.0; // Consider passing via uniform
     screenPos.x *= aspect;
 
     vec3 rayDir = normalize(cameraFront + screenPos.x * cameraRight + screenPos.y * cameraUp);
@@ -56,10 +58,12 @@ void main()
         vec3 hitPos = rayOrigin + minT * rayDir;
         vec3 normal = normalize(hitPos - spheres[hitIndex].center);
         float lighting = dot(normal, normalize(vec3(1.0, 1.0, -1.0))) * 0.5 + 0.5;
-        FragColor = vec4(vec3(1.0, 0.4, 0.1) * lighting, 1.0);
+        FragColor = vec4(spheres[hitIndex].color * lighting, 1.0);
     }
     else //If sphere should be skybox (background) color
     {
-        FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+        float t = clamp(rayDir.y * 0.5 + 0.5, 0.0, 1.0);
+        vec3 skyColor = mix(vec3(0.1, 0.2, 0.6), vec3(1.0, 1.0, 1.0), t);
+        FragColor = vec4(skyColor, 1.0);
     }
 }

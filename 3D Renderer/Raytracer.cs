@@ -15,11 +15,14 @@ class RayTracer : GameWindow
     Camera _camera;
     Vector2 _lastMousePos;
     bool _firstMouse = true;
+    private bool fullWindow = false;
 
     public RayTracer()
         : base(GameWindowSettings.Default, NativeWindowSettings.Default)
     {
+        Location = new Vector2i(400, 300);
         Size = new Vector2i(800, 600);
+        GL.Viewport(0, 0, 800, 600);
         Title = "Biological Simulation 3D Renderer";
     }
 
@@ -42,7 +45,7 @@ class RayTracer : GameWindow
                 (float)(rand.NextDouble() * 10 - 5),
                 (float)(rand.NextDouble() * 2 - 1),
                 (float)(rand.NextDouble() * 10 + 2));
-            _spheres.Add(new Sphere(pos, 0.3f));
+            _spheres.Add(new Sphere(pos, 0.3f, new Vector3(0.4f, 0.8f, 0.4f)));
         }
         
         //Uploads the list of spheres to the GPU using a SSBO
@@ -50,7 +53,9 @@ class RayTracer : GameWindow
         var sphereData = _spheres.Select(s => new Sphere
         {
             Center = s.Center,
-            Radius = s.Radius
+            Radius = s.Radius,
+            Color = s.Color,
+            Padding = s.Padding,
         }).ToArray();
 
         _sphereSSBO = GL.GenBuffer();
@@ -98,6 +103,25 @@ class RayTracer : GameWindow
         if (IsKeyDown(Keys.Escape))
             Close();
         
+        //Allow switching between fullscreen and windowed
+        if (IsKeyPressed(Keys.F))
+        {
+            if (!fullWindow)
+            {
+                Location = new Vector2i(0, 0);
+                Size = new Vector2i(1920, 1080); 
+                GL.Viewport(0, 0, 1920, 1080);
+            }
+            else
+            {
+                Location = new Vector2i(400, 300);
+                Size = new Vector2i(800, 600); 
+                GL.Viewport(0, 0, 800, 600);
+            }
+            
+            fullWindow = !fullWindow;
+        }
+        
         _camera.UpdateKeyboard(KeyboardState, (float)args.Time);
 
         var mouse = MouseState.Position;
@@ -135,6 +159,7 @@ class RayTracer : GameWindow
         GL.Uniform3(GL.GetUniformLocation(shader, "cameraFront"), _camera.Front);
         GL.Uniform3(GL.GetUniformLocation(shader, "cameraUp"), _camera.Up);
         GL.Uniform3(GL.GetUniformLocation(shader, "cameraRight"), _camera.Right);
+        GL.Uniform1(GL.GetUniformLocation(shader, "aspect"), Size.X / (float)Size.Y);
         
         GL.BindVertexArray(_quadVAO);
         GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
