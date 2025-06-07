@@ -1,6 +1,8 @@
 using System.Net.Mime;
 using System.Runtime.InteropServices;
 using _3D_Renderer;
+using BioSim;
+using BioSim.Simulation;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
@@ -9,8 +11,10 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 class RayTracer : GameWindow
 {
-    List<Sphere> _spheres = new List<Sphere>();
+    public Sphere[] Spheres;
     private int shader, _quadVAO, _sphereSSBO;
+    private int fileTimestampIndex = 0;
+    private string readFilePath = "../../../Past simulations/testing.txt";
     
     Camera _camera;
     Vector2 _lastMousePos;
@@ -37,35 +41,11 @@ class RayTracer : GameWindow
         GL.AttachShader(shader, vs);
         GL.AttachShader(shader, fs);
         GL.LinkProgram(shader);
-        
-        Random rand = new Random();
-        for (int i = 0; i < 500; i++)
-        {
-            var pos = new Vector3(
-                (float)(rand.NextDouble() * 10 - 5),
-                (float)(rand.NextDouble() * 2 - 1),
-                (float)(rand.NextDouble() * 10 + 2));
-            _spheres.Add(new Sphere(pos, 0.3f, new Vector3(0.4f, 0.8f, 0.4f)));
-        }
-        
+
         //Uploads the list of spheres to the GPU using a SSBO
         //Note this does currently not do live updates (that needs to be done with GL.BufferSubData)
-        var sphereData = _spheres.Select(s => new Sphere
-        {
-            Center = s.Center,
-            Radius = s.Radius,
-            Color = s.Color,
-            Padding = s.Padding,
-        }).ToArray();
-
         _sphereSSBO = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ShaderStorageBuffer, _sphereSSBO);
-        GL.BufferData(BufferTarget.ShaderStorageBuffer, 
-            sphereData.Length * Marshal.SizeOf<Sphere>(), 
-            sphereData, 
-            BufferUsageHint.DynamicDraw);
-        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, _sphereSSBO);
-
+        UpdateSphereBuffer();
         
         // Vertex data for a full screen quad
         float[] quadVertices = {
@@ -121,6 +101,19 @@ class RayTracer : GameWindow
             
             fullWindow = !fullWindow;
         }
+
+        if (IsKeyPressed(Keys.Left))
+        {
+            fileTimestampIndex--;
+            fileTimestampIndex = Math.Max(fileTimestampIndex, 0);
+            UpdateSphereBuffer();
+        }
+        if (IsKeyPressed(Keys.Right))
+        {
+            fileTimestampIndex++;
+            fileTimestampIndex = Math.Min(fileTimestampIndex, File.ReadLines(readFilePath).Count()-1);
+            UpdateSphereBuffer();
+        }
         
         _camera.UpdateKeyboard(KeyboardState, (float)args.Time);
 
@@ -146,13 +139,13 @@ class RayTracer : GameWindow
 
         GL.UseProgram(shader);
         
-        for (int i = 0; i < _spheres.Count; i++)
-        {
-            var sphere = _spheres[i];
-            GL.Uniform3(GL.GetUniformLocation(shader, $"spheres[{i}].center"), sphere.Center);
-            GL.Uniform1(GL.GetUniformLocation(shader, $"spheres[{i}].radius"), sphere.Radius);
-        }
-        GL.Uniform1(GL.GetUniformLocation(shader, "sphereCount"), _spheres.Count);
+        // for (int i = 0; i < Organisms.Length; i++)
+        // {
+        //     var sphere = Organisms[i];
+        //     GL.Uniform3(GL.GetUniformLocation(shader, $"spheres[{i}].center"), sphere.Center);
+        //     GL.Uniform1(GL.GetUniformLocation(shader, $"spheres[{i}].radius"), sphere.Radius);
+        // }
+        GL.Uniform1(GL.GetUniformLocation(shader, "sphereCount"), Spheres.Length);
 
         
         GL.Uniform3(GL.GetUniformLocation(shader, "cameraPos"), _camera.Position);
@@ -192,5 +185,35 @@ class RayTracer : GameWindow
             throw new Exception($"Shader compile error ({path}): {log}");
         }
         return shader;
+    }
+    
+    void UpdateSphereBuffer()
+    {
+        //Testing.txt uses the format specified in Simple graphical implementation.sln, if another system is used, then this must change as well to render it
+        Spheres = SimulationImporter.FromFileToObjectType<Sphere>(readFilePath, (string key, string contents) =>
+        {
+            Sphere sphere = new Sphere();
+            if (key == "A")
+            {
+                sphere.Color = new Vector3(0.4f, 0.8f, 0.4f); //Green
+            }
+            else if(key == "B")
+            {
+                sphere.Color = new Vector3(0.4f, 0.8f, 0.8f); //Yellow
+            }
+            sphere.Radius = 0.5f; //Does not change in our example
+            string[] values = contents.Split(' ');
+            sphere.Center = new Vector3(float.Parse(values[1]), float.Parse(values[2]), float.Parse(values[3]));
+            return sphere;
+        }, fileTimestampIndex);
+
+        GL.BindBuffer(BufferTarget.ShaderStorageBuffer, _sphereSSBO);
+
+        int bufferSize = Spheres.Length * Marshal.SizeOf<Sphere>();
+
+        // Resize buffer if needed
+        GL.BufferData(BufferTarget.ShaderStorageBuffer, bufferSize, Spheres, BufferUsageHint.DynamicDraw);
+
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, _sphereSSBO);
     }
 }

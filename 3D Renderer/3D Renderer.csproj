@@ -12,4 +12,12 @@
       <PackageReference Include="OpenTK" Version="4.9.4" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\BiologicalSimulation\BiologicalSimulation.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Past simulations\" />
+    </ItemGroup>
+
 </Project>
