@@ -11,7 +11,7 @@ public class RTree<T>(int m, int M)
     public List<T> Search(Mbb searchArea)
     {
         if (root == null)
-            throw new Exception("Tree is empty");
+            return [];
         List<T> results = [];
         root.Search(searchArea, ref results);
         return results;

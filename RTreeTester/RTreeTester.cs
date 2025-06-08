@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using BioSim.Datastructures;
 using Microsoft.Xna.Framework;
@@ -13,8 +14,8 @@ public class RTreeTester : Game
 {
     private const int screenWidth = 1920;
     private const int screenHeight = 1200;
-    private const int m = 2, M = 50;
-    private const float Scale = 0.01f;
+    private const int m = 2, M = 20;
+    private const float Scale = 0.0115f;
     private const int TestSize = 10;
     private Random random = new Random(33419680);
     private KeyboardState lastKeyState;
@@ -24,7 +25,8 @@ public class RTreeTester : Game
     private SpriteBatch _spriteBatch;
     private RTree<TestObject> rTree;
     private List<TestObject> list = [];
-    
+    private List<TestObject> searchResult = [];
+    private Mbb searchArea = new Mbb(new Vector3(0), new Vector3(0));
     public RTreeTester()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -64,11 +66,27 @@ public class RTreeTester : Game
         if (wrongParents > 0)
             throw new Exception("Wrong parents detected");
         
-        int size = 50000;
+        int size = 10000;
+        float spread = 50000;
         KeyboardState keyState = Keyboard.GetState();
+        if (keyState.IsKeyUp(Keys.S) && lastKeyState.IsKeyDown(Keys.S))
+        {
+            Vector3 minimum = new Vector3(spread * 0.5f);
+            Vector3 halfSize = new Vector3(spread * 0.05f);
+            searchArea = new Mbb(minimum - halfSize, minimum + halfSize);
+            searchResult = rTree.Search(searchArea);
+        }
+
+        if (keyState.IsKeyDown(Keys.Q))
+        {
+            float searchSizeMultiplier = 100f;
+            Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
+                random.NextSingle() * spread);
+            searchArea = new Mbb(pos, pos + new Vector3(TestSize * searchSizeMultiplier));
+            searchResult = rTree.Search(searchArea);
+        }
         if (keyState.IsKeyUp(Keys.A) && lastKeyState.IsKeyDown(Keys.A))
         {
-            float spread = 50000;
             Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
                 random.NextSingle() * spread);
             Mbb mbb = new Mbb(pos, pos + new Vector3(TestSize));
@@ -77,11 +95,10 @@ public class RTreeTester : Game
             list.Add(obj);
         }
 
-        if (keyState.IsKeyUp(Keys.Space) && lastKeyState.IsKeyDown(Keys.Space))
+        if (true)//keyState.IsKeyUp(Keys.Space) && lastKeyState.IsKeyDown(Keys.Space))
         {
             for (int i = 0; i < size; i++)
             {
-                float spread = 50000;
                 Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
                     random.NextSingle() * spread);
                 Mbb mbb = new Mbb(pos, pos + new Vector3(TestSize));
@@ -94,7 +111,6 @@ public class RTreeTester : Game
         {
             for (int i = 0; i < 270; i++)
             {
-                float spread = 50000;
                 Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
                     random.NextSingle() * spread);
                 Mbb mbb = new Mbb(pos, pos + new Vector3(TestSize));
@@ -137,7 +153,6 @@ public class RTreeTester : Game
                     random = new Random(randomSeed);
                     for (int i = 0; i < size; i++)
                     {
-                        float spread = 50000;
                         Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
                             random.NextSingle() * spread);
                         Mbb mbb = new Mbb(pos, pos + new Vector3(TestSize));
@@ -168,7 +183,6 @@ public class RTreeTester : Game
             {
                 for (int i = 0; i < size; i++)
                 {
-                    float spread = 50000;
                     Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
                         random.NextSingle() * spread);
                     Mbb mbb = new Mbb(pos, pos + new Vector3(TestSize));
@@ -186,9 +200,12 @@ public class RTreeTester : Game
             }
             Exit();
         }
-        if (keyState.IsKeyUp(Keys.L) && lastKeyState.IsKeyDown(Keys.L))
+        if (true)//keyState.IsKeyUp(Keys.L) && lastKeyState.IsKeyDown(Keys.L))
         {
-            for (int sim = 0; sim < 60; sim++)
+            int iterations = 100000;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            for (int sim = 0; sim < iterations; sim++)
             {
                 for (int i = 0; i < currentN; i++)
                 {
@@ -196,7 +213,153 @@ public class RTreeTester : Game
                     rTree.Insert(list[i]);
                 }
             }
+            Console.WriteLine("Total time: " + sw.Elapsed);
+            Console.WriteLine("Time per cycle: " + sw.Elapsed / iterations);
+            
             Exit();
+        }
+
+        if (keyState.IsKeyUp(Keys.B) && lastKeyState.IsKeyDown(Keys.B))
+        {
+            List<(int, int)> bestCombs = [];
+            for (int retry = 0; retry < 100; retry++)
+            {
+                (int, int) bestComb = (0, 0);
+                double bestTime = float.MaxValue;
+                for (int M = 4; M < 84; M += 4)
+                {
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+                    rTree = new RTree<TestObject>(M / 2, M);
+                    for (int i = 0; i < size; i++)
+                    {
+                        Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
+                            random.NextSingle() * spread);
+                        Mbb mbb = new Mbb(pos, pos + new Vector3(TestSize));
+                        TestObject obj = new TestObject(currentN++, mbb);
+                        rTree.Insert(obj);
+                        list.Add(obj);
+                    }
+
+                    for (int i = 0; i < size && currentN > 0; i++)
+                    {
+                        rTree.Delete(list[--currentN]);
+                        //list.Remove(list[currentN]);
+                    }
+
+                    list = [];
+                    sw.Stop();
+                    if (sw.Elapsed.TotalSeconds < bestTime)
+                    {
+                        bestTime = sw.Elapsed.TotalSeconds;
+                        bestComb = (M / 2, M);
+                    }
+
+                    sw.Restart();
+                    rTree = new RTree<TestObject>(2, M);
+                    for (int i = 0; i < size; i++)
+                    {
+                        Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
+                            random.NextSingle() * spread);
+                        Mbb mbb = new Mbb(pos, pos + new Vector3(TestSize));
+                        TestObject obj = new TestObject(currentN++, mbb);
+                        rTree.Insert(obj);
+                        list.Add(obj);
+                    }
+
+                    for (int i = 0; i < size && currentN > 0; i++)
+                    {
+                        rTree.Delete(list[--currentN]);
+                        //list.Remove(list[currentN]);
+                    }
+
+                    list = [];
+                    sw.Stop();
+                    if (sw.Elapsed.TotalSeconds < bestTime)
+                    {
+                        bestTime = sw.Elapsed.TotalSeconds;
+                        bestComb = (2, M);
+                    }
+                }
+                Console.Write(bestComb);
+                Console.WriteLine(" " + bestTime);
+                bestCombs.Add(bestComb);
+            }
+            Console.WriteLine("Best: " + bestCombs.GroupBy(n => n)
+                .OrderByDescending(g => g.Count())
+                .First()
+                .Key);
+        }
+        if (keyState.IsKeyUp(Keys.C) && lastKeyState.IsKeyDown(Keys.C))
+        {
+            List<(int, int)> bestCombs = [];
+            for (int retry = 0; retry < 100; retry++)
+            {
+                (int, int) bestComb = (0, 0);
+                double bestTime = float.MaxValue;
+                for (int M = 4; M < 84; M += 4)
+                {
+                    Stopwatch sw = new Stopwatch();
+                    currentN = 0;
+                    rTree = new RTree<TestObject>(M / 2, M);
+                    for (int i = 0; i < size; i++)
+                    {
+                        Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
+                            random.NextSingle() * spread);
+                        Mbb mbb = new Mbb(pos, pos + new Vector3(TestSize));
+                        TestObject obj = new TestObject(currentN++, mbb);
+                        rTree.Insert(obj);
+                        list.Add(obj);
+                    }
+                    sw.Start();
+                    for (int i = 0; i < currentN; i++)
+                    {
+                        rTree.Delete(list[i]);
+                        rTree.Insert(list[i]);
+                    }
+                    list = [];
+                    
+                    sw.Stop();
+                    if (sw.Elapsed.TotalSeconds < bestTime)
+                    {
+                        bestTime = sw.Elapsed.TotalSeconds;
+                        bestComb = (M / 2, M);
+                    }
+
+                    currentN = 0;
+                    rTree = new RTree<TestObject>(2, M);
+                    for (int i = 0; i < size; i++)
+                    {
+                        Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
+                            random.NextSingle() * spread);
+                        Mbb mbb = new Mbb(pos, pos + new Vector3(TestSize));
+                        TestObject obj = new TestObject(currentN++, mbb);
+                        rTree.Insert(obj);
+                        list.Add(obj);
+                    }
+
+                    sw.Restart();
+                    for (int i = 0; i < currentN; i++)
+                    {
+                        rTree.Delete(list[i]);
+                        rTree.Insert(list[i]);
+                    }
+                    list = [];
+                    sw.Stop();
+                    if (sw.Elapsed.TotalSeconds < bestTime)
+                    {
+                        bestTime = sw.Elapsed.TotalSeconds;
+                        bestComb = (2, M);
+                    }
+                }
+                Console.Write(bestComb);
+                Console.WriteLine(" " + bestTime);
+                bestCombs.Add(bestComb);
+            }
+            Console.WriteLine("Best: " + bestCombs.GroupBy(n => n)
+                .OrderByDescending(g => g.Count())
+                .First()
+                .Key);
         }
         
         lastKeyState = keyState;
@@ -224,7 +387,18 @@ public class RTreeTester : Game
         
         //draw graph representation.
         DrawNode(rTree.Root, 0, 0, Vector2.Zero);
-        
+
+        //draw search query
+        DrawMbb(searchArea, Color.Red, 2);
+        foreach (var testObject in searchResult)
+        {
+            float scale = 30f;
+            float halfScale = scale / 2f;
+            Vector3 seperation = testObject.Mbb.Maximum - testObject.Mbb.Minimum;
+            Mbb drawMbb = new Mbb(testObject.Mbb.Minimum - seperation * halfScale,
+                testObject.Mbb.Maximum + seperation * halfScale);
+            DrawMbb(drawMbb, Color.Red, 2);
+        }
         
         // TODO: Add your drawing code here
         _spriteBatch.End();
@@ -242,12 +416,23 @@ public class RTreeTester : Game
         if (node is RLeafNode<TestObject>)
         {
             //draw 
-            DrawRectangle(drawPos - halfSize, drawPos + halfSize, Color.Green);
+            Color color = Color.Green;
+            float searchSizeMultiplier = 1f;
+            foreach (var testObject in searchResult)
+            {
+                if (((RLeafNode<TestObject>)node).LeafEntries.Contains(testObject))
+                {
+                    color = Color.Red;
+                    searchSizeMultiplier = 1.4f;
+                }
+            }
+            DrawRectangle(drawPos - halfSize * searchSizeMultiplier, drawPos + halfSize * searchSizeMultiplier, color);
         }
         else
         {
             //draw node
-            DrawRectangle(drawPos - halfSize, drawPos + halfSize, Color.White);
+            Color color = Color.White;
+            DrawRectangle(drawPos - halfSize, drawPos + halfSize, color);
             RNonLeafNode<TestObject> nonLeaf = (RNonLeafNode<TestObject>)node;
             for(int i = 0; i < nonLeaf.Children.Count; i++)
             {
@@ -272,10 +457,10 @@ public class RTreeTester : Game
         Vector2 topRight = new Vector2(maximum.X, maximum.Y);
         Vector2 bottomLeft = new Vector2(minimum.X, minimum.Y);
         Vector2 bottomRight = new Vector2(maximum.X, minimum.Y);
-        DrawLine(topLeft, topRight, color);
-        DrawLine(topRight, bottomRight, color);
-        DrawLine(bottomRight, bottomLeft, color);
-        DrawLine(bottomLeft, topLeft, color);
+        DrawLine(topLeft, topRight, color, thickness);
+        DrawLine(topRight, bottomRight, color, thickness);
+        DrawLine(bottomRight, bottomLeft, color, thickness);
+        DrawLine(bottomLeft, topLeft, color, thickness);
     }
 
     void DrawLine(Vector2 point1, Vector2 point2, Microsoft.Xna.Framework.Color color, int thickness = 1)
