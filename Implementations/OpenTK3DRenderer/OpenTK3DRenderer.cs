@@ -2,7 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using BioSim;
+using BioSim.Datastructures;
 using BioSim.Simulation;
+using Implementations;
 using Implementations.OpenTK3DRenderer;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Graphics.OpenGL4;
@@ -10,8 +13,12 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-class OpenTK3DRenderer : GameWindow
+class OpenTK3DRenderer : GameWindow, IProgramMedium
 {
+    public Simulation Simulation { get; set; }
+    public World World { get; set; }
+    public DataStructure DataStructure { get; set; }
+    
     public Sphere[] Spheres;
     private int shader, _quadVAO, _sphereSSBO;
     private int fileTimestampIndex = 0;
@@ -215,5 +222,20 @@ class OpenTK3DRenderer : GameWindow
         GL.BufferData(BufferTarget.ShaderStorageBuffer, bufferSize, Spheres, BufferUsageHint.DynamicDraw);
 
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, _sphereSSBO);
+    }
+    
+    public void StartProgram()
+    {
+        Run();
+    }
+
+    public void StopProgram()
+    {
+        Close();
+    }
+
+    public void DrawCall()
+    {
+        throw new NotImplementedException();
     }
 }

@@ -11,5 +11,4 @@ public interface IProgramMedium
     public DataStructure DataStructure { get; set; }
     public void StartProgram();
     public void StopProgram();
-    public void DrawCall();
 }

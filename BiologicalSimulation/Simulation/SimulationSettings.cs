@@ -9,16 +9,6 @@ public partial class Simulation
     {
         this.dataStructure = dataStructure;
     }
-
-    public void SetDrawFrequency(int ticksPerDrawCall)
-    {
-        if (ticksPerDrawCall <= 0)
-        {
-            throw new ArgumentException("Ticks per draw call must be greater than zero.");
-        }
-        
-        this.ticksPerDrawCall = ticksPerDrawCall;
-    }
     
     public void SetFileWriteFrequency(int ticksPerFileWrite)
     {

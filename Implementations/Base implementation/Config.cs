@@ -26,10 +26,6 @@ public class Config
         GrowthGrid.Initialize(new Vector3(-worldHalfSize), 
             new Vector3(worldHalfSize), new Vector3(0.5f));
         
-        //Decide if you want draw calls to be made and how often (this may not be necessary for every type of program medium
-        simulation.DrawingEnabled = true;
-        simulation.SetDrawFrequency(1);
-        
         //Decide if, and when, to save the contents of the simulation to a file
         simulation.FileWritingEnabled = false;
         simulation.SetFileWriteFrequency(100);

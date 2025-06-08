@@ -9,10 +9,8 @@ public partial class Simulation
     private Random random;
     private bool abort;
     public int Tick { get; private set; } //The current tick we are on
-    public bool DrawingEnabled { get; set; }
     public bool FileWritingEnabled { get; set; }
     public bool WriteToSameFile { get; set; }
-    private int ticksPerDrawCall;
     private int ticksPerFileWrite;
     
     private SimulationExporter simulationExporter;
@@ -20,10 +18,6 @@ public partial class Simulation
     //This event happens at the end of every tick
     public delegate void OnTickEventHandler(World world);
     public event OnTickEventHandler? OnTick;
-    
-    //This event happens at depending on if it is turned on and if it's frequency, basically a lesser called OnTick
-    public delegate void OnDrawEventHandler(World world);
-    public event OnDrawEventHandler? OnDraw;
     
     //This event happens at depending on if it is turned on and if it's frequency, basically a lesser called OnTick
     public delegate void OnFileWriteEventHandler(string filePath, string fileContents);
@@ -40,9 +34,7 @@ public partial class Simulation
         dataStructure = new NoDataStructure(); //Default data structure has no optimizations
         abort = false;
         Tick = 0;
-        DrawingEnabled = false;
         FileWritingEnabled = true;
-        ticksPerDrawCall = 0;
         ticksPerFileWrite = 0;
         simulationExporter = new SimulationExporter();
         
@@ -78,12 +70,6 @@ public partial class Simulation
         dataStructure.Step();
         world.Step();
         OnTick?.Invoke(world);
-
-        //Invoke OnDraw if it has been a set amount of ticks
-        if (DrawingEnabled && Tick % ticksPerDrawCall == 0)
-        {
-            OnDraw?.Invoke(world);
-        }
 
         //Save file and invoke event letting know that it happened
         if (FileWritingEnabled && Tick % ticksPerFileWrite == 0)

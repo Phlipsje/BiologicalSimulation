@@ -44,7 +44,6 @@ public class Main : IDisposable
         Simulation.SetDataStructure(DataStructure);
         
         Simulation.OnEnd += StopProgram;
-        Simulation.OnDraw += OnDrawCall;
         
         OrganismACount = 0;
         OrganismBCount = 0;
@@ -55,11 +54,6 @@ public class Main : IDisposable
     {
         //Simulation has already stopped before this
         ProgramMedium.StopProgram();
-    }
-
-    private void OnDrawCall(World world)
-    {
-        ProgramMedium.DrawCall();
     }
     
     public void Dispose()
