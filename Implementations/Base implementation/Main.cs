@@ -1,9 +1,8 @@
 using System;
+using System.Numerics;
 using BioSim;
 using BioSim.Datastructures;
 using BioSim.Simulation;
-using Microsoft.Xna.Framework;
-using Vector3  = System.Numerics.Vector3;
 
 namespace Implementations;
 
@@ -42,8 +41,6 @@ public class Main : IDisposable
         dataStructure = new MultithreadedChunk3DFixedDataStructure(new Vector3(-worldHalfSize), 
             new Vector3(worldHalfSize), 4f, organismSize);
         world = new TestWorld(dataStructure, simulation, worldHalfSize);
-        //TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
-        //OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
         simulation.CreateSimulation(world, random);
         simulation.SetDataStructure(dataStructure);
         simulation.DrawingEnabled = true;
