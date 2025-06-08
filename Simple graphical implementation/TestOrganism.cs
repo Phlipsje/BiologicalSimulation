@@ -18,7 +18,7 @@ public class TestOrganism : VisualOrganism
     public override Color Color => Color.Green;
     public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
-        VisualSimulation.OrganismACount++;
+        Main.OrganismACount++;
         GrowthRate = random.NextSingle(); //Between 0 and 1
         Resources = 0;
         BB1 = 0;

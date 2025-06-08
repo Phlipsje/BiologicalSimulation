@@ -20,7 +20,7 @@ namespace Simple_graphical_implementation;
 /// This project contains a visual implementation of the biological simulation library.
 /// Used to test visually test that everything works as intended.
 /// </summary>
-public class VisualSimulation : Game
+public class VisualSimulation : Game, IProgramMedium
 {
     private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
@@ -31,15 +31,9 @@ public class VisualSimulation : Game
     private bool updateDrawnImage = true;
 
     public static Color BackgroundColor = Color.CornflowerBlue;
-
-    private World world;
-    private Simulation simulation;
     private ViewingInformation viewingInformation;
-    public new int Tick => simulation.Tick;
 
-    //Easiest way to implement global counter, not most safe way of doing it
-    public static int OrganismACount = 0;
-    public static int OrganismBCount = 0;
+    
     
     //For tracking fps performance
     public static float AverageFps { get; private set; }
@@ -57,6 +51,15 @@ public class VisualSimulation : Game
 
         IsFixedTimeStep = false;
         AverageFps = 60;
+    }
+
+    public Simulation Simulation { get; set; }
+    public World World { get; set; }
+    public DataStructure DataStructure { get; set; }
+
+    public void StartProgram()
+    {
+        Run();
     }
 
     protected override void Initialize()
@@ -89,37 +92,7 @@ public class VisualSimulation : Game
         renderManager.Draw = false;
         renderManager.LoadContent(Content);
         
-        simulation = new Simulation();
-        Random random = new Random(); //Can enter seed here
-        float worldHalfSize = 12f;
-        float organismSize = 0.5f;
-        DataStructure dataStructure = new MultithreadedChunk3DFixedDataStructure(new Vector3(-worldHalfSize), 
-            new Vector3(worldHalfSize), 4f, organismSize);
-        world = new TestWorld(dataStructure, simulation, worldHalfSize);
-        //TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
-        //OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
-        simulation.CreateSimulation(world, random);
-        simulation.SetDataStructure(dataStructure);
-        simulation.DrawingEnabled = true;
-        simulation.SetDrawFrequency(1);
         
-        //For saving to file
-        simulation.FileWritingEnabled = true;
-        simulation.WriteToSameFile = true;
-        simulation.SetFileWriteFrequency(100);
-        SimulationExporter.FileName = "testing";
-        SimulationExporter.SaveDirectory = "Content\\Testing";
-        SimulationExporter.ShowExportFilePath = true;
-        SimulationExporter.ClearDirectory = true;
-
-        simulation.OnDraw += OnDrawCall;
-        simulation.OnEnd += StopProgram;
-        
-        OrganismACount = 0;
-        OrganismBCount = 0;
-        GrowthGrid.Initialize(new Vector3(-worldHalfSize), 
-            new Vector3(worldHalfSize), new Vector3(0.5f));
-        simulation.StartSimulation();
     }
 
     protected override void Update(GameTime gameTime)
@@ -127,7 +100,7 @@ public class VisualSimulation : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
         {
-            simulation.AbortSimulation();
+            Simulation.AbortSimulation();
             Exit();
         }
         
@@ -146,7 +119,7 @@ public class VisualSimulation : Game
         //Now can write average fps in render manager
         #endregion
 
-        simulation.Step();
+        Simulation.Step();
         GrowthGrid.Step();
         
         base.Update(gameTime);
@@ -159,22 +132,27 @@ public class VisualSimulation : Game
         
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        renderManager.Render(spriteBatch, world, viewingInformation);
+        renderManager.Render(spriteBatch, World, viewingInformation);
         
         updateDrawnImage = false;
         
         base.Draw(gameTime);
     }
-
-    private void OnDrawCall(World world)
-    {
-        updateDrawnImage = true;
-    }
-
+    
     private void StopProgram(World world)
     {
         //Simulation has already stopped before this
         Exit();
+    }
+
+    public void StopProgram()
+    {
+        Exit();
+    }
+
+    public void DrawCall()
+    {
+        updateDrawnImage = true;
     }
 }
 

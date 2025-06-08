@@ -1,2 +1,3 @@
-﻿using var game = new Simple_graphical_implementation.VisualSimulation();
-game.Run();
+﻿using Simple_graphical_implementation;
+
+using var program = new Main();
