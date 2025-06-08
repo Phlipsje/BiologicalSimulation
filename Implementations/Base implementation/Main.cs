@@ -43,6 +43,7 @@ public class Main : IDisposable
         Simulation.SetDataStructure(DataStructure);
         
         Simulation.OnEnd += StopProgram;
+        Simulation.OnFileWrite += FileWriten;
         
         OrganismACount = 0;
         OrganismBCount = 0;
@@ -53,6 +54,11 @@ public class Main : IDisposable
     {
         //Simulation has already stopped before this
         ProgramMedium.StopProgram();
+    }
+
+    private void FileWriten(string filePath, string fileContents)
+    {
+        ProgramMedium.FileWriten(filePath, fileContents);
     }
     
     public void Dispose()

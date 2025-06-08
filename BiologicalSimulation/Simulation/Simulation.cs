@@ -11,7 +11,7 @@ public partial class Simulation
     public int Tick { get; private set; } = 0; //The current tick we are on
     public bool FileWritingEnabled { get; set; } = false;
     public bool WriteToSameFile { get; set; } = false;
-    private int ticksPerFileWrite = 0;
+    public int TicksPerFileWrite = 0;
     
     private SimulationExporter simulationExporter;
     
@@ -68,7 +68,7 @@ public partial class Simulation
         OnTick?.Invoke(world);
 
         //Save file and invoke event letting know that it happened
-        if (FileWritingEnabled && Tick % ticksPerFileWrite == 0)
+        if (FileWritingEnabled && Tick % TicksPerFileWrite == 0)
         {
             (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(world, this) : simulationExporter.SaveToSeparateFiles(world, this);
             OnFileWrite?.Invoke(filePath, fileContents);

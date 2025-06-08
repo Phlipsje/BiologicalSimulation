@@ -216,4 +216,9 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
     {
         Close();
     }
+
+    public void FileWriten(string filePath, string fileContents)
+    {
+        //Nothing to do
+    }
 }

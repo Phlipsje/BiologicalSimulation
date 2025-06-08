@@ -1,6 +1,7 @@
 using System.Numerics;
 using BioSim.Datastructures;
 using BioSim.Simulation;
+using Implementations.Console_implementation;
 
 namespace Implementations;
 
@@ -38,6 +39,6 @@ public class Config
         SimulationExporter.ShowExportFilePath = true;
         
         //Choose in what form the simulation is run (this decides if you get a Console view, 2D view or 3D view)
-        Main.ProgramMedium = new Monogame2DRenderer();
+        Main.ProgramMedium = new ConsoleApp();
     }
 }

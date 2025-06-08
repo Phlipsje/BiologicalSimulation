@@ -17,6 +17,6 @@ public partial class Simulation
             throw new ArgumentException("Ticks per draw call must be greater than zero.");
         }
         
-        this.ticksPerFileWrite = ticksPerFileWrite;
+        this.TicksPerFileWrite = ticksPerFileWrite;
     }
 }

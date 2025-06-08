@@ -141,6 +141,11 @@ public class Monogame2DRenderer : Game, IProgramMedium
     {
         Exit();
     }
+
+    public void FileWriten(string filePath, string fileContents)
+    {
+        //Nothing to do
+    }
 }
 
 public class ViewingInformation
