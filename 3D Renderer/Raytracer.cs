@@ -43,7 +43,6 @@ class RayTracer : GameWindow
         GL.LinkProgram(shader);
 
         //Uploads the list of spheres to the GPU using a SSBO
-        //Note this does currently not do live updates (that needs to be done with GL.BufferSubData)
         _sphereSSBO = GL.GenBuffer();
         UpdateSphereBuffer();
         
