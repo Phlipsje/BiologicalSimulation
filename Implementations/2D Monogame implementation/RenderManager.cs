@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BioSim;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -38,10 +39,12 @@ public class RenderManager
     {
         if (Draw)
         {
+            Organism[] organisms = world.GetOrganisms().ToArray();
+            
             //First let every render target be formed
             foreach (Renderer renderer in renderers)
             {
-                renderer.Render(graphicsDevice, spriteBatch, world, viewingInformation);
+                renderer.Render(graphicsDevice, spriteBatch, organisms, viewingInformation);
             } 
         }
         

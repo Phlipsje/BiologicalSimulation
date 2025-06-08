@@ -58,7 +58,7 @@ public class Renderer
         font = content.Load<SpriteFont>("Font");
     }
 
-    public void Render(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, World world, ViewingInformation viewingInformation)
+    public void Render(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, Organism[] organisms, ViewingInformation viewingInformation)
     {
         //Tell buffer we are drawing to a render target
         graphicsDevice.SetRenderTarget(RenderTarget);
@@ -69,7 +69,7 @@ public class Renderer
         //Start a new buffer to draw to
         spriteBatch.Begin();
 
-        IEnumerable<Organism> organisms = world.GetOrganisms();
+        
         foreach (Organism visualOrganism in organisms)
         {
             var organism = (VisualOrganism)visualOrganism;

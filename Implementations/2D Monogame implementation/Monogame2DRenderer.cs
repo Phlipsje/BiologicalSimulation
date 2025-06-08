@@ -88,10 +88,8 @@ public class Monogame2DRenderer : Game, IProgramMedium
                 ViewDirection.XZPlane, new Rectangle(0, sizeY, sizeX, sizeY))
         });
         renderManager.DrawBorders = true;
-        renderManager.Draw = false;
+        renderManager.Draw = true;
         renderManager.LoadContent(Content);
-        
-        
     }
 
     protected override void Update(GameTime gameTime)
