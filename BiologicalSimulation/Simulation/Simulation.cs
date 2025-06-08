@@ -7,11 +7,11 @@ public partial class Simulation
     private World world;
     private DataStructure dataStructure;
     private Random random;
-    private bool abort;
-    public int Tick { get; private set; } //The current tick we are on
-    public bool FileWritingEnabled { get; set; }
-    public bool WriteToSameFile { get; set; }
-    private int ticksPerFileWrite;
+    private bool abort = false;
+    public int Tick { get; private set; } = 0; //The current tick we are on
+    public bool FileWritingEnabled { get; set; } = false;
+    public bool WriteToSameFile { get; set; } = false;
+    private int ticksPerFileWrite = 0;
     
     private SimulationExporter simulationExporter;
     
@@ -32,10 +32,6 @@ public partial class Simulation
         this.world = world;
         this.random = random;
         dataStructure = new NoDataStructure(); //Default data structure has no optimizations
-        abort = false;
-        Tick = 0;
-        FileWritingEnabled = true;
-        ticksPerFileWrite = 0;
         simulationExporter = new SimulationExporter();
         
         //Sets culture to US-English, specific language does not matter, but because we set this, using float.Parse and writing floats to file always use '.' as decimal point.

@@ -29,12 +29,11 @@ public class Main : IDisposable
         config.Setup();
         
         Initialize();
-
-        ProgramMedium = new Monogame2DRenderer();
+        
         ProgramMedium.Simulation = Simulation;
         ProgramMedium.DataStructure = DataStructure;
         ProgramMedium.World = World;
-        ((Monogame2DRenderer)ProgramMedium).Run();
+        ProgramMedium.StartProgram();
     }
 
     public void Initialize()

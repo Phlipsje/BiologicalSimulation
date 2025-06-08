@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 using BioSim;
 using BioSim.Datastructures;
 using BioSim.Simulation;
-using Implementations;
-using Implementations.OpenTK3DRenderer;
-using OpenTK.Windowing.Desktop;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+
+namespace Implementations.OpenTK3DRenderer;
 
 class OpenTK3DRenderer : GameWindow, IProgramMedium
 {
@@ -21,8 +21,6 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
     
     public Sphere[] Spheres;
     private int shader, _quadVAO, _sphereSSBO;
-    private int fileTimestampIndex = 0;
-    private string readFilePath = "../../../Past simulations/testing.txt";
     
     Camera _camera;
     Vector2 _lastMousePos;
@@ -32,6 +30,7 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
     public OpenTK3DRenderer()
         : base(GameWindowSettings.Default, NativeWindowSettings.Default)
     {
+        //Set window settings
         Location = new Vector2i(400, 300);
         Size = new Vector2i(800, 600);
         GL.Viewport(0, 0, 800, 600);
@@ -44,8 +43,8 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
         
         // Compile shaders
         shader = GL.CreateProgram();
-        int vs = CompileShader(ShaderType.VertexShader, "../../../Shaders/shader.vert");
-        int fs = CompileShader(ShaderType.FragmentShader, "../../../Shaders/shader.frag");
+        int vs = CompileShader(ShaderType.VertexShader, "../../../OpenTK3DRenderer/Shaders/shader.vert");
+        int fs = CompileShader(ShaderType.FragmentShader, "../../../OpenTK3DRenderer/Shaders/shader.frag");
         GL.AttachShader(shader, vs);
         GL.AttachShader(shader, fs);
         GL.LinkProgram(shader);
@@ -54,11 +53,11 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
         _sphereSSBO = GL.GenBuffer();
         UpdateSphereBuffer();
         
-        // Vertex data for a full screen quad
+        // Vertex data for a full screen quad (used so that we have a screen)
         float[] quadVertices = {
             -1f, -1f,
-             1f, -1f,
-             1f,  1f,
+            1f, -1f,
+            1f,  1f,
             -1f,  1f
         };
         uint[] indices = { 0, 1, 2, 2, 3, 0 };
@@ -79,6 +78,7 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
         GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
         
         _camera = new Camera(new Vector3(0, 0, -3));
+        //This means that your cursor is used by the program (so you can't move it around anymore)
         CursorState = CursorState.Grabbed;
     }
 
@@ -86,9 +86,22 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
     {
         base.OnUpdateFrame(args);
         
+        HandleInput(args);
+        
+        Simulation.Step();
+        GrowthGrid.Step();
+        
+        UpdateSphereBuffer();
+    }
+
+    private void HandleInput(FrameEventArgs args)
+    {
         //Exit program on escape press
         if (IsKeyDown(Keys.Escape))
+        {
+            Simulation.AbortSimulation();
             Close();
+        }
         
         //Allow switching between fullscreen and windowed
         if (IsKeyPressed(Keys.F))
@@ -107,19 +120,6 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
             }
             
             fullWindow = !fullWindow;
-        }
-
-        if (IsKeyPressed(Keys.Left))
-        {
-            fileTimestampIndex--;
-            fileTimestampIndex = Math.Max(fileTimestampIndex, 0);
-            UpdateSphereBuffer();
-        }
-        if (IsKeyPressed(Keys.Right))
-        {
-            fileTimestampIndex++;
-            fileTimestampIndex = Math.Min(fileTimestampIndex, File.ReadLines(readFilePath).Count()-1);
-            UpdateSphereBuffer();
         }
         
         _camera.UpdateKeyboard(KeyboardState, (float)args.Time);
@@ -146,14 +146,7 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
 
         GL.UseProgram(shader);
         
-        // for (int i = 0; i < Organisms.Length; i++)
-        // {
-        //     var sphere = Organisms[i];
-        //     GL.Uniform3(GL.GetUniformLocation(shader, $"spheres[{i}].center"), sphere.Center);
-        //     GL.Uniform1(GL.GetUniformLocation(shader, $"spheres[{i}].radius"), sphere.Radius);
-        // }
         GL.Uniform1(GL.GetUniformLocation(shader, "sphereCount"), Spheres.Length);
-
         
         GL.Uniform3(GL.GetUniformLocation(shader, "cameraPos"), _camera.Position);
         GL.Uniform3(GL.GetUniformLocation(shader, "cameraFront"), _camera.Front);
@@ -196,23 +189,13 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
     
     void UpdateSphereBuffer()
     {
-        //Testing.txt uses the format specified in Implementations.sln, if another system is used, then this must change as well to render it
-        Spheres = SimulationImporter.FromFileToObjectType<Sphere>(readFilePath, (string key, string contents) =>
+        Spheres = World.GetOrganisms().Select(o =>
         {
-            Sphere sphere = new Sphere();
-            if (key == "A")
-            {
-                sphere.Color = new Vector3(0.4f, 0.8f, 0.4f); //Green
-            }
-            else if(key == "B")
-            {
-                sphere.Color = new Vector3(0.4f, 0.8f, 0.8f); //Yellow
-            }
-            sphere.Radius = 0.5f; //Does not change in our example
-            string[] values = contents.Split(' ');
-            sphere.Center = new Vector3(float.Parse(values[1]), float.Parse(values[2]), float.Parse(values[3]));
+            Vector3 pos = new Vector3(o.Position.X, o.Position.Y, o.Position.Z);
+            Vector3 color = o is TestOrganism ? new Vector3(0.4f, 0.8f, 0.4f) : new Vector3(0.4f, 0.8f, 0.8f);
+            Sphere sphere = new Sphere(pos, o.Size, color);
             return sphere;
-        }, fileTimestampIndex);
+        }).ToArray();
 
         GL.BindBuffer(BufferTarget.ShaderStorageBuffer, _sphereSSBO);
 
@@ -232,10 +215,5 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
     public void StopProgram()
     {
         Close();
-    }
-
-    public void DrawCall()
-    {
-        throw new NotImplementedException();
     }
 }

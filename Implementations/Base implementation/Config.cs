@@ -36,5 +36,8 @@ public class Config
         SimulationExporter.ClearDirectory = true;
         //This is a small debug to show the user where the save file is located
         SimulationExporter.ShowExportFilePath = true;
+        
+        //Choose in what form the simulation is run (this decides if you get a Console view, 2D view or 3D view)
+        Main.ProgramMedium = new OpenTK3DRenderer.OpenTK3DRenderer();
     }
 }
