@@ -11,11 +11,11 @@ namespace Implementations;
 /// </summary>
 public class Main : IDisposable
 {
-    private static World world;
-    private static DataStructure dataStructure;
-    private static Simulation simulation;
-    private static IProgramMedium programMedium;
-    public static int Tick => simulation.Tick;
+    public static World World;
+    public static DataStructure DataStructure;
+    public static Simulation Simulation;
+    public static IProgramMedium ProgramMedium;
+    public static int Tick => Simulation.Tick;
 
     //Easiest way to implement global counter, not most safe way of doing it
     public static int OrganismACount = 0;
@@ -23,57 +23,43 @@ public class Main : IDisposable
 
     public Main()
     {
+        Simulation = new Simulation();
+        
+        Config config = new Config();
+        config.Setup();
+        
         Initialize();
 
-        programMedium = new Monogame2DRenderer();
-        programMedium.Simulation = simulation;
-        programMedium.DataStructure = dataStructure;
-        programMedium.World = world;
-        ((Monogame2DRenderer)programMedium).Run();
+        ProgramMedium = new Monogame2DRenderer();
+        ProgramMedium.Simulation = Simulation;
+        ProgramMedium.DataStructure = DataStructure;
+        ProgramMedium.World = World;
+        ((Monogame2DRenderer)ProgramMedium).Run();
     }
 
     public void Initialize()
     {
-        simulation = new Simulation();
         Random random = new Random(); //Can enter seed here
-        float worldHalfSize = 12f;
-        float organismSize = 0.5f;
-        dataStructure = new MultithreadedChunk3DFixedDataStructure(new Vector3(-worldHalfSize), 
-            new Vector3(worldHalfSize), 4f, organismSize);
-        world = new TestWorld(dataStructure, simulation, worldHalfSize);
-        simulation.CreateSimulation(world, random);
-        simulation.SetDataStructure(dataStructure);
-        simulation.DrawingEnabled = true;
-        simulation.SetDrawFrequency(1);
+        Simulation.CreateSimulation(World, random);
+        Simulation.SetDataStructure(DataStructure);
         
-        //For saving to file
-        simulation.FileWritingEnabled = true;
-        simulation.WriteToSameFile = true;
-        simulation.SetFileWriteFrequency(100);
-        SimulationExporter.FileName = "testing";
-        SimulationExporter.SaveDirectory = "Content\\Testing";
-        SimulationExporter.ShowExportFilePath = true;
-        SimulationExporter.ClearDirectory = true;
-        
-        simulation.OnEnd += StopProgram;
-        simulation.OnDraw += OnDrawCall;
+        Simulation.OnEnd += StopProgram;
+        Simulation.OnDraw += OnDrawCall;
         
         OrganismACount = 0;
         OrganismBCount = 0;
-        GrowthGrid.Initialize(new Vector3(-worldHalfSize), 
-            new Vector3(worldHalfSize), new Vector3(0.5f));
-        simulation.StartSimulation();
+        Simulation.StartSimulation();
     }
     
     private void StopProgram(World world)
     {
         //Simulation has already stopped before this
-        programMedium.StopProgram();
+        ProgramMedium.StopProgram();
     }
 
     private void OnDrawCall(World world)
     {
-        programMedium.DrawCall();
+        ProgramMedium.DrawCall();
     }
     
     public void Dispose()
