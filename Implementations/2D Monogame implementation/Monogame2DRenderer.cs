@@ -20,7 +20,7 @@ namespace Implementations;
 /// This project contains a visual implementation of the biological simulation library.
 /// Used to test visually test that everything works as intended.
 /// </summary>
-public class VisualSimulation : Game, IProgramMedium
+public class Monogame2DRenderer : Game, IProgramMedium
 {
     private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
@@ -41,7 +41,7 @@ public class VisualSimulation : Game, IProgramMedium
     private int fpsCounter;
     private const int ticksPerUpdate = 15;
     
-    public VisualSimulation()
+    public Monogame2DRenderer()
     {
         graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";

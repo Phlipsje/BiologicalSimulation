@@ -9,16 +9,16 @@ namespace Implementations;
 
 public class RenderManager
 {
-    VisualSimulation visualSimulation;
+    Monogame2DRenderer monogame2DRenderer;
     GraphicsDevice graphicsDevice;
     List<Renderer> renderers;
     private Texture2D pixel;
     private SpriteFont font;
     public bool DrawBorders { get; set; }
     public bool Draw { get; set; } = true;
-    public RenderManager(VisualSimulation visualSimulation, GraphicsDevice graphicsDevice, List<Renderer> renderers)
+    public RenderManager(Monogame2DRenderer monogame2DRenderer, GraphicsDevice graphicsDevice, List<Renderer> renderers)
     {
-        this.visualSimulation = visualSimulation;
+        this.monogame2DRenderer = monogame2DRenderer;
         this.graphicsDevice = graphicsDevice;
         this.renderers = renderers;
     }
@@ -63,7 +63,7 @@ public class RenderManager
         }
         
         //Draw some extra information on screen
-        spriteBatch.DrawString(font, $"FPS: {Math.Round(VisualSimulation.AverageFps)}", new Vector2(660, 380), Color.White);
+        spriteBatch.DrawString(font, $"FPS: {Math.Round(Monogame2DRenderer.AverageFps)}", new Vector2(660, 380), Color.White);
         spriteBatch.DrawString(font, $"Tick: {Main.Tick}", new Vector2(660, 410), Color.White);
         spriteBatch.DrawString(font, $"Total Organisms: {Main.OrganismACount + Main.OrganismBCount}", new Vector2(660, 440), Color.White);
         spriteBatch.DrawString(font, $"Green(A) Organisms: {Main.OrganismACount}", new Vector2(660, 470), Color.White);

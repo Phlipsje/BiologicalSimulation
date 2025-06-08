@@ -26,11 +26,11 @@ public class Main : IDisposable
     {
         Initialize();
 
-        programMedium = new VisualSimulation();
+        programMedium = new Monogame2DRenderer();
         programMedium.Simulation = simulation;
         programMedium.DataStructure = dataStructure;
         programMedium.World = world;
-        ((VisualSimulation)programMedium).Run();
+        ((Monogame2DRenderer)programMedium).Run();
     }
 
     public void Initialize()

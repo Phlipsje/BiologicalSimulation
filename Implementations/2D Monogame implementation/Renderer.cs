@@ -64,7 +64,7 @@ public class Renderer
         graphicsDevice.SetRenderTarget(RenderTarget);
 
         //Remove everything that is set in the render target and set it to a singular background color
-        graphicsDevice.Clear(VisualSimulation.BackgroundColor);
+        graphicsDevice.Clear(Monogame2DRenderer.BackgroundColor);
 
         //Start a new buffer to draw to
         spriteBatch.Begin();
