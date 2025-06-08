@@ -188,7 +188,7 @@ class RayTracer : GameWindow
     
     void UpdateSphereBuffer()
     {
-        //Testing.txt uses the format specified in Simple graphical implementation.sln, if another system is used, then this must change as well to render it
+        //Testing.txt uses the format specified in Implementations.sln, if another system is used, then this must change as well to render it
         Spheres = SimulationImporter.FromFileToObjectType<Sphere>(readFilePath, (string key, string contents) =>
         {
             Sphere sphere = new Sphere();

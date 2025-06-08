@@ -2,7 +2,7 @@ using BioSim;
 using BioSim.Datastructures;
 using BioSim.Simulation;
 
-namespace Simple_graphical_implementation;
+namespace Implementations;
 
 public interface IProgramMedium
 {

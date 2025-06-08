@@ -5,7 +5,7 @@ using BioSim.Datastructures;
 using Microsoft.Xna.Framework;
 using Vector3 = System.Numerics.Vector3;
 
-namespace Simple_graphical_implementation;
+namespace Implementations;
 
 public class TestOrganism : VisualOrganism
 {

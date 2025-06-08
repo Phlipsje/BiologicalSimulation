@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiologicalSimulation", "BiologicalSimulation\BiologicalSimulation.csproj", "{EEC23ED4-5979-4098-8D0E-E29F8BEAB87A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple graphical implementation", "Simple graphical implementation\Simple graphical implementation.csproj", "{59DCB4D9-7E8D-4585-89EB-92ACBB663C15}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementations", "Implementations\Implementations.csproj", "{59DCB4D9-7E8D-4585-89EB-92ACBB663C15}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3D Renderer", "3D Renderer\3D Renderer.csproj", "{990FAC51-B013-4975-A11A-3E2686C4F82C}"
 EndProject

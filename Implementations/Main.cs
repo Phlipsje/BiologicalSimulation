@@ -5,7 +5,7 @@ using BioSim.Simulation;
 using Microsoft.Xna.Framework;
 using Vector3  = System.Numerics.Vector3;
 
-namespace Simple_graphical_implementation;
+namespace Implementations;
 
 /// <summary>
 /// This class does the setup for a world and data structure and chooses a medium to run it in

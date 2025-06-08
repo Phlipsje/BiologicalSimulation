@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework.Input;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
 
-namespace Simple_graphical_implementation;
+namespace Implementations;
 
 /// <summary>
 /// This project contains a visual implementation of the biological simulation library.
