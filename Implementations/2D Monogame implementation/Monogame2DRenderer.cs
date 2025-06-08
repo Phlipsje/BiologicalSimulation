@@ -28,7 +28,6 @@ public class Monogame2DRenderer : Game, IProgramMedium
     private const int screenWidth = 1280;
     private const int screenHeight = 720;
     private RenderManager renderManager;
-    private bool updateDrawnImage = true;
 
     public static Color BackgroundColor = Color.CornflowerBlue;
     private ViewingInformation viewingInformation;
@@ -127,14 +126,9 @@ public class Monogame2DRenderer : Game, IProgramMedium
 
     protected override void Draw(GameTime gameTime)
     {
-        if (!updateDrawnImage)
-            return;
-        
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         renderManager.Render(spriteBatch, World, viewingInformation);
-        
-        updateDrawnImage = false;
         
         base.Draw(gameTime);
     }
@@ -148,11 +142,6 @@ public class Monogame2DRenderer : Game, IProgramMedium
     public void StopProgram()
     {
         Exit();
-    }
-
-    public void DrawCall()
-    {
-        updateDrawnImage = true;
     }
 }
 
