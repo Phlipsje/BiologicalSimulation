@@ -12,15 +12,16 @@ public static class GrowthGrid
     private static GridValues[,,] values;
     private static Vector3 minPosition;
     private static Vector3 chunkSize;
+    private static int chunkCountX;
+    private static int chunkCountY;
+    private static int chunkCountZ;
     private static (int, int, int) maxIndices;
 
     public static void Initialize(Vector3 minPosition, Vector3 maxPosition, Vector3 chunkSize)
     {
-        minPosition = minPosition - chunkSize * 2;
-        maxPosition = maxPosition + chunkSize * 2;
-        int chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize.X);
-        int chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize.Y);
-        int chunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize.Z);
+        chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize.X);
+        chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize.Y);
+        chunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize.Z);
         values = new GridValues[chunkCountX, chunkCountY, chunkCountZ];
         GrowthGrid.minPosition = minPosition;
         GrowthGrid.chunkSize = chunkSize;
@@ -90,6 +91,10 @@ public static class GrowthGrid
         int chunkX = (int)Math.Ceiling((position.X - minPosition.X) / chunkSize.X);
         int chunkY = (int)Math.Ceiling((position.Y - minPosition.Y) / chunkSize.Y);
         int chunkZ = (int)Math.Ceiling((position.Z - minPosition.Z) / chunkSize.Z);
+        //Math.Min because otherwise can throw error if X,Y, or Z is exactly maxValue
+        chunkX = Math.Min(chunkX, chunkCountX - 1);
+        chunkY = Math.Min(chunkY, chunkCountY - 1);
+        chunkZ = Math.Min(chunkZ, chunkCountZ - 1);
         return (chunkX, chunkY, chunkZ);
     }
 }

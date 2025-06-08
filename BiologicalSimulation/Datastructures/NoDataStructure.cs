@@ -4,13 +4,28 @@ namespace BioSim.Datastructures;
 
 /// <summary>
 /// This implements DataStructure (because that is required), but isn't a data structure
-/// It simply stores all organisms in a list
+/// It simply stores all organisms in a list, used as a fallback if no data structure is given
 /// </summary>
-public class NoDataStructure(World world) : DataStructure(world)
+public class NoDataStructure : DataStructure
 {
+    public LinkedList<Organism> Organisms { get; }
+    private List<LinkedList<Organism>> listsToSend { get; }
+
+    public NoDataStructure()
+    {
+        Organisms = new LinkedList<Organism>();
+        listsToSend = [Organisms];
+    }
+    
     public override void Step()
     {
-        //Nothing
+        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        {
+            Organism organism = organismNode.Value;
+            
+            //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
+            organism.Step(listsToSend);
+        }
     }
 
     /// <summary>
@@ -23,7 +38,7 @@ public class NoDataStructure(World world) : DataStructure(world)
         //Tracking distance without the square root, because it is not needed to find the closest organism and would only take more compute
         float currentDistanceSquared = float.MaxValue;
         Organism closestOrganism = organism;
-        foreach (Organism otherOrganism in World.Organisms)
+        foreach (Organism otherOrganism in Organisms)
         {
             //If the organism is itself, we need to exclude it (because it's distance to itself is not what we want)
             if (otherOrganism == organism)
@@ -43,19 +58,16 @@ public class NoDataStructure(World world) : DataStructure(world)
         return closestOrganism;
     }
 
-    public override bool CheckCollision(Organism organism, Vector3 position)
+    public override bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists)
     {
+        LinkedList<Organism> organisms = organismLists[0];
+        
         //If out of bounds, then there is a collision
         if (!World.IsInBounds(position))
             return true;
 
-        //Not using foreach but for loop, because organisms can be added while the loop is active
-        LinkedListNode<Organism> organismNode = World.Organisms.First!;
-        for (int i = 0; i < World.OrganismCount; i++)
+        foreach (Organism otherOrganism in organisms)
         {
-            Organism otherOrganism = organismNode.Value;
-            organismNode = organismNode.Next!;
-            
             //Cannot be a collision with itself
             if(otherOrganism == organism)
                 continue;
@@ -76,8 +88,18 @@ public class NoDataStructure(World world) : DataStructure(world)
         return false;
     }
 
-    protected override IEnumerator<IOrganism> ToEnumerator()
+    public override void AddOrganism(Organism organism)
     {
-        return World.Organisms.GetEnumerator();
+        Organisms.AddFirst(organism);
+    }
+
+    public override IEnumerable<Organism> GetOrganisms()
+    {
+        return Organisms;
+    }
+    
+    public override int GetOrganismCount()
+    {
+        return Organisms.Count;
     }
 }
