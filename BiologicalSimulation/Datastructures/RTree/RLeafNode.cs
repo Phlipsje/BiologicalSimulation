@@ -126,66 +126,16 @@ public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
     {
         List<T> entries = LeafEntries;
         entries.Add(entry);
-        (T e1, T e2) = SplitUtils.LinearPickSeeds(entries);
-        entries.Remove(e1);
-        entries.Remove(e2);
         RLeafNode<T> group1 = this;
         RLeafNode<T> group2 = new RLeafNode<T>(MinSize, MaxSize);
-        group1.LeafEntries = new List<T>(maxSize) { e1 };
-        group1.Mbb = e1.GetMbb();
-        group2.LeafEntries = new List<T>(maxSize) { e2 };
-        group2.Mbb = e2.GetMbb();
-        for (int i = 0; i < entries.Count; i++)
+        void AddToGroup(RLeafNode<T> group, T item)
         {
-            T currentEntry = entries[i];
-
-            //if it is required to put all remaining entries into a group to ensure that group is filled to size m do so
-            RLeafNode<T>? groupToFill = null;
-            if (group1.Count + (entries.Count - i) <= group1.MinSize)
-                groupToFill = group1;
-            if (group2.Count + (entries.Count - i) <= group2.MinSize)
-                groupToFill = group2;
-            if (groupToFill != null)
-            {
-                for (int j = i; j < entries.Count; j++)
-                {
-                    currentEntry = entries[j];
-                    groupToFill.LeafEntries.Add(currentEntry);
-                    groupToFill.Mbb = groupToFill.Mbb.Enlarged(currentEntry.GetMbb());
-                }
-
-                break;
-            }
-
-            Mbb group1Enlarged = group1.Mbb.Enlarged(currentEntry.GetMbb());
-            Mbb group2Enlarged = group2.Mbb.Enlarged(currentEntry.GetMbb());
-            if (group1Enlarged.Area < group2Enlarged.Area)
-            {
-                group1.LeafEntries.Add(currentEntry);
-                group1.Mbb = group1Enlarged;
-                continue;
-            }
-
-            if (group1Enlarged.Area == group2Enlarged.Area)
-            {
-                if (group1.Count < group2.Count)
-                {
-                    group1.LeafEntries.Add(currentEntry);
-                    group1.Mbb = group1Enlarged;
-                }
-                else
-                {
-                    group2.LeafEntries.Add(currentEntry);
-                    group2.Mbb = group2Enlarged;
-                }
-
-                continue;
-            }
-
-            group2.LeafEntries.Add(currentEntry);
-            group2.Mbb = group2Enlarged;
+            group.LeafEntries.Add(item);
+            group.Mbb = group.Mbb.Enlarged(item.GetMbb());
         }
-
+        SplitUtils.DistributeEntries(entries, group1, group2, AddToGroup, 
+            (group, item) => { group.LeafEntries = new List<T>(maxSize) { item }; },
+            leaf => leaf.Count, minSize);
         return (group1, group2);
     }
 }

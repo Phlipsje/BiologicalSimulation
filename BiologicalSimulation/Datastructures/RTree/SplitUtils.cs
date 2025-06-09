@@ -85,9 +85,16 @@ public static class SplitUtils
         return mostWasteful;
     }
 
-    public static void DistributeEntries<TGroup,TEntry>(List<TEntry> entries, TGroup group1, TGroup group2, 
-        Action<TGroup, TEntry> addToGroup, Func<TGroup, int> groupCount, int minSize) where TGroup : IMinimumBoundable where TEntry : IMinimumBoundable
+    public static void DistributeEntries<TGroup,TEntry>(List<TEntry> entries, TGroup group1, TGroup group2, Action<TGroup, TEntry> addToGroup,
+        Action<TGroup, TEntry> insertInitial, Func<TGroup, int> groupCount, int minSize) where TGroup : IMinimumBoundable where TEntry : IMinimumBoundable
     {
+        (TEntry e1, TEntry e2) = LinearPickSeeds(entries);
+        entries.Remove(e1);
+        entries.Remove(e2);
+        insertInitial(group1, e1);
+        group1.SetMbb(e1.GetMbb());
+        insertInitial(group2, e2);
+        group2.SetMbb(e2.GetMbb());
         for (int i = 0; i < entries.Count; i++)
         {
             TEntry currentEntry = entries[i];

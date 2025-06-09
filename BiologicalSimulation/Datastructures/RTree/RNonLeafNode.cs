@@ -131,79 +131,20 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
     {
         List<RNode<T>> entries = NodeEntries;
         entries.Add(entry);
-        (RNode<T> e1, RNode<T> e2) = SplitUtils.LinearPickSeeds(entries);
-        entries.Remove(e1);
-        entries.Remove(e2);
         RNonLeafNode<T> group1 = this;
         RNonLeafNode<T> group2 = new RNonLeafNode<T>(MinSize, MaxSize);
-        group1.NodeEntries = new List<RNode<T>>(maxSize) { e1 };
-        e1.Parent = group1;
-        group1.Mbb = e1.GetMbb();
-        group2.NodeEntries = new List<RNode<T>>(maxSize) { e2 };
-        e2.Parent = group2;
-        group2.Mbb = e2.GetMbb();
-        /*Action<RNonLeafNode<T>, RNode<T>> addToGroup = (RNonLeafNode<T> group, RNode<T> node) =>
+        void InsertInitial(RNonLeafNode<T> group, RNode<T> node)
+        {
+            group.NodeEntries = new List<RNode<T>>(maxSize) { node };
+            node.Parent = group;
+        }
+        void AddToGroup(RNonLeafNode<T> group, RNode<T> node)
         {
             group.NodeEntries.Add(node);
             node.Parent = group;
             group.Mbb = group.Mbb.Enlarged(node.Mbb);
-        };
-        SplitUtils.DistributeEntries(entries, group1, group2, addToGroup, node => node.Count, minSize);*/
-        for (int i = 0; i < entries.Count; i++)
-        {
-            RNode<T> currentEntry = entries[i];
-
-            //if it is required to put all remaining entries into a group to ensure that group is filled to size m do so
-            RNonLeafNode<T>? groupToFill = null;
-            if (group1.Count + (entries.Count - i) <= group1.MinSize)
-                groupToFill = group1;
-            if (group2.Count + (entries.Count - i) <= group2.MinSize)
-                groupToFill = group2;
-            if (groupToFill != null)
-            {
-                for (int j = i; j < entries.Count; j++)
-                {
-                    currentEntry = entries[j];
-                    groupToFill.NodeEntries.Add(currentEntry);
-                    currentEntry.Parent = groupToFill;
-                    groupToFill.Mbb = groupToFill.Mbb.Enlarged(currentEntry.GetMbb());
-                }
-
-                break;
-            }
-
-            Mbb group1Enlarged = group1.Mbb.Enlarged(currentEntry.GetMbb());
-            Mbb group2Enlarged = group2.Mbb.Enlarged(currentEntry.GetMbb());
-            if (group1Enlarged.Area < group2Enlarged.Area)
-            {
-                group1.NodeEntries.Add(currentEntry);
-                currentEntry.Parent = group1;
-                group1.Mbb = group1Enlarged;
-                continue;
-            }
-            if (group1Enlarged.Area == group2Enlarged.Area)
-            {
-                if (group1.Count < group2.Count)
-                {
-                    group1.NodeEntries.Add(currentEntry);
-                    currentEntry.Parent = group1;
-                    group1.Mbb = group1Enlarged;
-                }
-                else
-                {
-                    group2.NodeEntries.Add(currentEntry);
-                    currentEntry.Parent = group2;
-                    group2.Mbb = group2Enlarged;
-                }
-
-                continue;
-            }
-
-            group2.NodeEntries.Add(currentEntry);
-            currentEntry.Parent = group2;
-            group2.Mbb = group2Enlarged;
         }
-
+        SplitUtils.DistributeEntries(entries, group1, group2, AddToGroup, InsertInitial, node => node.Count, minSize);
         return (group1, group2);
     }
 
