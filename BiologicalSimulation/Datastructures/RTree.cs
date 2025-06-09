@@ -1,8 +1,10 @@
-﻿namespace BioSim.Datastructures;
+﻿using System.Collections;
+
+namespace BioSim.Datastructures;
 using System.Numerics;
 
-public class RTree<T>(int m, int M)
-    where T : IMinimumBoundable
+public class RTree<T>(int m, int M) : IEnumerable<T>
+    where T : IMinimumBoundable 
 {
     public RNode<T> Root => root != null ? root : new RLeafNode<T>(_m, _M); //public for testing
     
@@ -29,14 +31,40 @@ public class RTree<T>(int m, int M)
         root.Insert(entry, ref root);
     }
 
-    public void Delete(T entry)
+    public bool Delete(T entry)
     {
-        root.Delete(entry, ref root);
-        if (root.Count == 0)
-            root = null;
+        if (root != null && root.Delete(entry, ref root))
+        {
+            if (root.Count == 0)
+                root = null;
+            return true;
+        }
+        return false;
     }
 
-    public List<(Mbb,int)> GetMbbsWithLevel()
+    public bool UpdateMbb(T entry, Mbb newMbb)
+    {
+        if (root != null)
+            return root.UpdateMbb(entry, newMbb, ref root);
+        return false;
+    }
+
+    public void ForEach(Action<T> action)
+    {
+        if (root != null)
+            root.ForEach(action);
+    }
+    
+    public List<T> ToList()
+    {
+        if (root == null)
+            return [];
+        List<T> list = [];
+        root.GetAllLeafEntries(list);
+        return list;
+    }
+
+    public List<(Mbb,int)> GetMbbsWithLevel() //for debugging
     {
         List<(Mbb, int)> list = [];
         if (root != null)
@@ -44,18 +72,50 @@ public class RTree<T>(int m, int M)
         return list;
     }
 
-    public int DisconnectedParentCount()
+    public int DisconnectedParentCount() //for debugging
     {
         if (root != null)
             return root.DisconnectedParentCount(root);
         return 0;
     }
 
-    public int WrongParentCount()
+    public int WrongParentCount() //for debugging
     {
         if (root != null)
             return root.WrongParentCount();
         return 0;
+    }
+
+    public IEnumerator<T> GetEnumerator()
+    {
+        return new RTreeEnumerator<T>(root);
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+}
+
+public class RTreeEnumerator<T>(RNode<T>? root) : IEnumerator<T> where T : IMinimumBoundable
+{
+    public bool MoveNext()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Reset()
+    {
+        throw new NotImplementedException();
+    }
+
+    public T Current { get; }
+
+    object IEnumerator.Current => Current;
+
+    public void Dispose()
+    {
+        //can be empty, no database connections to closew
     }
 }
 
@@ -67,17 +127,20 @@ public abstract class RNode<T>(int m, int M) : IMinimumBoundable where T : IMini
     public abstract int Count { get; }
     public Mbb Mbb;
     public Mbb GetMbb() { return Mbb; }
+    public void SetMbb(Mbb newMbb) { Mbb = newMbb; }
 
-    public abstract int WrongParentCount();
-    public abstract int DisconnectedParentCount(RNode<T> root);
-    public abstract RLeafNode<T>? ThoroughContains(T entry);
+    public abstract int WrongParentCount(); //for debugging
+    public abstract int DisconnectedParentCount(RNode<T> root); //for debugging
+    public abstract RLeafNode<T>? ThoroughContains(T entry); //for debugging
+    public abstract void ForEach(Action<T> action);
     public abstract void Search(Mbb searchArea, ref List<T> results);
     public abstract void Insert(T entry, ref RNode<T> root);
     public abstract void ReInsert(RNode<T> node, int level, ref RNode<T> root);
-    public abstract void Delete(T entry, ref RNode<T> root);
+    public abstract bool Delete(T entry, ref RNode<T> root);
+    public abstract bool UpdateMbb(T entry, Mbb newMbb, ref RNode<T> root);
     public abstract void CondenseTree(ref RNode<T> root, List<(RNode<T>, int)> eliminatedNodes);
     public abstract RLeafNode<T>? FindLeaf(T entry);
-    public abstract void GetMbbsWithLevel(List<(Mbb, int)> list, RNode<T> root);
+    public abstract void GetMbbsWithLevel(List<(Mbb, int)> list, RNode<T> root); //for debugging
     public abstract void RecalculateMbb();
     public abstract void GetAllLeafEntries(List<T> results);
     public int GetLevel(RNode<T> root)
@@ -128,6 +191,7 @@ public abstract class RNode<T>(int m, int M) : IMinimumBoundable where T : IMini
 public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
     where T : IMinimumBoundable
 {
+    private float epsilon = 0.01f; //a small value to check whether an mbb lies on this mbb's edge
     public override int Count => LeafEntries.Count;
     public List<T> LeafEntries = new (M);
     public override int WrongParentCount()
@@ -145,6 +209,12 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
     public override RLeafNode<T>? ThoroughContains(T entry)
     {
         return LeafEntries.Contains(entry) ? this : null;
+    }
+
+    public override void ForEach(Action<T> action)
+    {
+        for (int i = 0; i < Count; i++)
+            action(LeafEntries[i]);
     }
 
     public override void Search(Mbb searchArea, ref List<T> results)
@@ -190,10 +260,36 @@ public class RLeafNode<T>(int m, int M) : RNode<T>(m,M)
     {
         results.AddRange(LeafEntries);
     }
-    public override void Delete(T entry, ref RNode<T> root)
+    public override bool Delete(T entry, ref RNode<T> root)
     {
-        LeafEntries.Remove(entry);
+        if (LeafEntries.Remove(entry))
+        {
+            CondenseTree(ref root, []);
+            return true;
+        }
+        return false;
+    }
+
+    public override bool UpdateMbb(T entry, Mbb newMbb, ref RNode<T> root)
+    {
+        //leaf was found by findLeaf so entry is guaranteed to be contained in this leaf
+        entry.SetMbb(newMbb);
+        if (Mbb.Enlarged(newMbb).Area > Mbb.Area)
+        {
+            LeafEntries.Remove(entry);
+            CondenseTree(ref root, []);
+            root.Insert(entry, ref root);
+            return true;
+        }
+        //if entry's mbb is not near the edge moving it inwards can not lower the area of the nodes mbb since it is delimited by other entry's mbbs
+        Vector3 smallVector = new Vector3(epsilon);
+        if (new Mbb(Mbb.Minimum + smallVector, Mbb.Maximum - smallVector).Contains(Mbb))
+        {
+            return true;
+        }
+        //in this case the node's mbb probably shrunk so propagate changes
         CondenseTree(ref root, []);
+        return true;
     }
 
     public override void CondenseTree(ref RNode<T> root, List<(RNode<T>, int)> eliminatedNodes)
@@ -432,6 +528,12 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBou
         return null;
     }
 
+    public override void ForEach(Action<T> action)
+    {
+        for (int i = 0; i < Count; i++)
+            Children[i].ForEach(action);
+    }
+
     public override void Search(Mbb searchArea, ref List<T> results)
     {
         for (int i = 0; i < Count; i++)
@@ -512,21 +614,20 @@ public class RNonLeafNode<T>(int m, int M) : RNode<T>(m,M) where T : IMinimumBou
             Children[i].GetAllLeafEntries(results);
         }
     }
-    public override void Delete(T entry, ref RNode<T> root)
+    public override bool Delete(T entry, ref RNode<T> root)
     {
         RLeafNode<T>? leaf = FindLeaf(entry);
         if (leaf == null)
-        {
-            throw new Exception("Attempted deletion of non existent entry"); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //debug code
-            leaf = root.ThoroughContains(entry);
-            if (leaf != null)
-            {
-                throw new Exception("entry should have been found but wasn't");
-            }
-            return;
-        }
-        leaf.Delete(entry, ref root);
+            return false;
+        return leaf.Delete(entry, ref root);
+    }
+
+    public override bool UpdateMbb(T entry, Mbb newMbb, ref RNode<T> root)
+    {
+        RLeafNode<T>? leaf = FindLeaf(entry);
+        if (leaf == null)
+            return false;
+        return leaf.UpdateMbb(entry, newMbb, ref root);
     }
 
     public override void CondenseTree(ref RNode<T> root, List<(RNode<T>, int)> eliminatedNodes)
@@ -821,4 +922,5 @@ public struct Mbb(Vector3 minimum, Vector3 maximum)
 public interface IMinimumBoundable
 {
     public Mbb GetMbb();
+    public void SetMbb(Mbb newMbb);
 }

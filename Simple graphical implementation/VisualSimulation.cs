@@ -87,15 +87,16 @@ public class VisualSimulation : Game
                 ViewDirection.XZPlane, new Rectangle(0, sizeY, sizeX, sizeY))
         });
         renderManager.DrawBorders = true;
-        renderManager.Draw = false;
+        renderManager.Draw = true;
         renderManager.LoadContent(Content);
         
         simulation = new Simulation();
         Random random = new Random(); //Can enter seed here
         float worldHalfSize = 12f;
         float organismSize = 0.5f;
-        DataStructure dataStructure = new Chunk3DFixedDataStructure(new Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
-            new Vector3(worldHalfSize), 4f, organismSize);
+        DataStructure dataStructure = new RTreeDataStructure(0.1f);
+        /*DataStructure dataStructure = new Chunk3DFixedDataStructure(new Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
+            new Vector3(worldHalfSize), 4f, organismSize); */
         //DataStructure dataStructure = new Chunk2DFixedDataStructure(new Vector2(-worldHalfSize), 
         //    new Vector2(worldHalfSize), 2.5f, organismSize);
         world = new TestWorld(dataStructure, simulation, worldHalfSize);

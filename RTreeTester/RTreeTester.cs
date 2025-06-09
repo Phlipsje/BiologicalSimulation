@@ -494,5 +494,10 @@ public class RTreeTester : Game
         {
             return mbb;
         }
+
+        public void SetMbb(Mbb newMbb)
+        {
+            mbb = newMbb;
+        }
     }
 }

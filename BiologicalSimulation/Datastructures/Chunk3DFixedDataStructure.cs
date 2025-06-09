@@ -158,7 +158,7 @@ public class Chunk3DFixedDataStructure : DataStructure
             if (organism == otherOrganism)
                 continue;
             
-            //Checks collision by checking distance between circles
+            //Checks collision by checking distance between spheres
             float x = position.X - otherOrganism.Position.X;
             float x2 = x * x;
             float y = position.Y - otherOrganism.Position.Y;

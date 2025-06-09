@@ -7,10 +7,19 @@ namespace BioSim;
 /// This is an abstract class which can be extended to create a type of organism
 /// It must be given a Key, Size, Step function, ToString function and FromString function to describe it
 /// </summary>
-public abstract class Organism : IOrganism
+public abstract class Organism : IOrganism, IMinimumBoundable
 {
     public abstract string Key { get; } //Used to identify which organism it is in a file
-    public Vector3 Position { get; set; }
+    private Vector3 position;
+    public Vector3 Position
+    {
+        get => position;
+        set
+        {
+            position = value;
+            SetMbb(position);
+        } 
+    }
     public float Size { get; } //Organism is a sphere, so this is the radius
     protected World World { get; } //Needs this to check if it is in bounds
     protected DataStructure DataStructure { get; } //Needs this to understand where other organisms are
@@ -100,6 +109,22 @@ public abstract class Organism : IOrganism
     {
         return DataStructure.CheckCollision(this, position, organismLists);
     }
+
+    public Mbb GetMbb()
+    {
+        return _mbb;
+    }
+    public void SetMbb(Mbb mbb)
+    {
+        mbb = _mbb;
+        Position = mbb.Minimum + new Vector3(Size);
+    }
+    private void SetMbb(Vector3 position)
+    {
+        Vector3 sizeVector = new Vector3(Size);
+        _mbb = new Mbb(Position - sizeVector, Position + sizeVector);
+    }
+    private Mbb _mbb;
 }
 
 public interface IOrganism
