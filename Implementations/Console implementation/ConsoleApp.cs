@@ -27,6 +27,9 @@ public class ConsoleApp : IProgramMedium
     //We have a separate thread for input, because otherwise Console.ReadLine() would block running the simulation
     private Thread inputThread;
     
+    private int millisecondsWait;
+    private TimeSpan tickDuration;
+    
     //For tracking fps performance
     private Stopwatch stopwatch;
     public static float TimeRunning { get; private set; }
@@ -37,9 +40,6 @@ public class ConsoleApp : IProgramMedium
     
     public void StartProgram()
     {
-        AllocConsole();
-        RedirectConsoleIO();
-        
         Console.WriteLine("Running Biological Simulation");
         
         PrintSimulationInfo();
@@ -58,14 +58,16 @@ public class ConsoleApp : IProgramMedium
         stopwatch = new Stopwatch();
         stopwatch.Start();
         
+        //NOTE: The console application is throttled to run a maximum of 200 tps, because otherwise the system breaks with multithreading
+        millisecondsWait = 5;
+        tickDuration = TimeSpan.FromMilliseconds(millisecondsWait);
+        
         //Actually start program
         CoreLoop();
     }
 
     private void CoreLoop()
     {
-        //NOTE: The console application is throttled to run a maximum of 1000 ticks per second, because otherwise the system breaks with multithreading
-        var tickDuration = TimeSpan.FromMilliseconds(1); // 1000Hz
         Stopwatch tickWatch = new Stopwatch();
 
         while (looping)
@@ -95,7 +97,7 @@ public class ConsoleApp : IProgramMedium
             // Busy wait until tick duration elapsed
             while (tickWatch.Elapsed < tickDuration)
             {
-                Thread.SpinWait(1); // Prevent 100% CPU burn
+                Thread.SpinWait(millisecondsWait); // Prevent 100% CPU burn
             }
         }
 
@@ -160,7 +162,6 @@ public class ConsoleApp : IProgramMedium
 
     public void PrintSimulationStats()
     {
-        //TODO add fps, or real time running
         string[] lines =
         [
             $"|[{DateTime.Now}]|",
@@ -201,71 +202,11 @@ public class ConsoleApp : IProgramMedium
         //Readline is here to await input
         Console.ReadKey();
         
-        FreeConsole();
+        Environment.Exit(0);
     }
 
     public void FileWriten(string filePath, string fileContents)
     {
         PrintSimulationStats();
     }
-
-    #region Console handling stuff
-    /// <summary>
-    /// Extra stuff here is to make sure the console in windows is used and not the IDE
-    /// </summary>
-    
-    //This makes it so Console.WriteLine is sent to the console and not to the IDE
-    private void RedirectConsoleIO()
-    {
-        IntPtr stdOutHandle = CreateFile("CONOUT$", GENERIC_WRITE, FILE_SHARE_WRITE, IntPtr.Zero, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, IntPtr.Zero);
-        IntPtr stdInHandle = CreateFile("CONIN$", GENERIC_READ, FILE_SHARE_READ, IntPtr.Zero, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, IntPtr.Zero);
-
-        SetStdHandle(STD_OUTPUT_HANDLE, stdOutHandle);
-        SetStdHandle(STD_ERROR_HANDLE, stdOutHandle);
-        SetStdHandle(STD_INPUT_HANDLE, stdInHandle);
-
-        var outStream = new FileStream(new SafeFileHandle(stdOutHandle, true), FileAccess.Write);
-        var inStream = new FileStream(new SafeFileHandle(stdInHandle, true), FileAccess.Read);
-
-        var writer = new StreamWriter(outStream) { AutoFlush = true };
-        Console.SetOut(writer);
-        Console.SetError(writer);
-        Console.SetIn(new StreamReader(inStream));
-    }
-
-    const int STD_OUTPUT_HANDLE = -11;
-    const int STD_INPUT_HANDLE = -10;
-    const int STD_ERROR_HANDLE = -12;
-
-    //With this we can create a console application
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool AllocConsole();
-    
-    //With this we can forcefully close the console
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool FreeConsole();
-    
-    [DllImport("kernel32.dll", SetLastError = true)]
-    static extern bool SetStdHandle(int nStdHandle, IntPtr handle);
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    static extern IntPtr GetStdHandle(int nStdHandle);
-    
-    [DllImport("kernel32.dll", SetLastError = true)]
-    static extern IntPtr CreateFile(
-        string lpFileName,
-        uint dwDesiredAccess,
-        uint dwShareMode,
-        IntPtr lpSecurityAttributes,
-        uint dwCreationDisposition,
-        uint dwFlagsAndAttributes,
-        IntPtr hTemplateFile);
-
-    const uint GENERIC_READ = 0x80000000;
-    const uint GENERIC_WRITE = 0x40000000;
-    const uint OPEN_EXISTING = 3;
-    const uint FILE_ATTRIBUTE_NORMAL = 0x80;
-    const uint FILE_SHARE_READ = 1;
-    const uint FILE_SHARE_WRITE = 2;
-    #endregion
 }

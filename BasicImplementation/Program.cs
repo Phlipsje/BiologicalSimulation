@@ -2,6 +2,7 @@
 using BioSim.Datastructures;
 using BioSim.Simulation;
 using Implementations;
+using Implementations.Console_implementation;
 using Implementations.Monogame2DRenderer;
 using Implementations.OpenTK3DRenderer;
 
@@ -23,10 +24,10 @@ class Program
         Simulation simulation = SimulationRunner.Simulation;
         
         //Choose the data structure that is used to speed up the simulation
-        float worldHalfSize = 12f;
+        float worldHalfSize = 16f;
         float organismSize = 0.5f;
-        SimulationRunner.DataStructure = new Chunk3DFixedDataStructure(new Vector3(-worldHalfSize), 
-            new Vector3(worldHalfSize), 4f, organismSize);
+        SimulationRunner.DataStructure = new MultithreadedChunk2DFixedDataStructure(new Vector2(-worldHalfSize), 
+            new Vector2(worldHalfSize), 4f, organismSize);
         
         //Create a world which implements the data structure and defines rules such as:
         // where organisms start in the simulation, what the bounds are of the virtual environment and when to stop the simulation automatically
@@ -44,7 +45,7 @@ class Program
         SimulationExporter.ShowExportFilePath = true;
         
         //Choose in what form the simulation is run (this decides if you get a Console view, 2D view or 3D view)
-        SimulationRunner.ProgramMedium = new OpenTK3DRenderer();
+        SimulationRunner.ProgramMedium = new ConsoleApp();
 
         runner.Start();
     }
