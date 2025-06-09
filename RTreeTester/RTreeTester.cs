@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using BiologicalSimulation.Datastructures.RTree;
 using BioSim.Datastructures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -58,13 +59,6 @@ public class RTreeTester : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
-
-        int disconnectedParents = rTree.DisconnectedParentCount();
-        if (disconnectedParents > 0)
-            throw new Exception("disconnected parents detected");
-        int wrongParents = rTree.WrongParentCount();
-        if (wrongParents > 0)
-            throw new Exception("Wrong parents detected");
         
         int size = 10000;
         float spread = 50000;
@@ -95,7 +89,7 @@ public class RTreeTester : Game
             list.Add(obj);
         }
 
-        if (true)//keyState.IsKeyUp(Keys.Space) && lastKeyState.IsKeyDown(Keys.Space))
+        if (keyState.IsKeyUp(Keys.Space) && lastKeyState.IsKeyDown(Keys.Space))
         {
             for (int i = 0; i < size; i++)
             {
@@ -200,7 +194,7 @@ public class RTreeTester : Game
             }
             Exit();
         }
-        if (true)//keyState.IsKeyUp(Keys.L) && lastKeyState.IsKeyDown(Keys.L))
+        if (keyState.IsKeyUp(Keys.L) && lastKeyState.IsKeyDown(Keys.L))
         {
             int iterations = 100000;
             Stopwatch sw = new Stopwatch();
@@ -434,9 +428,9 @@ public class RTreeTester : Game
             Color color = Color.White;
             DrawRectangle(drawPos - halfSize, drawPos + halfSize, color);
             RNonLeafNode<TestObject> nonLeaf = (RNonLeafNode<TestObject>)node;
-            for(int i = 0; i < nonLeaf.Children.Count; i++)
+            for(int i = 0; i < nonLeaf.NodeEntries.Count; i++)
             {
-                DrawNode(nonLeaf.Children[i], level + 1, offset + i * (levelWidth / nonLeaf.Children.Count) - levelWidth / 2f, drawPos);
+                DrawNode(nonLeaf.NodeEntries[i], level + 1, offset + i * (levelWidth / nonLeaf.NodeEntries.Count) - levelWidth / 2f, drawPos);
             }
         }
         if (level != 0)

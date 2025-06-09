@@ -1,12 +1,13 @@
 ﻿using System.Numerics;
+using BioSim;
+using BioSim.Datastructures;
 
-namespace BioSim.Datastructures;
+namespace BiologicalSimulation.Datastructures.RTree;
 
-//simple Octree implementation for comparison purposes 
 public class RTreeDataStructure(float moveRange) : DataStructure
 {
     private RTree<Organism> rTree = new RTree<Organism>(2, 10);
-    private int organismCount = 0;
+    private int organismCount;
     private Dictionary<Organism, List<Organism>> collisionBuffer = [];
     
     public override void Step()
