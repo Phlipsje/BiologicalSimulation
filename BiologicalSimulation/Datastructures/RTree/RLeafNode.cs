@@ -1,14 +1,14 @@
 ﻿using System.Numerics;
-using BiologicalSimulation.Datastructures.RTree;
+using BioSim.Datastructures;
 
-namespace BioSim.Datastructures;
+namespace BiologicalSimulation.Datastructures.RTree;
 
 public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
     where T : IMinimumBoundable
 {
     private const float Epsilon = 0.01f; //a small value to check whether an MBB lies on this mbb's edge
     public override int Count => LeafEntries.Count;
-    public override IEnumerable<IMinimumBoundable> Children => LeafEntries.Cast<IMinimumBoundable>();
+    protected override IEnumerable<IMinimumBoundable> Children => LeafEntries.Cast<IMinimumBoundable>();
 
     public List<T> LeafEntries = new(maxSize);
 
@@ -33,7 +33,7 @@ public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
     }
     public override void Insert(T entry, ref RNode<T> root)
     {
-        if (Count < maxSize)
+        if (Count < MaxSize)
         {
             LeafEntries.Add(entry);
             Mbb = Mbb.Enlarged(entry.GetMbb());
@@ -41,8 +41,8 @@ public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
             return;
         }
 
-        (RNode<T> L, RNode<T> LL) = SplitNode(entry);
-        AdjustTree(L, LL, ref root);
+        (RNode<T> adjustedNode, RNode<T> newNode) = SplitNode(entry);
+        AdjustTree(adjustedNode, newNode, ref root);
     }
 
     public override void ReInsert(RNode<T> node, int level, ref RNode<T> root)
@@ -134,8 +134,8 @@ public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
             group.Mbb = group.Mbb.Enlarged(item.GetMbb());
         }
         SplitUtils.DistributeEntries(entries, group1, group2, AddToGroup, 
-            (group, item) => { group.LeafEntries = new List<T>(maxSize) { item }; },
-            leaf => leaf.Count, minSize);
+            (group, item) => { group.LeafEntries = new List<T>(MaxSize) { item }; },
+            leaf => leaf.Count, MinSize);
         return (group1, group2);
     }
 }

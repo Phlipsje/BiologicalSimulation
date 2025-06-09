@@ -4,11 +4,11 @@ namespace BiologicalSimulation.Datastructures.RTree;
 
 public abstract class RNode<T>(int minSize, int maxSize) : IMinimumBoundable where T : IMinimumBoundable
 {
-    protected int MinSize = minSize;
-    protected int MaxSize = maxSize;
+    protected readonly int MinSize = minSize;
+    protected readonly int MaxSize = maxSize;
     public RNode<T> Parent;
     public abstract int Count { get; }
-    public abstract IEnumerable<IMinimumBoundable> Children { get; }
+    protected abstract IEnumerable<IMinimumBoundable> Children { get; }
     public Mbb Mbb;
     public Mbb GetMbb() { return Mbb; }
     public void SetMbb(Mbb newMbb) { Mbb = newMbb; }
@@ -56,12 +56,10 @@ public abstract class RNode<T>(int minSize, int maxSize) : IMinimumBoundable whe
                     }
                 }
             }
-
-            for (int i = 0; i < leafEntriesToBeAdded.Count; i++)
+            foreach (var entry in leafEntriesToBeAdded)
             {
-                root.Insert(leafEntriesToBeAdded[i], ref root);
+                root.Insert(entry, ref root);
             }
-
             return;
         }
 
@@ -80,38 +78,38 @@ public abstract class RNode<T>(int minSize, int maxSize) : IMinimumBoundable whe
 
         parentNode.CondenseTree(ref root, eliminatedNodes);
     }
-    protected void AdjustTree(RNode<T> L, RNode<T>? LL, ref RNode<T> root)
+    protected void AdjustTree(RNode<T> adjustedNode, RNode<T>? newSiblingNode, ref RNode<T> root)
     {
-        if (L.Equals(root)) //stop condition
+        if (adjustedNode.Equals(root)) //stop condition
         {
-            if(LL == null)//Then root can stay the way it is
+            if(newSiblingNode == null)//Then root can stay the way it is
                 return;
-            //This means the root was split into L and LL
+            //This means the root was split so a new root should be installed
             RNonLeafNode<T> newRoot = new RNonLeafNode<T>(MinSize, MaxSize);
-            newRoot.NodeEntries = [L, LL];
-            newRoot.Mbb = L.Mbb.Enlarged(LL.Mbb);
-            L.Parent = newRoot;
-            LL.Parent = newRoot;
+            newRoot.NodeEntries = [adjustedNode, newSiblingNode];
+            newRoot.Mbb = adjustedNode.Mbb.Enlarged(newSiblingNode.Mbb);
+            adjustedNode.Parent = newRoot;
+            newSiblingNode.Parent = newRoot;
             root = newRoot;
             return;
         }
-        RNonLeafNode<T> P = (RNonLeafNode<T>)L.Parent; //a parent of a node should never be a leaf node.
-        if (LL == null)
+        RNonLeafNode<T> nodeParent = (RNonLeafNode<T>)adjustedNode.Parent; //a parent of a node should never be a leaf node.
+        if (newSiblingNode == null)
         {
-            P.Mbb = P.Mbb.Enlarged(L.Mbb); 
-            P.AdjustTree(P, null, ref root);
+            nodeParent.Mbb = nodeParent.Mbb.Enlarged(adjustedNode.Mbb); 
+            nodeParent.AdjustTree(nodeParent, null, ref root);
             return;
         }
-        if (P.Count < MaxSize)
+        if (nodeParent.Count < MaxSize)
         { 
-            P.Mbb = P.Mbb.Enlarged(L.Mbb); 
-            P.NodeEntries.Add(LL);
-            LL.Parent = P;
-            P.Mbb = P.Mbb.Enlarged(LL.Mbb);
-            P.AdjustTree(P, null, ref root);
+            nodeParent.Mbb = nodeParent.Mbb.Enlarged(adjustedNode.Mbb); 
+            nodeParent.NodeEntries.Add(newSiblingNode);
+            newSiblingNode.Parent = nodeParent;
+            nodeParent.Mbb = nodeParent.Mbb.Enlarged(newSiblingNode.Mbb);
+            nodeParent.AdjustTree(nodeParent, null, ref root);
             return;
         }
-        (RNode<T> N, RNode<T> NN) = P.SplitNode(LL);
-        AdjustTree(N, NN, ref root);
+        (RNode<T> n, RNode<T> nn) = nodeParent.SplitNode(newSiblingNode);
+        AdjustTree(n, nn, ref root);
     }
 }

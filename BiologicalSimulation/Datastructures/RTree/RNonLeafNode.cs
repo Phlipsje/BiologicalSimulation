@@ -7,7 +7,7 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
     public List<RNode<T>> NodeEntries = new(maxSize);
 
     public override int Count => NodeEntries.Count;
-    public override IEnumerable<IMinimumBoundable> Children => NodeEntries;
+    protected override IEnumerable<IMinimumBoundable> Children => NodeEntries;
 
     public override void ForEach(Action<T> action)
     {
@@ -61,8 +61,8 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
             }
             else
             {
-                (RNode<T> L, RNode<T> LL) = SplitNode(node);
-                AdjustTree(L, LL, ref root);
+                (RNode<T> adjustedNode, RNode<T> newNode) = SplitNode(node);
+                AdjustTree(adjustedNode, newNode, ref root);
             }
 
             return;
@@ -135,7 +135,7 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
         RNonLeafNode<T> group2 = new RNonLeafNode<T>(MinSize, MaxSize);
         void InsertInitial(RNonLeafNode<T> group, RNode<T> node)
         {
-            group.NodeEntries = new List<RNode<T>>(maxSize) { node };
+            group.NodeEntries = new List<RNode<T>>(MaxSize) { node };
             node.Parent = group;
         }
         void AddToGroup(RNonLeafNode<T> group, RNode<T> node)
@@ -144,7 +144,7 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
             node.Parent = group;
             group.Mbb = group.Mbb.Enlarged(node.Mbb);
         }
-        SplitUtils.DistributeEntries(entries, group1, group2, AddToGroup, InsertInitial, node => node.Count, minSize);
+        SplitUtils.DistributeEntries(entries, group1, group2, AddToGroup, InsertInitial, node => node.Count, MinSize);
         return (group1, group2);
     }
 

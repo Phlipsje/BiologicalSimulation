@@ -1,10 +1,10 @@
-﻿using BiologicalSimulation.Datastructures.RTree;
+﻿using BioSim.Datastructures;
 
-namespace BioSim.Datastructures;
+namespace BiologicalSimulation.Datastructures.RTree;
 
 public static class SplitUtils
 {
-    public static (T, T) LinearPickSeeds<T>(List<T> entries) where T : IMinimumBoundable
+    private static (T, T) LinearPickSeeds<T>(List<T> entries) where T : IMinimumBoundable
     {
         //Find extreme rectangles along all dimensions and record total width of entries
         T highLowX = entries[0];
@@ -57,7 +57,7 @@ public static class SplitUtils
         float normSepY = (highLowY.GetMbb().Minimum.Y - lowHighY.GetMbb().Maximum.Y) / widthY;
         float normSepZ = (highLowZ.GetMbb().Minimum.Z - lowHighZ.GetMbb().Maximum.Z) / widthZ;
 
-        //select the pair with greatest seperation
+        //select the pair with the greatest separation
         (T, T) pair = normSepX > normSepY && normSepX > normSepZ ? 
             (highLowX, lowHighX) : normSepY > normSepZ ? (highLowY, lowHighY) : (highLowZ, lowHighZ);
 
@@ -66,7 +66,8 @@ public static class SplitUtils
         
         return pair;
     }
-    public static (T, T) QuadraticPickSeeds<T>(List<T> entries) where T : IMinimumBoundable
+
+    private static (T, T) QuadraticPickSeeds<T>(List<T> entries) where T : IMinimumBoundable
     {
         (T, T) mostWasteful = (entries[0], entries[0]); //placeholder
         float largestD = float.MinValue;
@@ -76,8 +77,8 @@ public static class SplitUtils
             {
                 Mbb e1 = entries[i].GetMbb();
                 Mbb e2 = entries[i].GetMbb();
-                Mbb J = e1.Enlarged(e2);
-                float d = J.Area - e1.Area - e2.Area;
+                Mbb combined = e1.Enlarged(e2);
+                float d = combined.Area - e1.Area - e2.Area;
                 if(d > largestD)
                     mostWasteful = (entries[i], entries[j]);
             }
@@ -88,13 +89,13 @@ public static class SplitUtils
     public static void DistributeEntries<TGroup,TEntry>(List<TEntry> entries, TGroup group1, TGroup group2, Action<TGroup, TEntry> addToGroup,
         Action<TGroup, TEntry> insertInitial, Func<TGroup, int> groupCount, int minSize) where TGroup : IMinimumBoundable where TEntry : IMinimumBoundable
     {
-        (TEntry e1, TEntry e2) = LinearPickSeeds(entries);
-        entries.Remove(e1);
-        entries.Remove(e2);
-        insertInitial(group1, e1);
-        group1.SetMbb(e1.GetMbb());
-        insertInitial(group2, e2);
-        group2.SetMbb(e2.GetMbb());
+        (TEntry seedEntry1, TEntry seedEntry2) = LinearPickSeeds(entries);
+        entries.Remove(seedEntry1);
+        entries.Remove(seedEntry2);
+        insertInitial(group1, seedEntry1);
+        group1.SetMbb(seedEntry1.GetMbb());
+        insertInitial(group2, seedEntry2);
+        group2.SetMbb(seedEntry2.GetMbb());
         for (int i = 0; i < entries.Count; i++)
         {
             TEntry currentEntry = entries[i];
@@ -124,14 +125,7 @@ public static class SplitUtils
             }
             if (group1Enlarged.Area == group2Enlarged.Area)
             {
-                if (groupCount(group1) < groupCount(group2))
-                {
-                    addToGroup(group1, currentEntry);
-                }
-                else
-                {
-                    addToGroup(group2, currentEntry);
-                }
+                addToGroup(groupCount(group1) < groupCount(group2) ? group1 : group2, currentEntry);
                 continue;
             }
             addToGroup(group2, currentEntry);
