@@ -17,7 +17,7 @@ public class Config
         //Choose the data structure that is used to speed up the simulation
         float worldHalfSize = 12f;
         float organismSize = 0.5f;
-        Main.DataStructure = new Chunk3DFixedDataStructure(new Vector3(-worldHalfSize), 
+        Main.DataStructure = new MultithreadedChunk3DFixedDataStructure(new Vector3(-worldHalfSize), 
             new Vector3(worldHalfSize), 4f, organismSize);
         
         //Create a world which implements the data structure and defines rules such as:

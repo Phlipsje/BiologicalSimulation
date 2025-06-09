@@ -64,30 +64,41 @@ public class ConsoleApp : IProgramMedium
 
     private void CoreLoop()
     {
+        //NOTE: The console application is throttled to run a maximum of 1000 ticks per second, because otherwise the system breaks with multithreading
+        var tickDuration = TimeSpan.FromMilliseconds(1); // 1000Hz
+        Stopwatch tickWatch = new Stopwatch();
+
         while (looping)
         {
-            #region Performance tracking
+            tickWatch.Restart();
+
+            Simulation.Step();
+
+            // Performance Tracking
             TimeRunning += (float)stopwatch.Elapsed.TotalSeconds;
             tallyFps += 1 / (float)stopwatch.Elapsed.TotalSeconds;
             stopwatch.Restart();
+
             fpsCounter++;
-            if (fpsCounter >= ticksPerUpdate) 
-            { 
+            if (fpsCounter >= ticksPerUpdate)
+            {
                 AverageFps = tallyFps / fpsCounter;
-                if (AverageFps is Single.PositiveInfinity)
+                if (AverageFps is float.PositiveInfinity)
                     AverageFps = 0;
-                
                 fpsCounter = 0;
                 tallyFps = 0;
             }
-            //Now can write average fps in render manager
-            #endregion
-            
+
             if (!Simulation.FileWritingEnabled && Simulation.Tick % 250 == 0)
                 PrintSimulationStats();
-            Simulation.Step();
+
+            // Busy wait until tick duration elapsed
+            while (tickWatch.Elapsed < tickDuration)
+            {
+                Thread.SpinWait(1); // Prevent 100% CPU burn
+            }
         }
-        
+
         stopwatch.Stop();
     }
 
