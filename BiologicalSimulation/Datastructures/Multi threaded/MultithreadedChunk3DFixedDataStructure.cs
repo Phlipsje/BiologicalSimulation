@@ -82,7 +82,8 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
         } 
         
         //Next we assign them to every logical core (and respect defined amount of cores if done)
-        int allowedCores = amountOfLogicalCoresToUse == 0 ? Environment.ProcessorCount : amountOfLogicalCoresToUse;
+        //We always keep one logical core free to work on other tasks (mainly controlling the rest of the program)
+        int allowedCores = amountOfLogicalCoresToUse == 0 ? (Environment.ProcessorCount - 1) : amountOfLogicalCoresToUse;
         chunkGroupBatches = new Chunk3D[groupCount][][];
         for (int group = 0; group < groupCount; group++)
         {
