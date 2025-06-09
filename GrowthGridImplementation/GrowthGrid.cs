@@ -2,7 +2,7 @@ using System;
 using BioSim.Datastructures;
 using Microsoft.Xna.Framework;
 
-namespace Implementations;
+namespace GrowthGridImplementation;
 
 /// <summary>
 /// Used to determine growth properties of organisms, only for this specific visual implementation, not a general system we support

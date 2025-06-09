@@ -9,7 +9,7 @@ namespace Implementations;
 /// <summary>
 /// This class does the setup for a world and data structure and chooses a medium to run it in
 /// </summary>
-public class Main : IDisposable
+public class SimulationRunner : IDisposable
 {
     public static World World;
     public static DataStructure DataStructure;
@@ -17,23 +17,13 @@ public class Main : IDisposable
     public static IProgramMedium ProgramMedium;
     public static int Tick => Simulation.Tick;
 
-    //Easiest way to implement global counter, not most safe way of doing it
-    public static int OrganismACount = 0;
-    public static int OrganismBCount = 0;
-
-    public Main()
+    public SimulationRunner()
     {
+        //Sets culture to US-English, specific language does not matter, but because we set this, using float.Parse and writing floats to file always use '.' as decimal point.
+        System.Globalization.CultureInfo ci = new System.Globalization.CultureInfo("en-US");
+        System.Threading.Thread.CurrentThread.CurrentCulture = ci;
+        
         Simulation = new Simulation();
-        
-        Config config = new Config();
-        config.Setup();
-        
-        Initialize();
-        
-        ProgramMedium.Simulation = Simulation;
-        ProgramMedium.DataStructure = DataStructure;
-        ProgramMedium.World = World;
-        ProgramMedium.StartProgram();
     }
 
     public void Initialize()
@@ -45,9 +35,18 @@ public class Main : IDisposable
         Simulation.OnEnd += StopProgram;
         Simulation.OnFileWrite += FileWriten;
         
-        OrganismACount = 0;
-        OrganismBCount = 0;
         Simulation.StartSimulation();
+    }
+
+    public void Start()
+    {
+        Initialize();
+        
+        ProgramMedium.Simulation = Simulation;
+        ProgramMedium.DataStructure = DataStructure;
+        ProgramMedium.World = World;
+        
+        ProgramMedium.StartProgram();
     }
     
     private void StopProgram(World world)

@@ -13,7 +13,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Implementations.OpenTK3DRenderer;
 
-class OpenTK3DRenderer : GameWindow, IProgramMedium
+public class OpenTK3DRenderer : GameWindow, IProgramMedium
 {
     public Simulation Simulation { get; set; }
     public World World { get; set; }
@@ -43,8 +43,8 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
         
         // Compile shaders
         shader = GL.CreateProgram();
-        int vs = CompileShader(ShaderType.VertexShader, "../../../OpenTK3DRenderer/Shaders/shader.vert");
-        int fs = CompileShader(ShaderType.FragmentShader, "../../../OpenTK3DRenderer/Shaders/shader.frag");
+        int vs = CompileShader(ShaderType.VertexShader, GetSourceRelativePath("Shaders/shader.vert"));
+        int fs = CompileShader(ShaderType.FragmentShader, GetSourceRelativePath("Shaders/shader.frag"));
         GL.AttachShader(shader, vs);
         GL.AttachShader(shader, fs);
         GL.LinkProgram(shader);
@@ -82,6 +82,11 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
         CursorState = CursorState.Grabbed;
     }
 
+    public static string GetSourceRelativePath(string relativePath, [System.Runtime.CompilerServices.CallerFilePath] string callerFile = "")
+    {
+        return Path.Combine(Path.GetDirectoryName(callerFile), relativePath);
+    }
+    
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
@@ -89,7 +94,6 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
         HandleInput(args);
         
         Simulation.Step();
-        GrowthGrid.Step();
         
         UpdateSphereBuffer();
     }
@@ -192,7 +196,7 @@ class OpenTK3DRenderer : GameWindow, IProgramMedium
         Spheres = World.GetOrganisms().Select(o =>
         {
             Vector3 pos = new Vector3(o.Position.X, o.Position.Y, o.Position.Z);
-            Vector3 color = o is TestOrganism ? new Vector3(0.4f, 0.8f, 0.4f) : new Vector3(0.4f, 0.8f, 0.8f);
+            Vector3 color = new Vector3(o.Color.X, o.Color.Y, o.Color.Z);
             Sphere sphere = new Sphere(pos, o.Size, color);
             return sphere;
         }).ToArray();

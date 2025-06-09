@@ -6,6 +6,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementations", "Implemen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3D Renderer", "3D Renderer\3D Renderer.csproj", "{990FAC51-B013-4975-A11A-3E2686C4F82C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicImplementation", "BasicImplementation\BasicImplementation.csproj", "{6FC47ACB-A478-4471-9A5D-45947722717F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrowthGridImplementation", "GrowthGridImplementation\GrowthGridImplementation.csproj", "{0F0608AC-6D30-40BA-8A83-18D3FD4C1EBA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{990FAC51-B013-4975-A11A-3E2686C4F82C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{990FAC51-B013-4975-A11A-3E2686C4F82C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{990FAC51-B013-4975-A11A-3E2686C4F82C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FC47ACB-A478-4471-9A5D-45947722717F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FC47ACB-A478-4471-9A5D-45947722717F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FC47ACB-A478-4471-9A5D-45947722717F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FC47ACB-A478-4471-9A5D-45947722717F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F0608AC-6D30-40BA-8A83-18D3FD4C1EBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F0608AC-6D30-40BA-8A83-18D3FD4C1EBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F0608AC-6D30-40BA-8A83-18D3FD4C1EBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F0608AC-6D30-40BA-8A83-18D3FD4C1EBA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

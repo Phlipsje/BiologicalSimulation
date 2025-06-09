@@ -6,7 +6,7 @@ using BioSim;
 using BioSim.Datastructures;
 using BioSim.Simulation;
 
-namespace Implementations;
+namespace BasicImplementation;
 
 /// <summary>
 /// This is an example implementation of a simulation world

@@ -6,9 +6,9 @@ using BioSim.Datastructures;
 using Microsoft.Xna.Framework;
 using Vector3 = System.Numerics.Vector3;
 
-namespace Implementations;
+namespace GrowthGridImplementation;
 
-public class TestOrganismB : VisualOrganism
+public class TestOrganismB : Organism
 {
     public override string Key => "B";
     public float GrowthRate;
@@ -16,11 +16,11 @@ public class TestOrganismB : VisualOrganism
     public float BB1; //No idea what this is
     public float BB2; //No idea what this is
     public float Biomass;
-    public override Color Color => Color.Yellow;
+    public override Vector3 Color => color;
+    private static readonly Vector3 color = new Vector3(0.4f, 0.8f, 0.8f);
     public TestOrganismB(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
-        Main.OrganismBCount++;
-        
+        Program.OrganismBCount++;
         GrowthRate = random.NextSingle(); //Between 0 and 1
         Resources = 0;
         BB1 = 0;

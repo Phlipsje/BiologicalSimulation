@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework.Input;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
 
-namespace Implementations;
+namespace Implementations.Monogame2DRenderer;
 
 /// <summary>
 /// This project contains a visual implementation of the biological simulation library.
@@ -88,7 +88,6 @@ public class Monogame2DRenderer : Game, IProgramMedium
                 ViewDirection.XZPlane, new Rectangle(0, sizeY, sizeX, sizeY))
         });
         renderManager.DrawBorders = true;
-        renderManager.Draw = true;
         renderManager.LoadContent(Content);
     }
 
@@ -116,7 +115,6 @@ public class Monogame2DRenderer : Game, IProgramMedium
         #endregion
 
         Simulation.Step();
-        GrowthGrid.Step();
         
         base.Update(gameTime);
     }

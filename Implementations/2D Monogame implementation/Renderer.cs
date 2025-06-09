@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Implementations;
+namespace Implementations.Monogame2DRenderer;
 
 public class Renderer
 {
@@ -70,9 +70,8 @@ public class Renderer
         spriteBatch.Begin();
 
         
-        foreach (Organism visualOrganism in organisms)
+        foreach (Organism organism in organisms)
         {
-            var organism = (VisualOrganism)visualOrganism;
             float posAxis0 = (organism.Position[axisIndex0] - viewingInformation.Position[axisIndex0] - organism.Size/2) * viewingInformation.Scale + viewingInformation.Width/2;
             float posAxis1 = (organism.Position[axisIndex1] - viewingInformation.Position[axisIndex1] - organism.Size/2) * viewingInformation.Scale + viewingInformation.Height/2;
 
@@ -92,7 +91,9 @@ public class Renderer
             float layerDepth = (organism.Position[topDownAxis] - minDistanceToCamera) / (maxDistanceToCamera - minDistanceToCamera);
             Vector2 position = new Vector2(posAxis0, posAxis1);
             float scale = viewingInformation.Scale / 1000f; //1000 because the size of the organism sprite is 1000x1000
-            spriteBatch.Draw(organismTexture, position, null, organism.Color, 0f, Vector2.Zero, scale, SpriteEffects.None, layerDepth);
+            Color color = new Color(organism.Color.X * byte.MaxValue, organism.Color.Y * byte.MaxValue,
+                organism.Color.Z * byte.MaxValue);
+            spriteBatch.Draw(organismTexture, position, null, color, 0f, Vector2.Zero, scale, SpriteEffects.None, layerDepth);
         }
         
         spriteBatch.DrawString(font, axis0Char + " ->", new Vector2(50, 20), Color.White);

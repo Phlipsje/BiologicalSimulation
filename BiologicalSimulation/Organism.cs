@@ -12,6 +12,7 @@ public abstract class Organism
     public abstract string Key { get; } //Used to identify which organism it is in a file
     public Vector3 Position { get; set; }
     public float Size { get; } //Organism is a sphere, so this is the radius
+    public virtual Vector3 Color { get; } = Vector3.Zero; //Used to identify which organism it is in any visual representation, has no effect besides visual clarity
     protected World World { get; } //Needs this to check if it is in bounds
     protected DataStructure DataStructure { get; } //Needs this to understand where other organisms are
     protected Random Random;

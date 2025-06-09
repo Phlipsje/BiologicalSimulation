@@ -1,31 +1,36 @@
-using System.Numerics;
+﻿using System.Numerics;
 using BioSim.Datastructures;
 using BioSim.Simulation;
-using Implementations.Console_implementation;
+using Implementations;
+using Implementations.Monogame2DRenderer;
+using Implementations.OpenTK3DRenderer;
 
-namespace Implementations;
+namespace BasicImplementation;
 
 /// <summary>
-/// Use this class to make adjustments to how the simulation is run
+/// Controls the custom simulation
 /// </summary>
-public class Config
+class Program
 {
-    public void Setup()
+    //Easiest way to implement global counter, not most safe way of doing it
+    public static int OrganismACount = 0;
+    public static int OrganismBCount = 0;
+    
+    static void Main(string[] args)
     {
-        Simulation simulation = Main.Simulation;
+        SimulationRunner runner = new SimulationRunner();
+        
+        Simulation simulation = SimulationRunner.Simulation;
         
         //Choose the data structure that is used to speed up the simulation
         float worldHalfSize = 12f;
         float organismSize = 0.5f;
-        Main.DataStructure = new MultithreadedChunk3DFixedDataStructure(new Vector3(-worldHalfSize), 
+        SimulationRunner.DataStructure = new MultithreadedChunk3DFixedDataStructure(new Vector3(-worldHalfSize), 
             new Vector3(worldHalfSize), 4f, organismSize);
         
         //Create a world which implements the data structure and defines rules such as:
         // where organisms start in the simulation, what the bounds are of the virtual environment and when to stop the simulation automatically
-        Main.World = new TestWorld(Main.DataStructure, simulation, worldHalfSize);
-        //For this specific simulation we have made use of an extra class for which we also do the setup here, this is not needed for every type of simulation
-        GrowthGrid.Initialize(new Vector3(-worldHalfSize), 
-            new Vector3(worldHalfSize), new Vector3(0.5f));
+        SimulationRunner.World = new TestWorld(SimulationRunner.DataStructure, simulation, worldHalfSize);
         
         //Decide if, and when, to save the contents of the simulation to a file
         simulation.FileWritingEnabled = false;
@@ -39,6 +44,8 @@ public class Config
         SimulationExporter.ShowExportFilePath = true;
         
         //Choose in what form the simulation is run (this decides if you get a Console view, 2D view or 3D view)
-        Main.ProgramMedium = new Monogame2DRenderer();
+        SimulationRunner.ProgramMedium = new Monogame2DRenderer();
+
+        runner.Start();
     }
 }

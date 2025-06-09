@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BioSim;
+using BioSim.Simulation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Implementations;
+namespace Implementations.Monogame2DRenderer;
 
 public class RenderManager
 {
@@ -16,7 +17,6 @@ public class RenderManager
     private Texture2D pixel;
     private SpriteFont font;
     public bool DrawBorders { get; set; }
-    public bool Draw { get; set; } = true;
     public RenderManager(Monogame2DRenderer monogame2DRenderer, GraphicsDevice graphicsDevice, List<Renderer> renderers)
     {
         this.monogame2DRenderer = monogame2DRenderer;
@@ -37,40 +37,32 @@ public class RenderManager
 
     public void Render(SpriteBatch spriteBatch, World world, ViewingInformation viewingInformation)
     {
-        if (Draw)
+        Organism[] organisms = world.GetOrganisms().ToArray();
+        
+        //First let every render target be formed
+        foreach (Renderer renderer in renderers)
         {
-            Organism[] organisms = world.GetOrganisms().ToArray();
-            
-            //First let every render target be formed
-            foreach (Renderer renderer in renderers)
-            {
-                renderer.Render(graphicsDevice, spriteBatch, organisms, viewingInformation);
-            } 
-        }
+            renderer.Render(graphicsDevice, spriteBatch, organisms, viewingInformation);
+        } 
         
         graphicsDevice.Clear(Color.Black);
         
         //Create a new buffer to draw to (the screen in the case)
         spriteBatch.Begin();
 
-        if (Draw)
+        foreach (Renderer renderer in renderers)
         {
-            foreach (Renderer renderer in renderers)
+            spriteBatch.Draw(renderer.RenderTarget, renderer.DisplayRectangle, Color.White);
+            if (DrawBorders)
             {
-                spriteBatch.Draw(renderer.RenderTarget, renderer.DisplayRectangle, Color.White);
-                if (DrawBorders)
-                {
-                    DrawRectangle(spriteBatch, renderer.DisplayRectangle, Color.Red);
-                }
-            } 
-        }
+                DrawRectangle(spriteBatch, renderer.DisplayRectangle, Color.Red);
+            }
+        } 
         
         //Draw some extra information on screen
         spriteBatch.DrawString(font, $"FPS: {Math.Round(Monogame2DRenderer.AverageFps)}", new Vector2(660, 380), Color.White);
-        spriteBatch.DrawString(font, $"Tick: {Main.Tick}", new Vector2(660, 410), Color.White);
-        spriteBatch.DrawString(font, $"Total Organisms: {Main.OrganismACount + Main.OrganismBCount}", new Vector2(660, 440), Color.White);
-        spriteBatch.DrawString(font, $"Green(A) Organisms: {Main.OrganismACount}", new Vector2(660, 470), Color.White);
-        spriteBatch.DrawString(font, $"Yellow(B) Organisms: {Main.OrganismBCount}", new Vector2(660, 500), Color.White);
+        spriteBatch.DrawString(font, $"Tick: {SimulationRunner.Tick}", new Vector2(660, 410), Color.White);
+        spriteBatch.DrawString(font, $"Total Organisms: {organisms.Length}", new Vector2(660, 440), Color.White);
         
         //Stop drawing to the buffer and flush the output to the gpu
         spriteBatch.End();
