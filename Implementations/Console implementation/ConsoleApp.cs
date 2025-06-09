@@ -1,14 +1,11 @@
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using BioSim;
 using BioSim.Datastructures;
 using BioSim.Simulation;
-using Microsoft.Win32.SafeHandles;
 
 namespace Implementations.Console_implementation;
 
@@ -29,6 +26,7 @@ public class ConsoleApp : IProgramMedium
     
     private int millisecondsWait;
     private TimeSpan tickDuration;
+    private int ticksPerPrint; //Set to 0 to disable (only used when file writing is disabled)
     
     //For tracking fps performance
     private Stopwatch stopwatch;
@@ -37,6 +35,53 @@ public class ConsoleApp : IProgramMedium
     private float tallyFps;
     private int fpsCounter;
     private const int ticksPerUpdate = 15;
+
+    public ConsoleApp()
+    {
+        //Start with all default values
+        DefaultValues();
+    }
+
+    public ConsoleApp(string[] args)
+    {
+        DefaultValues();
+        foreach (string s in args)
+        {
+            try
+            {
+                string field = s.Split('=')[0];
+                string value = s.Split('=')[1];
+                //input sanitizing
+                field = field.Trim();
+                value = value.Trim();
+                field = field.ToLower();
+                value = value.ToLower();
+                switch (field)
+                {
+                    case "tps":
+                        millisecondsWait = (int)Math.Ceiling(1000f/int.Parse(value));
+                        break;
+                    case "tpp":
+                        ticksPerPrint = int.Parse(value);
+                        break;
+                    default:
+                        Console.WriteLine("Invalid argument: " + s);
+                        break;
+                }
+            }
+            catch //Just ignore anything invalid
+            {
+                Console.WriteLine("Invalid argument: " + s);
+            }
+        }
+    }
+
+    private void DefaultValues()
+    {
+        millisecondsWait = 5;
+        TimeRunning = 0;
+        ticksPerPrint = 500;
+    }
     
     public void StartProgram()
     {
@@ -59,7 +104,7 @@ public class ConsoleApp : IProgramMedium
         stopwatch.Start();
         
         //NOTE: The console application is throttled to run a maximum of 200 tps, because otherwise the system breaks with multithreading
-        millisecondsWait = 5;
+        millisecondsWait = Math.Max(5, millisecondsWait);
         tickDuration = TimeSpan.FromMilliseconds(millisecondsWait);
         
         //Actually start program
@@ -91,7 +136,7 @@ public class ConsoleApp : IProgramMedium
                 tallyFps = 0;
             }
 
-            if (!Simulation.FileWritingEnabled && Simulation.Tick % 250 == 0)
+            if (!Simulation.FileWritingEnabled && Simulation.Tick % ticksPerPrint == 0)
                 PrintSimulationStats();
 
             // Busy wait until tick duration elapsed
@@ -164,12 +209,12 @@ public class ConsoleApp : IProgramMedium
     {
         string[] lines =
         [
-            $"|[{DateTime.Now}]|",
+            $"|[{DateTime.Now.ToString("HH:mm:ss")}]|",
             $"|Tick: {Simulation.Tick}|",
             $"|Organisms: {World.GetOrganismCount()}|",
-            $"|Time running: {Math.Round(TimeRunning, 2)}s|",
-            $"|Tick speed: {Math.Round(AverageFps, 2)}/s|",
-            $"|Seconds per tick: {Math.Round(1/AverageFps, 2)}s|"
+            $"|Runtime: {Math.Round(TimeRunning, 2)}s|",
+            $"|Tick/Sec: {Math.Round(AverageFps, 2)}/s|",
+            $"|Sec/Tick: {Math.Round(1/AverageFps, 3)}s|"
         ];
 
         int length = lines.Select(s =>
