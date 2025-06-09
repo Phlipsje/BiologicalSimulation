@@ -44,7 +44,7 @@ class Program
         SimulationExporter.ShowExportFilePath = true;
         
         //Choose in what form the simulation is run (this decides if you get a Console view, 2D view or 3D view)
-        SimulationRunner.ProgramMedium = new Monogame2DRenderer();
+        SimulationRunner.ProgramMedium = new OpenTK3DRenderer();
 
         runner.Start();
     }

@@ -84,15 +84,13 @@ public class Renderer
             //Skip if out of scope
             if (posAxis1 < -organismPixelSize || posAxis1 > viewingInformation.Height + organismPixelSize)
                 continue;
-
-            //TODO base scale, color and layerDepth off of what is in the foreground (and don't draw what is behind the camera)
+            
             float minDistanceToCamera = -3f;
             float maxDistanceToCamera = 3f;
             float layerDepth = (organism.Position[topDownAxis] - minDistanceToCamera) / (maxDistanceToCamera - minDistanceToCamera);
             Vector2 position = new Vector2(posAxis0, posAxis1);
             float scale = viewingInformation.Scale / 1000f; //1000 because the size of the organism sprite is 1000x1000
-            Color color = new Color(organism.Color.X * byte.MaxValue, organism.Color.Y * byte.MaxValue,
-                organism.Color.Z * byte.MaxValue);
+            Color color = new Color(organism.Color.X, organism.Color.Y, organism.Color.Z);
             spriteBatch.Draw(organismTexture, position, null, color, 0f, Vector2.Zero, scale, SpriteEffects.None, layerDepth);
         }
         

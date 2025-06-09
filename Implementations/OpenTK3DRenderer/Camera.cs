@@ -28,7 +28,7 @@ public class Camera
 
     public void UpdateKeyboard(KeyboardState input, float deltaTime)
     {
-        float speed = 2.0f * deltaTime;
+        float speed = 4.0f * deltaTime;
 
         if (input.IsKeyDown(Keys.W))
             Position += Front * speed;

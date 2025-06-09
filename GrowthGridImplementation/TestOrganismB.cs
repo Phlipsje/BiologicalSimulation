@@ -13,11 +13,11 @@ public class TestOrganismB : Organism
     public override string Key => "B";
     public float GrowthRate;
     public float Resources;
-    public float BB1; //No idea what this is
-    public float BB2; //No idea what this is
+    public float BB1;
+    public float BB2;
     public float Biomass;
     public override Vector3 Color => color;
-    private static readonly Vector3 color = new Vector3(0.4f, 0.8f, 0.8f);
+    private static readonly Vector3 color = new Vector3(0.9f, 0.9f, 0.2f);
     public TestOrganismB(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
         Program.OrganismBCount++;

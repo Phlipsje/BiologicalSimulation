@@ -13,7 +13,7 @@ public class TestOrganismB : Organism
     private int ticksAlive = 0;
     private int ticksForReproduction = 0;
     public override Vector3 Color => color;
-    private static readonly Vector3 color = new Vector3(0.4f, 0.8f, 0.8f);
+    private static readonly Vector3 color = new Vector3(0.9f, 0.9f, 0.2f);
     public TestOrganismB(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
         Program.OrganismBCount++;
