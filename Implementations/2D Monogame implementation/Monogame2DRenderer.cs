@@ -94,8 +94,7 @@ public class Monogame2DRenderer : Game, IProgramMedium
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-            Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if (Keyboard.GetState().IsKeyDown(Keys.Escape))
         {
             Simulation.AbortSimulation();
             Exit();

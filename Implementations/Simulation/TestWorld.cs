@@ -23,122 +23,20 @@ public class TestWorld : World
     }
     public override void StartingDistribution(Random random)
     {
-        //One singular organism at the center
+        float range = worldHalfSize * 0.9f;
         
-        //Singular setup 3D, 2D, 1D
-        /*
-        Organisms.AddFirst(new TestOrganism(new Vector3(-1, 0, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(1, 0, 0), 0.5f, this, dataStructure, random));
-        */
+        //This spawns 8 organisms of type A in random position in world
+        for (int i = 0; i < 8; i++)
+        {
+            new TestOrganism(new Vector3(random.NextSingle()*range-range/2, random.NextSingle()*range-range/2, random.NextSingle()*range-range/2), 0.5f, this, DataStructure, random);
+        }
         
-        //Partial trapping setup 3D
-        /*
-        Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, -0.5f, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(0.5f, -0.5f, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, 0.5f, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(0.5f, 0.5f, 0), 0.5f, this, dataStructure, random));
-        
-        Organisms.AddFirst(new TestOrganismB(new Vector3(-1.5f, 0, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(1.5f, 0, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(0, -1.5f, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(0, 1.5f, 0), 0.5f, this, dataStructure, random));
-        */
-        
-        //Partial trapping setup 2D
-        /*
-        Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, 0, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(0.5f, 0, 0), 0.5f, this, dataStructure, random));
-        
-        Organisms.AddFirst(new TestOrganismB(new Vector3(-1.5f, 0, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(1.5f, 0, 0), 0.5f, this, dataStructure, random));
-        */
-        
-        //Full trapping setup 3D
-        /*
-        Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, -0.5f, -0.5f), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(0.5f, -0.5f, -0.5f), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, 0.5f, -0.5f), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(0.5f, 0.5f, -0.5f), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, -0.5f, 0.5f), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(0.5f, -0.5f, 0.5f), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, 0.5f, 0.5f), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(0.5f, 0.5f, 0.5f), 0.5f, this, dataStructure, random));
+        //This spawns 8 organisms of type B in random position in world
+        for (int i = 0; i < 8; i++)
+        {
+            new TestOrganismB(new Vector3(random.NextSingle()*range-range/2, random.NextSingle()*range-range/2, random.NextSingle()*range-range/2), 0.5f, this, DataStructure, random);
+        }
 
-        float d = 1.4f;
-        Organisms.AddFirst(new TestOrganismB(new Vector3(-d, -d, -d), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(-d, -d, d), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(-d, d, -d), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(-d, d, d), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(d, -d, -d), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(d, -d, d), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(d, d, -d), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(d, d, d), 0.5f, this, dataStructure, random));
-        */
-        
-        //Full trapping setup 2D
-        /*
-        Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, -0.5f, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(0.5f, -0.5f, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, 0.5f, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(0.5f, 0.5f, 0), 0.5f, this, dataStructure, random));
-
-        Organisms.AddFirst(new TestOrganismB(new Vector3(-1.4f, -1.4f, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(1.4f, -1.4f, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(-1.4f, 1.4f, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(1.4f, 1.4f, 0), 0.5f, this, dataStructure, random));
-        */
-        
-        //Full trapping 1D
-        /*
-        Organisms.AddFirst(new TestOrganism(new Vector3(-0.5f, 0, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(0.5f, 0, 0), 0.5f, this, dataStructure, random));
-
-        Organisms.AddFirst(new TestOrganismB(new Vector3(-1.5f, 0, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(1.5f, 0, 0), 0.5f, this, dataStructure, random));
-        */
-        
-        //Random 3D
-        
-        new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        
-        new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, random.NextSingle()*20-10), 0.5f, this, DataStructure, random);
-        
-        
-        //Random 2D
-        /*
-        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
-        
-        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, random.NextSingle()*20-10, 0), 0.5f, this, dataStructure, random));
-        */
-        
-        //Random 1D
-        /*
-        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, 0, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganism(new Vector3(random.NextSingle()*20-10, 0, 0), 0.5f, this, dataStructure, random));
-        
-        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, 0, 0), 0.5f, this, dataStructure, random));
-        Organisms.AddFirst(new TestOrganismB(new Vector3(random.NextSingle()*20-10, 0, 0), 0.5f, this, dataStructure, random));
-        */
     }
 
     public override bool IsInBounds(Vector3 position)
@@ -152,13 +50,6 @@ public class TestWorld : World
             return false;
         if (MathF.Abs(position.Z) >= cubeHalfSize)
             return false;
-        //For 2D
-        //if (MathF.Abs(position.Z) > 0.6f)
-        //    return false;
-        
-        //For 1D
-        //if (MathF.Abs(position.Y) > 0.6f)
-        //    return false;
         
         return true;
     }
