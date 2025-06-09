@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -22,35 +23,40 @@ public class ConsoleApp : IProgramMedium
     public World World { get; set; }
     public DataStructure DataStructure { get; set; }
     private bool looping = true;
+    
     //We have a separate thread for input, because otherwise Console.ReadLine() would block running the simulation
     private Thread inputThread;
+    
+    //For tracking fps performance
+    private Stopwatch stopwatch;
+    public static float TimeRunning { get; private set; }
+    public static float AverageFps { get; private set; }
+    private float tallyFps;
+    private int fpsCounter;
+    private const int ticksPerUpdate = 15;
+    
     public void StartProgram()
     {
         AllocConsole();
         RedirectConsoleIO();
         
         Console.WriteLine("Running Biological Simulation");
-        Console.WriteLine($"Using data structure: {DataStructure.GetType()}.");
-        Console.WriteLine($"Starting organism count: {World.GetOrganismCount()}.");
-        if (Simulation.FileWritingEnabled)
-        {
-            Console.WriteLine($"Data will be written to file every: {Simulation.TicksPerFileWrite} ticks.");
-            Console.WriteLine($"Data will be stored in:");
-            Console.WriteLine(Path.GetFullPath(SimulationExporter.SaveDirectory));
-        }
-        else
-            Console.WriteLine("[WARNING] File writing is disabled.");
         
-        Console.WriteLine("A limited overview will about the current simulation state will be given every time a save is made.");
+        PrintSimulationInfo();
         
-        Console.WriteLine("Press 'q' to abort the simulation, all data writen to files will persist and one final save will be made.");
-        Console.WriteLine("Press 'h' for help commands while simulation is running.");
+        Console.WriteLine("A limited overview will about the current simulation state will be given every time a save is made");
+        
+        Console.WriteLine("Press 'q' to abort the simulation, all data writen to files will persist and one final save will be made");
+        Console.WriteLine("Press 'h' for help commands while simulation is running");
 
         //Thread will call ReadInput()
         inputThread = new Thread(ReadInput);
         //It will run in the background (thus never blocking a process or action)
         inputThread.IsBackground = true;
         inputThread.Start();
+        
+        stopwatch = new Stopwatch();
+        stopwatch.Start();
         
         //Actually start program
         CoreLoop();
@@ -60,17 +66,36 @@ public class ConsoleApp : IProgramMedium
     {
         while (looping)
         {
+            #region Performance tracking
+            TimeRunning += (float)stopwatch.Elapsed.TotalSeconds;
+            tallyFps += 1 / (float)stopwatch.Elapsed.TotalSeconds;
+            stopwatch.Restart();
+            fpsCounter++;
+            if (fpsCounter >= ticksPerUpdate) 
+            { 
+                AverageFps = tallyFps / fpsCounter;
+                if (AverageFps is Single.PositiveInfinity)
+                    AverageFps = 0;
+                
+                fpsCounter = 0;
+                tallyFps = 0;
+            }
+            //Now can write average fps in render manager
+            #endregion
+            
             if (!Simulation.FileWritingEnabled && Simulation.Tick % 250 == 0)
                 PrintSimulationStats();
             Simulation.Step();
         }
+        
+        stopwatch.Stop();
     }
 
     private void ReadInput()
     {
         while (looping)
         {
-            char c = Console.ReadKey().KeyChar;
+            char c = Console.ReadKey(true).KeyChar;
 
             switch (c)
             {
@@ -80,6 +105,18 @@ public class ConsoleApp : IProgramMedium
                 case 'h':
                     PrintHelp();
                     break;
+                case 's':
+                    PrintSimulationStats();
+                    break;
+                case 'i':
+                    PrintSimulationInfo();
+                    break;
+                case 'p':
+                    if(looping)
+                        Console.WriteLine("Simulation is currently running, Tick: " + Simulation.Tick);
+                    else
+                        Console.WriteLine("Simulation is NOT currently active");
+                    break;
             }
         }
     }
@@ -87,7 +124,27 @@ public class ConsoleApp : IProgramMedium
     public void PrintHelp()
     {
         //Stuff like, print stats and other stuff
-        throw new NotImplementedException();
+        Console.WriteLine("------COMMANDS------");
+        Console.WriteLine("- q: ABORT simulation");
+        Console.WriteLine("- i: INFO about simulation");
+        Console.WriteLine("- s: STATS about simulation");
+        Console.WriteLine("- p: PING process");
+    }
+
+    public void PrintSimulationInfo()
+    {
+        Console.WriteLine($"[{DateTime.Now}]");
+        Console.WriteLine($"Simulating world: {World.GetType()}");
+        Console.WriteLine($"Using data structure: {DataStructure.GetType()}");
+        Console.WriteLine($"Starting organism count: {World.GetOrganismCount()}");
+        if (Simulation.FileWritingEnabled)
+        {
+            Console.WriteLine($"Data will be written to file every: {Simulation.TicksPerFileWrite} ticks");
+            Console.WriteLine($"Data will be stored in:");
+            Console.WriteLine(Path.GetFullPath(SimulationExporter.SaveDirectory));
+        }
+        else
+            Console.WriteLine("[WARNING] File writing is disabled");
     }
 
     public void PrintSimulationStats()
@@ -95,8 +152,12 @@ public class ConsoleApp : IProgramMedium
         //TODO add fps, or real time running
         string[] lines =
         [
+            $"|[{DateTime.Now}]|",
             $"|Tick: {Simulation.Tick}|",
             $"|Organisms: {World.GetOrganismCount()}|",
+            $"|Time running: {Math.Round(TimeRunning, 2)}s|",
+            $"|Tick speed: {Math.Round(AverageFps, 2)}/s|",
+            $"|Seconds per tick: {Math.Round(1/AverageFps, 2)}s|"
         ];
 
         int length = lines.Select(s =>
