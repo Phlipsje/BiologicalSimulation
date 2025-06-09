@@ -10,7 +10,7 @@ using Vector3 = System.Numerics.Vector3;
 public class TestOrganism : Organism
 {
     public override string Key => "A";
-    private int ticksAlive = 0;
+    private int reproductionCounter = 0;
     private int ticksForReproduction = 0;
     public override Vector3 Color => color;
     private static readonly Vector3 color = new Vector3(0.15f, 0.5f, 0.15f);
@@ -34,14 +34,15 @@ public class TestOrganism : Organism
         Move(direction);
         
         Reproduction();
-        ticksAlive++;
+        reproductionCounter++;
     }
     
     private void Reproduction()
     {
-        if (ticksAlive % ticksForReproduction == 0)
+        if (reproductionCounter > ticksForReproduction)
         {
             Reproduce();
+            reproductionCounter = 0;
         }
     }
 

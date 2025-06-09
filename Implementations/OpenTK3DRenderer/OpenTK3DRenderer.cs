@@ -77,7 +77,7 @@ public class OpenTK3DRenderer : GameWindow, IProgramMedium
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
         
-        _camera = new Camera(new Vector3(0, 0, -3));
+        _camera = new Camera(new Vector3(0, 10, 10));
         //This means that your cursor is used by the program (so you can't move it around anymore)
         CursorState = CursorState.Grabbed;
     }

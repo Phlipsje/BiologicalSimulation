@@ -10,7 +10,7 @@ using Vector3 = System.Numerics.Vector3;
 public class TestOrganismB : Organism
 {
     public override string Key => "B";
-    private int ticksAlive = 0;
+    private int reproductionCounter = 0;
     private int ticksForReproduction = 0;
     public override Vector3 Color => color;
     private static readonly Vector3 color = new Vector3(0.9f, 0.9f, 0.2f);
@@ -20,9 +20,9 @@ public class TestOrganismB : Organism
         ticksForReproduction = random.Next(210, 250);
     }
 
-    public override TestOrganism CreateNewOrganism(Vector3 startingPosition)
+    public override TestOrganismB CreateNewOrganism(Vector3 startingPosition)
     {
-        return new TestOrganism(startingPosition, Size, World, DataStructure, Random);
+        return new TestOrganismB(startingPosition, Size, World, DataStructure, Random);
     }
 
     public override void Step()
@@ -34,14 +34,15 @@ public class TestOrganismB : Organism
         Move(direction);
         
         Reproduction();
-        ticksAlive++;
+        reproductionCounter++;
     }
     
     private void Reproduction()
     {
-        if (ticksAlive % ticksForReproduction == 0)
+        if (reproductionCounter > ticksForReproduction)
         {
             Reproduce();
+            reproductionCounter = 0;
         }
     }
 

@@ -13,8 +13,8 @@ public class Camera
     public Camera(Vector3 startPosition)
     {
         Position = startPosition;
-        Pitch = 0.0f;
-        Yaw = -90.0f; // Looking down -Z
+        Pitch = -40.0f;
+        Yaw = -90.0f;
     }
 
     public Vector3 Front => Vector3.Normalize(new Vector3(
