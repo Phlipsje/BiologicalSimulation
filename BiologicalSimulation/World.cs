@@ -21,7 +21,7 @@ public abstract class World
 
     public virtual void Step()
     {
-        
+        //MAKE SURE NOT TO INCLUDE Datastructure.Step() in here, because already done in Simulation itself!
     }
 
     public void AddOrganism(Organism organism)

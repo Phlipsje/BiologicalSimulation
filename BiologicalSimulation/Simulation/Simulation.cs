@@ -7,23 +7,17 @@ public partial class Simulation
     private World world;
     private DataStructure dataStructure;
     private Random random;
-    private bool abort;
-    public int Tick { get; private set; } //The current tick we are on
-    public bool DrawingEnabled { get; set; }
-    public bool FileWritingEnabled { get; set; }
-    public bool WriteToSameFile { get; set; }
-    private int ticksPerDrawCall;
-    private int ticksPerFileWrite;
+    private bool abort = false;
+    public int Tick { get; private set; } = 0; //The current tick we are on
+    public bool FileWritingEnabled { get; set; } = false;
+    public bool WriteToSameFile { get; set; } = false;
+    public int TicksPerFileWrite = 0;
     
     private SimulationExporter simulationExporter;
     
     //This event happens at the end of every tick
     public delegate void OnTickEventHandler(World world);
     public event OnTickEventHandler? OnTick;
-    
-    //This event happens at depending on if it is turned on and if it's frequency, basically a lesser called OnTick
-    public delegate void OnDrawEventHandler(World world);
-    public event OnDrawEventHandler? OnDraw;
     
     //This event happens at depending on if it is turned on and if it's frequency, basically a lesser called OnTick
     public delegate void OnFileWriteEventHandler(string filePath, string fileContents);
@@ -38,12 +32,6 @@ public partial class Simulation
         this.world = world;
         this.random = random;
         dataStructure = new NoDataStructure(); //Default data structure has no optimizations
-        abort = false;
-        Tick = 0;
-        DrawingEnabled = false;
-        FileWritingEnabled = true;
-        ticksPerDrawCall = 0;
-        ticksPerFileWrite = 0;
         simulationExporter = new SimulationExporter();
         
         //Sets culture to US-English, specific language does not matter, but because we set this, using float.Parse and writing floats to file always use '.' as decimal point.
@@ -79,14 +67,8 @@ public partial class Simulation
         world.Step();
         OnTick?.Invoke(world);
 
-        //Invoke OnDraw if it has been a set amount of ticks
-        if (DrawingEnabled && Tick % ticksPerDrawCall == 0)
-        {
-            OnDraw?.Invoke(world);
-        }
-
         //Save file and invoke event letting know that it happened
-        if (FileWritingEnabled && Tick % ticksPerFileWrite == 0)
+        if (FileWritingEnabled && Tick % TicksPerFileWrite == 0)
         {
             (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(world, this) : simulationExporter.SaveToSeparateFiles(world, this);
             OnFileWrite?.Invoke(filePath, fileContents);
@@ -109,6 +91,13 @@ public partial class Simulation
         
         //Tell the user that the simulation is over
         OnEnd?.Invoke(world);
+    }
+
+    //Forcefully make a save to a specified file location
+    public void Save()
+    {
+        (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(world, this) : simulationExporter.SaveToSeparateFiles(world, this);
+        OnFileWrite?.Invoke(filePath, fileContents);
     }
 
     #region Warnings and errors

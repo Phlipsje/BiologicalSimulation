@@ -12,36 +12,36 @@ namespace BioSim.Datastructures.Datastructures;
 /// </summary>
 public class Chunk2DFixedDataStructure : DataStructure
 {
-    private Chunk2D[,] chunks;
-    private Vector2 minPosition;
-    private float chunkSize;
-    private int chunkCountX;
-    private int chunkCountY;
+    protected ExtendedChunk2D[,] Chunks;
+    protected Vector2 MinPosition;
+    protected float ChunkSize;
+    protected int ChunkCountX;
+    protected int ChunkCountY;
     
     public Chunk2DFixedDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize)
     {
-        chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
-        chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
-        chunks = new Chunk2D[chunkCountX, chunkCountY];
-        this.minPosition = minPosition;
-        this.chunkSize = chunkSize;
+        ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
+        ChunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
+        Chunks = new ExtendedChunk2D[ChunkCountX, ChunkCountY];
+        MinPosition = minPosition;
+        ChunkSize = chunkSize;
 
         //Create all chunks
-        for (int i = 0; i < chunkCountX; i++)
+        for (int i = 0; i < ChunkCountX; i++)
         {
-            for (int j = 0; j < chunkCountY; j++)
+            for (int j = 0; j < ChunkCountY; j++)
             {
                 Vector2 chunkCenter = minPosition + new Vector2(i, j) * chunkSize + new Vector2(chunkSize*0.5f);
-                chunks[i, j] = new Chunk2D(chunkCenter, chunkSize, largestOrganismSize);
+                Chunks[i, j] = new ExtendedChunk2D(chunkCenter, chunkSize, largestOrganismSize);
             }
         }
         
         //Get all connected chunks
-        for (int i = 0; i < chunkCountX; i++)
+        for (int i = 0; i < ChunkCountX; i++)
         {
-            for (int j = 0; j < chunkCountY; j++)
+            for (int j = 0; j < ChunkCountY; j++)
             {
-                chunks[i, j].Initialize(GetConnectedChunks(i, j));
+                Chunks[i, j].Initialize(GetConnectedChunks(i, j));
             }
         }
         
@@ -50,27 +50,27 @@ public class Chunk2DFixedDataStructure : DataStructure
     }
 
     [Pure]
-    private Chunk2D[] GetConnectedChunks(int chunkX, int chunkY)
+    protected ExtendedChunk2D[] GetConnectedChunks(int chunkX, int chunkY)
     {
-        List<Chunk2D> connectedChunks = new List<Chunk2D>(8);
+        List<ExtendedChunk2D> connectedChunks = new List<ExtendedChunk2D>(8);
         
         for (int x = -1; x <= 1; x++)
         {
             //Check bounds
-            if (chunkX + x < 0 || chunkX + x >= chunkCountX)
+            if (chunkX + x < 0 || chunkX + x >= ChunkCountX)
                 continue;
             
             for (int y = -1; y <= 1; y++)
             {
                 //Check bounds
-                if (chunkY + y < 0 || chunkY + y >= chunkCountY)
+                if (chunkY + y < 0 || chunkY + y >= ChunkCountY)
                     continue;
                 
                 //Don't add self
                 if (x == 0 && y == 0)
                     continue;
                     
-                connectedChunks.Add(chunks[chunkX+x,chunkY+y]);
+                connectedChunks.Add(Chunks[chunkX+x,chunkY+y]);
             }
         }
         
@@ -79,7 +79,7 @@ public class Chunk2DFixedDataStructure : DataStructure
 
     public override void Step()
     {
-        foreach (Chunk2D chunk2D in chunks)
+        foreach (ExtendedChunk2D chunk2D in Chunks)
         {
             chunk2D.Step();
         }
@@ -88,14 +88,14 @@ public class Chunk2DFixedDataStructure : DataStructure
     public override void AddOrganism(Organism organism)
     {
         (int x, int y) = GetChunk(organism.Position);
-        chunks[x,y].DirectlyInsertOrganism(organism);
+        Chunks[x,y].DirectlyInsertOrganism(organism);
     }
 
     public override IEnumerable<Organism> GetOrganisms()
     {
         Organism[] organisms = new Organism[GetOrganismCount()];
         int i = 0;
-        foreach (Chunk2D chunk in chunks)
+        foreach (ExtendedChunk2D chunk in Chunks)
         {
             foreach (Organism organism in chunk.Organisms)
             {
@@ -110,7 +110,7 @@ public class Chunk2DFixedDataStructure : DataStructure
     public override int GetOrganismCount()
     {
         int organismCount = 0;
-        foreach (Chunk2D chunk2D in chunks)
+        foreach (ExtendedChunk2D chunk2D in Chunks)
         {
             organismCount += chunk2D.OrganismCount;
         }
@@ -120,25 +120,27 @@ public class Chunk2DFixedDataStructure : DataStructure
 
     private (int, int) GetChunk(Vector3 position)
     {
-        int chunkX = (int)Math.Floor((position.X - minPosition.X) / chunkSize);
-        int chunkY = (int)Math.Floor((position.Y - minPosition.Y) / chunkSize);
+        int chunkX = (int)Math.Floor((position.X - MinPosition.X) / ChunkSize);
+        int chunkY = (int)Math.Floor((position.Y - MinPosition.Y) / ChunkSize);
         //Math.Min because otherwise can throw error if X,Y, or Z is exactly maxValue
-        chunkX = Math.Min(chunkX, chunkCountX - 1);
-        chunkY = Math.Min(chunkY, chunkCountY - 1);
+        chunkX = Math.Min(chunkX, ChunkCountX - 1);
+        chunkY = Math.Min(chunkY, ChunkCountY - 1);
         return (chunkX, chunkY);
     }
     
-    public override bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists)
+    public override bool CheckCollision(Organism organism, Vector3 position)
     {
-        LinkedList<Organism> collideableOrganisms = organismLists[0];
-        LinkedList<Organism> collideableExtendedOrganisms = organismLists[1];
+        (int cX, int cY) = GetChunk(organism.Position);
+        ExtendedChunk2D chunk = Chunks[cX, cY];
         
         if (!World.IsInBounds(position))
             return true;
         
         //Check for organisms within the chunk
-        foreach (Organism otherOrganism in collideableOrganisms)
+        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
         {
+            Organism otherOrganism = node.Value;
+            
             if (organism == otherOrganism)
                 continue;
             
@@ -155,8 +157,10 @@ public class Chunk2DFixedDataStructure : DataStructure
         }
         
         //Check for any organisms within neighbouring chunks that are within distance of possibly touching with this
-        foreach (Organism otherOrganism in collideableExtendedOrganisms)
+        for (LinkedListNode<Organism> node = chunk.ExtendedCheck.First!; node != null; node = node.Next!)
         {
+            Organism otherOrganism = node.Value;
+            
             if (organism == otherOrganism)
                 continue;
             
@@ -175,22 +179,69 @@ public class Chunk2DFixedDataStructure : DataStructure
         return false;
     }
 
-    public override Organism ClosestNeighbour(Organism organism)
+    /// <summary>
+    /// Returns the closest neighbour within reason: will return nothing if there is no Organism within this and all neighbouring chunks
+    /// </summary>
+    /// <param name="organism"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public override Organism? NearestNeighbour(Organism organism)
     {
-        throw new NotImplementedException();
+        (int cX, int cY) = GetChunk(organism.Position);
+        ExtendedChunk2D chunk = Chunks[cX, cY];
+        
+        float closestSquareDistance = 9999999999999f;
+        Organism? knownNearest = null;
+        
+        //Check for organisms within the chunk
+        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
+        {
+            Organism otherOrganism = node.Value;
+            
+            if (organism == otherOrganism)
+                continue;
+            
+            float distanceSquared = Vector3.DistanceSquared(organism.Position, otherOrganism.Position);
+            if (distanceSquared < closestSquareDistance)
+            {
+                closestSquareDistance = distanceSquared;
+                knownNearest = otherOrganism;
+            }
+        }
+
+        //Check all organisms in neighbouring chunks
+        foreach (ExtendedChunk2D neighbouringChunk in chunk.ConnectedChunks)
+        {
+            for (LinkedListNode<Organism> node = neighbouringChunk.Organisms.First!; node != null; node = node.Next!)
+            {
+                Organism otherOrganism = node.Value;
+            
+                if (organism == otherOrganism)
+                    continue;
+            
+                float distanceSquared = Vector3.DistanceSquared(organism.Position, otherOrganism.Position);
+                if (distanceSquared < closestSquareDistance)
+                {
+                    closestSquareDistance = distanceSquared;
+                    knownNearest = otherOrganism;
+                }
+            }
+        }
+        
+        return knownNearest;
     }
     
     #region Warnings and errors
 
     private void CheckWarnings(float largestOrganismSize)
     {
-        if (chunkSize > largestOrganismSize * 10)
+        if (ChunkSize > largestOrganismSize * 10)
             Console.WriteLine("Warning: Chunk size is rather large, smaller chunk size would improve performance");
     }
 
     private void CheckErrors(float largestOrganismSize)
     {
-        if (chunkSize / 2f < largestOrganismSize)
+        if (ChunkSize / 2f < largestOrganismSize)
             throw new ArgumentException("Chunk size must be at least twice largest organism size");
     }
     #endregion

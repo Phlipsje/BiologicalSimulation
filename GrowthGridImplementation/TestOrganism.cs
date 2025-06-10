@@ -5,20 +5,21 @@ using BioSim.Datastructures;
 using Microsoft.Xna.Framework;
 using Vector3 = System.Numerics.Vector3;
 
-namespace Simple_graphical_implementation;
+namespace GrowthGridImplementation;
 
-public class TestOrganism : VisualOrganism
+public class TestOrganism : Organism
 {
     public override string Key => "A";
     public float GrowthRate;
     public float Resources;
-    public float BB1; //No idea what this is
-    public float BB2; //No idea what this is
+    public float BB1;
+    public float BB2;
     public float Biomass;
-    public override Color Color => Color.Green;
+    public override Vector3 Color => color;
+    private static readonly Vector3 color = new Vector3(0.15f, 0.5f, 0.15f);
     public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
-        VisualSimulation.OrganismACount++;
+        Program.OrganismACount++;
         GrowthRate = random.NextSingle(); //Between 0 and 1
         Resources = 0;
         BB1 = 0;
@@ -31,18 +32,18 @@ public class TestOrganism : VisualOrganism
         return new TestOrganism(startingPosition, Size, World, DataStructure, Random);
     }
 
-    public override void Step(List<LinkedList<Organism>> organismLists)
+    public override void Step()
     {
         //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
         //Also known as brownian motion
         Vector3 direction = new Vector3((float)(Random.NextDouble() * 0.02 - 0.01),
             (float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01));
-        Move(direction, organismLists);
+        Move(direction);
         
-        Reproduction(organismLists);
+        Reproduction();
     }
     
-    private void Reproduction(List<LinkedList<Organism>> organismLists)
+    private void Reproduction()
     {
         GrowthRate = 0.02f;
         GridValues values = GrowthGrid.GetValues(Position);
@@ -70,7 +71,7 @@ public class TestOrganism : VisualOrganism
 
         if (Biomass > 6)
         {
-            TestOrganism child = Reproduce(organismLists) as TestOrganism;
+            TestOrganism child = Reproduce() as TestOrganism;
             if (child is null)
                 return;
             

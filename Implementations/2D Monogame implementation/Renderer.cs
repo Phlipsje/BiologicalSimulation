@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Simple_graphical_implementation;
+namespace Implementations.Monogame2DRenderer;
 
 public class Renderer
 {
@@ -58,21 +58,20 @@ public class Renderer
         font = content.Load<SpriteFont>("Font");
     }
 
-    public void Render(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, World world, ViewingInformation viewingInformation)
+    public void Render(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, Organism[] organisms, ViewingInformation viewingInformation)
     {
         //Tell buffer we are drawing to a render target
         graphicsDevice.SetRenderTarget(RenderTarget);
 
         //Remove everything that is set in the render target and set it to a singular background color
-        graphicsDevice.Clear(VisualSimulation.BackgroundColor);
+        graphicsDevice.Clear(Monogame2DRenderer.BackgroundColor);
 
         //Start a new buffer to draw to
         spriteBatch.Begin();
 
-        IEnumerable<Organism> organisms = world.GetOrganisms();
-        foreach (Organism visualOrganism in organisms)
+        
+        foreach (Organism organism in organisms)
         {
-            var organism = (VisualOrganism)visualOrganism;
             float posAxis0 = (organism.Position[axisIndex0] - viewingInformation.Position[axisIndex0] - organism.Size/2) * viewingInformation.Scale + viewingInformation.Width/2;
             float posAxis1 = (organism.Position[axisIndex1] - viewingInformation.Position[axisIndex1] - organism.Size/2) * viewingInformation.Scale + viewingInformation.Height/2;
 
@@ -85,14 +84,14 @@ public class Renderer
             //Skip if out of scope
             if (posAxis1 < -organismPixelSize || posAxis1 > viewingInformation.Height + organismPixelSize)
                 continue;
-
-            //TODO base scale, color and layerDepth off of what is in the foreground (and don't draw what is behind the camera)
+            
             float minDistanceToCamera = -3f;
             float maxDistanceToCamera = 3f;
             float layerDepth = (organism.Position[topDownAxis] - minDistanceToCamera) / (maxDistanceToCamera - minDistanceToCamera);
             Vector2 position = new Vector2(posAxis0, posAxis1);
             float scale = viewingInformation.Scale / 1000f; //1000 because the size of the organism sprite is 1000x1000
-            spriteBatch.Draw(organismTexture, position, null, organism.Color, 0f, Vector2.Zero, scale, SpriteEffects.None, layerDepth);
+            Color color = new Color(organism.Color.X, organism.Color.Y, organism.Color.Z);
+            spriteBatch.Draw(organismTexture, position, null, color, 0f, Vector2.Zero, scale, SpriteEffects.None, layerDepth);
         }
         
         spriteBatch.DrawString(font, axis0Char + " ->", new Vector2(50, 20), Color.White);

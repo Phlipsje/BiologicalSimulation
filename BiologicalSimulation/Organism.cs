@@ -7,7 +7,7 @@ namespace BioSim;
 /// This is an abstract class which can be extended to create a type of organism
 /// It must be given a Key, Size, Step function, ToString function and FromString function to describe it
 /// </summary>
-public abstract class Organism : IOrganism, IMinimumBoundable
+public abstract class Organism : IMinimumBoundable
 {
     public abstract string Key { get; } //Used to identify which organism it is in a file
     private Vector3 position;
@@ -21,6 +21,7 @@ public abstract class Organism : IOrganism, IMinimumBoundable
         } 
     }
     public float Size { get; } //Organism is a sphere, so this is the radius
+    public virtual Vector3 Color { get; } = Vector3.Zero; //Used to identify which organism it is in any visual representation, has no effect besides visual clarity
     protected World World { get; } //Needs this to check if it is in bounds
     protected DataStructure DataStructure { get; } //Needs this to understand where other organisms are
     protected Random Random;
@@ -37,23 +38,23 @@ public abstract class Organism : IOrganism, IMinimumBoundable
     }
 
     public abstract Organism CreateNewOrganism(Vector3 startingPosition);
-    public abstract void Step(List<LinkedList<Organism>> organismLists);
+    public abstract void Step();
     public new abstract string ToString();
     public abstract void FromString(string s);
 
-    public void Move(Vector3 direction, List<LinkedList<Organism>> organismLists)
+    public void Move(Vector3 direction)
     {
         //Simply add movement towards direction if there is no collision there
         Vector3 newPosition = Position + direction;
 
-        if (!CheckCollision(newPosition, organismLists))
+        if (!CheckCollision(newPosition))
         {
             //Otherwise no collision, so update position
             Position = newPosition;
         }
     }
 
-    public Organism Reproduce(List<LinkedList<Organism>> organismLists)
+    public Organism Reproduce()
     {
         //Will do a maximum of 5 attempts
         for (int i = 0; i < 5; i++)
@@ -73,30 +74,27 @@ public abstract class Organism : IOrganism, IMinimumBoundable
             Vector3 onlyNegativeNewPosition = Position - direction * 2 * Size;
 
             //Check if both positions are not within another organism
-            if (!CheckCollision(positiveNewPosition, organismLists) && !CheckCollision(negativeNewPosition, organismLists))
+            if (!CheckCollision(positiveNewPosition) && !CheckCollision(negativeNewPosition))
             {
                 //Create new organism 
                 Organism newOrganism = CreateNewOrganism(positiveNewPosition);
-                World.AddOrganism(newOrganism);
             
                 //Push the original organism away in the other direction
                 Position = negativeNewPosition;
             
                 return newOrganism;
             }
-            else if (!CheckCollision(onlyPositiveNewPosition, organismLists))
+            else if (!CheckCollision(onlyPositiveNewPosition))
             {
                 //Create new organism 
                 Organism newOrganism = CreateNewOrganism(onlyPositiveNewPosition);
-                World.AddOrganism(newOrganism);
             
                 return newOrganism;
             }
-            else if (!CheckCollision(onlyNegativeNewPosition, organismLists))
+            else if (!CheckCollision(onlyNegativeNewPosition))
             {
                 //Create new organism 
                 Organism newOrganism = CreateNewOrganism(onlyNegativeNewPosition);
-                World.AddOrganism(newOrganism);
             
                 return newOrganism;
             }
@@ -105,9 +103,9 @@ public abstract class Organism : IOrganism, IMinimumBoundable
         return null;
     }
 
-    private bool CheckCollision(Vector3 position, List<LinkedList<Organism>> organismLists)
+    private bool CheckCollision(Vector3 position)
     {
-        return DataStructure.CheckCollision(this, position, organismLists);
+        return DataStructure.CheckCollision(this, position);
     }
 
     public Mbb GetMbb()
@@ -125,15 +123,4 @@ public abstract class Organism : IOrganism, IMinimumBoundable
         _mbb = new Mbb(Position - sizeVector, Position + sizeVector);
     }
     private Mbb _mbb;
-}
-
-public interface IOrganism
-{
-    public string Key { get; } //Used to identify which organism it is in a file
-    public Vector3 Position { get; }
-    public float Size { get; } //Organism is a sphere, so this is the radius
-    
-    public void Step(List<LinkedList<Organism>> organismLists);
-    public string ToString();
-    public void FromString(string s);
 }

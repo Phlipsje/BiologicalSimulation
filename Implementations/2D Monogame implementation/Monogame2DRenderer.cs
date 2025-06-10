@@ -15,13 +15,13 @@ using Microsoft.Xna.Framework.Input;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
 
-namespace Simple_graphical_implementation;
+namespace Implementations.Monogame2DRenderer;
 
 /// <summary>
 /// This project contains a visual implementation of the biological simulation library.
 /// Used to test visually test that everything works as intended.
 /// </summary>
-public class VisualSimulation : Game
+public class Monogame2DRenderer : Game, IProgramMedium
 {
     private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
@@ -29,27 +29,19 @@ public class VisualSimulation : Game
     private const int screenWidth = 1280;
     private const int screenHeight = 720;
     private RenderManager renderManager;
-    private bool updateDrawnImage = true;
 
     public static Color BackgroundColor = Color.CornflowerBlue;
-
-    private World world;
-    private Simulation simulation;
     private ViewingInformation viewingInformation;
-    public new int Tick => simulation.Tick;
 
-    //Easiest way to implement global counter, not most safe way of doing it
-    public static int OrganismACount = 0;
-    public static int OrganismBCount = 0;
+    
     
     //For tracking fps performance
     public static float AverageFps { get; private set; }
     private float tallyFps;
     private int fpsCounter;
     private const int ticksPerUpdate = 15;
-    private float secondsCount = 0f;
     
-    public VisualSimulation()
+    public Monogame2DRenderer()
     {
         graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
@@ -59,6 +51,15 @@ public class VisualSimulation : Game
 
         IsFixedTimeStep = false;
         AverageFps = 60;
+    }
+
+    public Simulation Simulation { get; set; }
+    public World World { get; set; }
+    public DataStructure DataStructure { get; set; }
+
+    public void StartProgram()
+    {
+        Run();
     }
 
     protected override void Initialize()
@@ -88,51 +89,14 @@ public class VisualSimulation : Game
                 ViewDirection.XZPlane, new Rectangle(0, sizeY, sizeX, sizeY))
         });
         renderManager.DrawBorders = true;
-        renderManager.Draw = true;
         renderManager.LoadContent(Content);
-        
-        simulation = new Simulation();
-        Random random = new Random(); //Can enter seed here
-        float worldHalfSize = 12f;
-        float organismSize = 0.5f;
-        DataStructure dataStructure = new RTreeDataStructure(0.1f);
-        /*DataStructure dataStructure = new Chunk3DFixedDataStructure(new Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
-            new Vector3(worldHalfSize), 4f, organismSize); */
-        //DataStructure dataStructure = new Chunk2DFixedDataStructure(new Vector2(-worldHalfSize), 
-        //    new Vector2(worldHalfSize), 2.5f, organismSize);
-        world = new TestWorld(dataStructure, simulation, worldHalfSize);
-        //TestOrganism exampleOrganism = new TestOrganism(Vector3.Zero, organismSize, world, dataStructure, random);
-        //OrganismManager.RegisterOrganism(exampleOrganism.Key, exampleOrganism.CreateNewOrganism);
-        simulation.CreateSimulation(world, random);
-        simulation.SetDataStructure(dataStructure);
-        simulation.DrawingEnabled = true;
-        simulation.SetDrawFrequency(1);
-        
-        //For saving to file
-        simulation.FileWritingEnabled = false;
-        simulation.WriteToSameFile = true;
-        simulation.SetFileWriteFrequency(100);
-        SimulationExporter.FileName = "Random-3D-1";
-        SimulationExporter.SaveDirectory = "Content\\Extras";
-        SimulationExporter.ShowExportFilePath = true;
-        SimulationExporter.ClearDirectory = true;
-
-        simulation.OnDraw += OnDrawCall;
-        simulation.OnEnd += StopProgram;
-        
-        OrganismACount = 0;
-        OrganismBCount = 0;
-        GrowthGrid.Initialize(new Vector3(-worldHalfSize, -worldHalfSize, -worldHalfSize), 
-            new Vector3(worldHalfSize, worldHalfSize, worldHalfSize), new Vector3(0.5f, 0.5f, 0.5f));
-        simulation.StartSimulation();
     }
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-            Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if (Keyboard.GetState().IsKeyDown(Keys.Escape))
         {
-            simulation.AbortSimulation();
+            Simulation.AbortSimulation();
             Exit();
         }
         
@@ -151,42 +115,34 @@ public class VisualSimulation : Game
         //Now can write average fps in render manager
         #endregion
 
-        simulation.Step();
-        GrowthGrid.Step();
-
-        secondsCount += (float)gameTime.ElapsedGameTime.TotalSeconds;
-        if (simulation.Tick == 4000)
-        {
-            Console.WriteLine("Simulation reached 4000 ticks in:");
-            Console.WriteLine(secondsCount + " seconds"); //Elapsed seconds
-        }
+        Simulation.Step();
         
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        if (!updateDrawnImage)
-            return;
-        
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        renderManager.Render(spriteBatch, world, viewingInformation);
-        
-        updateDrawnImage = false;
+        renderManager.Render(spriteBatch, World, viewingInformation);
         
         base.Draw(gameTime);
     }
-
-    private void OnDrawCall(World world)
-    {
-        updateDrawnImage = true;
-    }
-
+    
     private void StopProgram(World world)
     {
         //Simulation has already stopped before this
         Exit();
+    }
+
+    public void StopProgram()
+    {
+        Exit();
+    }
+
+    public void FileWriten(string filePath, string fileContents)
+    {
+        //Nothing to do
     }
 }
 

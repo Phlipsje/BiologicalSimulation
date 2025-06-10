@@ -10,33 +10,31 @@ namespace BioSim.Datastructures;
 /// the larger size is an extension overlapping with neighbouring chunks that is of minimal size to include all organisms in other chunks that are relevant for collision within this chunk.
 /// Organisms are checked for inclusion/removal every frame, but are only actually removed/inserted if it falls outside the boundaries.
 /// </summary>
-public class Chunk3D
+public class ExtendedChunk3D
 {
     public Vector3 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
     private float dimenstionExtensionForCheck;
     public int OrganismCount { get; private set; }
     public LinkedList<Organism> Organisms { get; }
-    private LinkedList<Organism> extendedCheck;
+    public LinkedList<Organism> ExtendedCheck;
     public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
-    private Chunk3D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
-    private List<LinkedList<Organism>> listsToSend;
+    public ExtendedChunk3D[] ConnectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     
-    public Chunk3D(Vector3 center, float size, float largestOrganismSize)
+    public ExtendedChunk3D(Vector3 center, float size, float largestOrganismSize)
     {
         Center = center;
         HalfDimension = size/2f;
         Organisms = new LinkedList<Organism>();
-        extendedCheck = new LinkedList<Organism>();
+        ExtendedCheck = new LinkedList<Organism>();
         CheckToBeAdded = new Queue<Organism>();
         dimenstionExtensionForCheck = largestOrganismSize * 2;
-        listsToSend = [Organisms, extendedCheck];
     }
 
-    public void Initialize(Chunk3D[] connectedChunks)
+    public void Initialize(ExtendedChunk3D[] connectedChunks)
     {
         //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
-        this.connectedChunks = connectedChunks;
+        this.ConnectedChunks = connectedChunks;
     }
     
     /// <summary>
@@ -49,24 +47,24 @@ public class Chunk3D
         CheckNewPossibleAdditions();
         
         //Run update loop
-        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             Organism organism = organismNode.Value;
             
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
-            organism.Step(listsToSend);
+            organism.Step();
         }
         
         //Update what should and should not be in this chunk
         //No additions happen during this (to this chunk)
-        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             //Get organism at this index
             Organism organism = organismNode.Value;
             
             CheckPosition(organism, organismNode);
         }
-        for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
+        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             //Get organism at this index
             Organism organism = organismNode.Value;
@@ -94,9 +92,9 @@ public class Chunk3D
                 continue;
             }
             
-            if (singleAxisDistance <= HalfDimension + dimenstionExtensionForCheck && !extendedCheck.Contains(organism))
+            if (singleAxisDistance <= HalfDimension + dimenstionExtensionForCheck && !ExtendedCheck.Contains(organism))
             {
-                extendedCheck.AddLast(organism);
+                ExtendedCheck.AddLast(organism);
             }
         }
     }
@@ -115,10 +113,14 @@ public class Chunk3D
         if (singleAxisDistance > HalfDimension)
         {
             //Send to neighbouring chunk for checking
-            foreach (Chunk3D chunk in connectedChunks)
+            foreach (ExtendedChunk3D chunk in ConnectedChunks)
             {
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
+            
+            if (organismNode.Previous == null && organismNode.Next == null)
+                return;
+            
             //Removing via node if faster
             Organisms.Remove(organismNode);
             OrganismCount--;
@@ -128,7 +130,7 @@ public class Chunk3D
             //Send to neighbouring chunks for checking
             if (singleAxisDistance > HalfDimension - dimenstionExtensionForCheck)
             {
-                foreach (Chunk3D chunk in connectedChunks)
+                foreach (ExtendedChunk3D chunk in ConnectedChunks)
                 {
                     chunk.CheckToBeAdded.Enqueue(organism);
                 }
@@ -151,7 +153,7 @@ public class Chunk3D
         if (singleAxisDistance > HalfDimension + dimenstionExtensionForCheck)
         {
             //Removing via node if faster
-            extendedCheck.Remove(organismNode);
+            ExtendedCheck.Remove(organismNode);
         }
     }
 

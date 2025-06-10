@@ -21,7 +21,7 @@ public class RTreeDataStructure(float moveRange) : DataStructure
             List<Organism> collidables = rTree.Search(possibleCollisionArea);
             collisionBuffer[organism] = collidables;
             Vector3 oldPos = organisms[i].Position;
-            organism.Step([]);
+            organism.Step();
             if (organisms[i].Position != oldPos)
             {
                 //update data structure
@@ -38,10 +38,15 @@ public class RTreeDataStructure(float moveRange) : DataStructure
         organismCount++;
     }
 
-    public void RemoveOrganism(Organism organism)
+    public bool RemoveOrganism(Organism organism)
     {
         if (rTree.Delete(organism))
+        {
             organismCount--;
+            return true;
+        }
+
+        return false;
     }
     
     public override IEnumerable<Organism> GetOrganisms() //warning: do not perform spatial operations on the organisms through the IEnumerable, the datastructure will become stale
@@ -54,7 +59,7 @@ public class RTreeDataStructure(float moveRange) : DataStructure
         return organismCount;
     }
 
-    public override bool CheckCollision(Organism organism, Vector3 position, List<LinkedList<Organism>> organismLists)
+    public override bool CheckCollision(Organism organism, Vector3 position)
     {
         if (!World.IsInBounds(position))
             return true;
@@ -79,7 +84,7 @@ public class RTreeDataStructure(float moveRange) : DataStructure
         return false;
     }
 
-    public override Organism ClosestNeighbour(Organism organism)
+    public override Organism? NearestNeighbour(Organism organism)
     {
         throw new NotImplementedException();
     }
