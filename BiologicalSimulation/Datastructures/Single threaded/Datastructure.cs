@@ -24,5 +24,5 @@ public abstract class DataStructure
     public abstract IEnumerable<Organism> GetOrganisms();
     public abstract int GetOrganismCount();
     public abstract bool CheckCollision(Organism organism, Vector3 position);
-    public abstract Organism ClosestNeighbour(Organism organism);
+    public abstract Organism? NearestNeighbour(Organism organism);
 }

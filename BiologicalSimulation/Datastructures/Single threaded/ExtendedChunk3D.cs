@@ -20,7 +20,7 @@ public class ExtendedChunk3D
     public LinkedList<Organism> Organisms { get; }
     public LinkedList<Organism> ExtendedCheck;
     public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
-    private ExtendedChunk3D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
+    public ExtendedChunk3D[] ConnectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     
     public ExtendedChunk3D(Vector3 center, float size, float largestOrganismSize)
     {
@@ -35,7 +35,7 @@ public class ExtendedChunk3D
     public void Initialize(ExtendedChunk3D[] connectedChunks)
     {
         //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
-        this.connectedChunks = connectedChunks;
+        this.ConnectedChunks = connectedChunks;
     }
     
     /// <summary>
@@ -114,7 +114,7 @@ public class ExtendedChunk3D
         if (singleAxisDistance > HalfDimension)
         {
             //Send to neighbouring chunk for checking
-            foreach (ExtendedChunk3D chunk in connectedChunks)
+            foreach (ExtendedChunk3D chunk in ConnectedChunks)
             {
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
@@ -131,7 +131,7 @@ public class ExtendedChunk3D
             //Send to neighbouring chunks for checking
             if (singleAxisDistance > HalfDimension - dimenstionExtensionForCheck)
             {
-                foreach (ExtendedChunk3D chunk in connectedChunks)
+                foreach (ExtendedChunk3D chunk in ConnectedChunks)
                 {
                     chunk.CheckToBeAdded.Enqueue(organism);
                 }

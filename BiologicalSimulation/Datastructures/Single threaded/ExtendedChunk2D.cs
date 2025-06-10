@@ -22,8 +22,7 @@ public class ExtendedChunk2D
     public LinkedList<Organism> Organisms { get; }
     public LinkedList<Organism> ExtendedCheck;
     public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
-    private ExtendedChunk2D[] connectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
-    private List<LinkedList<Organism>> listsToSend;
+    public ExtendedChunk2D[] ConnectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
 
     public ExtendedChunk2D(Vector2 center, float size, float largestOrganismSize)
     {
@@ -33,13 +32,12 @@ public class ExtendedChunk2D
         ExtendedCheck = new LinkedList<Organism>();
         CheckToBeAdded = new Queue<Organism>();
         dimenstionExtensionForCheck = largestOrganismSize * 2;
-        listsToSend = [Organisms, ExtendedCheck];
     }
 
     public void Initialize(ExtendedChunk2D[] connectedChunks)
     {
         //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
-        this.connectedChunks = connectedChunks;
+        this.ConnectedChunks = connectedChunks;
     }
     
     public void Step()
@@ -115,7 +113,7 @@ public class ExtendedChunk2D
         if (singleAxisDistance > HalfDimension)
         {
             //Send to neighbouring chunk for checking
-            foreach (ExtendedChunk2D chunk in connectedChunks)
+            foreach (ExtendedChunk2D chunk in ConnectedChunks)
             {
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
@@ -132,7 +130,7 @@ public class ExtendedChunk2D
             //Send to neighbouring chunks for checking
             if (singleAxisDistance > HalfDimension - dimenstionExtensionForCheck)
             {
-                foreach (ExtendedChunk2D chunk in connectedChunks)
+                foreach (ExtendedChunk2D chunk in ConnectedChunks)
                 {
                     chunk.CheckToBeAdded.Enqueue(organism);
                 }

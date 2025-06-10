@@ -284,9 +284,56 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
         return false;
     }
 
-    public override Organism ClosestNeighbour(Organism organism)
+    /// <summary>
+    /// Returns the closest neighbour within reason: will return nothing if there is no Organism within this and all neighbouring chunks
+    /// </summary>
+    /// <param name="organism"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public override Organism? NearestNeighbour(Organism organism)
     {
-        throw new NotImplementedException();
+        (int cX, int cY, int cZ) = GetChunk(organism.Position);
+        Chunk3D chunk = Chunks[cX, cY, cZ];
+        
+        float closestSquareDistance = 9999999999999f;
+        Organism? knownNearest = null;
+        
+        //Check for organisms within the chunk
+        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
+        {
+            Organism otherOrganism = node.Value;
+            
+            if (organism == otherOrganism)
+                continue;
+            
+            float distanceSquared = Vector3.DistanceSquared(organism.Position, otherOrganism.Position);
+            if (distanceSquared < closestSquareDistance)
+            {
+                closestSquareDistance = distanceSquared;
+                knownNearest = otherOrganism;
+            }
+        }
+
+        //Check all organisms in neighbouring chunks
+        foreach (Chunk3D neighbouringChunk in chunk.ConnectedChunks)
+        {
+            for (LinkedListNode<Organism> node = neighbouringChunk.Organisms.First!; node != null; node = node.Next!)
+            {
+                Organism otherOrganism = node.Value;
+            
+                if (organism == otherOrganism)
+                    continue;
+            
+                float distanceSquared = Vector3.DistanceSquared(organism.Position, otherOrganism.Position);
+                if (distanceSquared < closestSquareDistance)
+                {
+                    closestSquareDistance = distanceSquared;
+                    knownNearest = otherOrganism;
+                }
+            }
+        }
+        
+        return knownNearest;
     }
     
     #region Warnings and errors

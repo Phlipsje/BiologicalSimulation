@@ -31,7 +31,7 @@ public class NoDataStructure : DataStructure
     /// </summary>
     /// <param name="organism"></param>
     /// <returns>NOTE: This returns the original organism if no other organisms exist</returns>
-    public override Organism ClosestNeighbour(Organism organism)
+    public override Organism NearestNeighbour(Organism organism)
     {
         //Tracking distance without the square root, because it is not needed to find the closest organism and would only take more compute
         float currentDistanceSquared = float.MaxValue;
