@@ -163,17 +163,21 @@ public class ConsoleApp : IProgramMedium
                 case 'h':
                     PrintHelp();
                     break;
-                case 's':
+                case 'o':
                     PrintSimulationStats();
                     break;
                 case 'i':
                     PrintSimulationInfo();
                     break;
                 case 'p':
-                    if(looping)
+                    if (looping)
                         Console.WriteLine("Simulation is currently running, Tick: " + Simulation.Tick);
                     else
                         Console.WriteLine("Simulation is NOT currently active");
+                    break;
+                case 's':
+                    Console.WriteLine("[Simulation manually saved]");
+                    Simulation.Save();
                     break;
             }
         }
@@ -185,8 +189,9 @@ public class ConsoleApp : IProgramMedium
         Console.WriteLine("------COMMANDS------");
         Console.WriteLine("- q: ABORT simulation");
         Console.WriteLine("- i: INFO about simulation");
-        Console.WriteLine("- s: STATS about simulation");
+        Console.WriteLine("- o: STATS about simulation");
         Console.WriteLine("- p: PING process");
+        Console.WriteLine("- s: SAVE simulation manually");
     }
 
     public void PrintSimulationInfo()

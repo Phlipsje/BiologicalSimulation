@@ -93,6 +93,13 @@ public partial class Simulation
         OnEnd?.Invoke(world);
     }
 
+    //Forcefully make a save to a specified file location
+    public void Save()
+    {
+        (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(world, this) : simulationExporter.SaveToSeparateFiles(world, this);
+        OnFileWrite?.Invoke(filePath, fileContents);
+    }
+
     #region Warnings and errors
 
     private void CheckWarnings()
