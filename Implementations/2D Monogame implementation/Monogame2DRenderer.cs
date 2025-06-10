@@ -6,6 +6,7 @@ using BioSim.Datastructures;
 using BioSim.Simulation;
 using System.Numerics;
 using BiologicalSimulation;
+using BiologicalSimulation.Datastructures.RTree;
 using BioSim.Datastructures;
 using BioSim.Datastructures.Datastructures;
 using Microsoft.Xna.Framework;
