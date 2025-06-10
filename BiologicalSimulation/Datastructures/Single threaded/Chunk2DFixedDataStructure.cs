@@ -77,12 +77,14 @@ public class Chunk2DFixedDataStructure : DataStructure
         return connectedChunks.ToArray();
     }
 
-    public override void Step()
+    public override Task Step()
     {
         foreach (ExtendedChunk2D chunk2D in Chunks)
         {
             chunk2D.Step();
         }
+
+        return Task.CompletedTask;
     }
 
     public override void AddOrganism(Organism organism)

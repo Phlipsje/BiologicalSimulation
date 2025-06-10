@@ -27,8 +27,7 @@ public class OpenTK3DRenderer : GameWindow, IProgramMedium
     bool _firstMouse = true;
     private bool fullWindow = false;
 
-    public OpenTK3DRenderer()
-        : base(GameWindowSettings.Default, NativeWindowSettings.Default)
+    public OpenTK3DRenderer() : base(GameWindowSettings.Default, NativeWindowSettings.Default)
     {
         //Set window settings
         Location = new Vector2i(400, 300);
@@ -87,13 +86,13 @@ public class OpenTK3DRenderer : GameWindow, IProgramMedium
         return Path.Combine(Path.GetDirectoryName(callerFile), relativePath);
     }
     
-    protected override void OnUpdateFrame(FrameEventArgs args)
+    protected override async void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
         
         HandleInput(args);
         
-        Simulation.Step();
+        await Simulation.Step();
         
         UpdateSphereBuffer();
     }

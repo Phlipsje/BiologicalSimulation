@@ -10,7 +10,7 @@ public class RTreeDataStructure(float moveRange) : DataStructure
     private int organismCount;
     private Dictionary<Organism, List<Organism>> collisionBuffer = [];
     
-    public override void Step()
+    public override Task Step()
     {
         List<Organism> organisms = rTree.ToList(); //can't apply step directly to data structure as it contents will change
         for (int i = 0; i < organisms.Count; i++)
@@ -32,6 +32,8 @@ public class RTreeDataStructure(float moveRange) : DataStructure
                 organism.Position = newPos;
             }
         }
+
+        return Task.CompletedTask;
     }
 
     public override void AddOrganism(Organism organism)

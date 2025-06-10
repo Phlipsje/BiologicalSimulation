@@ -147,7 +147,7 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
         return connectedChunks.ToArray();
     }
     
-    public override async void Step()
+    public override async Task Step()
     {
         //Apparently some frameworks are fucking funny (looking at you Monogame/XNA) and can break with multithreading,
         //so this check insures no update loop has been called twice in the same frame

@@ -19,7 +19,7 @@ public abstract class DataStructure
     }
 
     //Gets called every frame (before updating world)
-    public abstract void Step();
+    public abstract Task Step();
     public abstract void AddOrganism(Organism organism);
     public abstract bool RemoveOrganism(Organism organism);
     public abstract IEnumerable<Organism> GetOrganisms();

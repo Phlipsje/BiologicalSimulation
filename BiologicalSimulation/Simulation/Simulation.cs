@@ -54,7 +54,7 @@ public partial class Simulation
         }
     }
 
-    public void Step()
+    public async Task Step()
     {
         if (abort || world.StopCondition())
         {
@@ -63,7 +63,7 @@ public partial class Simulation
         }
         
         Tick++;
-        dataStructure.Step();
+        await dataStructure.Step();
         world.Step();
         OnTick?.Invoke(world);
 

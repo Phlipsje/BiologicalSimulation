@@ -15,7 +15,7 @@ public class NoDataStructure : DataStructure
         Organisms = new LinkedList<Organism>();
     }
     
-    public override void Step()
+    public override Task Step()
     {
         for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
         {
@@ -24,6 +24,8 @@ public class NoDataStructure : DataStructure
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
             organism.Step();
         }
+        
+        return Task.CompletedTask;
     }
 
     /// <summary>

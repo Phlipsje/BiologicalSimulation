@@ -91,12 +91,14 @@ public class Chunk3DFixedDataStructure : DataStructure
         return connectedChunks.ToArray();
     }
 
-    public override void Step()
+    public override Task Step()
     {
         foreach (ExtendedChunk3D chunk3D in Chunks)
         {
             chunk3D.Step();
         }
+        
+        return Task.CompletedTask;
     }
 
     public override void AddOrganism(Organism organism)

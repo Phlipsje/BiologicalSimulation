@@ -20,12 +20,11 @@ public class ConsoleApp : IProgramMedium
     public World World { get; set; }
     public DataStructure DataStructure { get; set; }
     private bool looping = true;
+    private bool stepLocked = false; //Lock for multithreading
     
     //We have a separate thread for input, because otherwise Console.ReadLine() would block running the simulation
     private Thread inputThread;
     
-    private int millisecondsWait;
-    private TimeSpan tickDuration;
     private int ticksPerPrint; //Set to 0 to disable (only used when file writing is disabled)
     
     //For tracking fps performance
@@ -58,9 +57,6 @@ public class ConsoleApp : IProgramMedium
                 value = value.ToLower();
                 switch (field)
                 {
-                    case "tps":
-                        millisecondsWait = (int)Math.Ceiling(1000f/int.Parse(value));
-                        break;
                     case "tpp":
                         ticksPerPrint = int.Parse(value);
                         break;
@@ -78,7 +74,6 @@ public class ConsoleApp : IProgramMedium
 
     private void DefaultValues()
     {
-        millisecondsWait = 5;
         TimeRunning = 0;
         ticksPerPrint = 500;
     }
@@ -103,10 +98,6 @@ public class ConsoleApp : IProgramMedium
         stopwatch = new Stopwatch();
         stopwatch.Start();
         
-        //NOTE: The console application is throttled to run a maximum of 200 tps, because otherwise the system breaks with multithreading
-        millisecondsWait = Math.Max(5, millisecondsWait);
-        tickDuration = TimeSpan.FromMilliseconds(millisecondsWait);
-        
         //Actually start program
         CoreLoop();
     }
@@ -119,7 +110,7 @@ public class ConsoleApp : IProgramMedium
         {
             tickWatch.Restart();
 
-            Simulation.Step();
+            Simulation.Step().Wait();
 
             // Performance Tracking
             TimeRunning += (float)stopwatch.Elapsed.TotalSeconds;
@@ -138,12 +129,6 @@ public class ConsoleApp : IProgramMedium
 
             if (!Simulation.FileWritingEnabled && Simulation.Tick % ticksPerPrint == 0)
                 PrintSimulationStats();
-
-            // Busy wait until tick duration elapsed
-            while (tickWatch.Elapsed < tickDuration)
-            {
-                Thread.SpinWait(millisecondsWait); // Prevent 100% CPU burn
-            }
         }
 
         stopwatch.Stop();
