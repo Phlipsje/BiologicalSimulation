@@ -1,14 +1,10 @@
-﻿using System.Collections;
-using BiologicalSimulation.Datastructures.RTree;
+﻿using BioSim.Datastructures;
+namespace BiologicalSimulation.Datastructures.RTree;
 
-namespace BioSim.Datastructures;
-
-public class RTree<T>(int m, int M)
+public class RTree<T>(int minNodeSize, int maxNodeSize)
     where T : IMinimumBoundable 
 {
-    public RNode<T> Root => root != null ? root : new RLeafNode<T>(_m, _M); //public for testing
-    
-    private int _m = m, _M = M;
+    public RNode<T> Root => root ?? new RLeafNode<T>(minNodeSize, maxNodeSize); //public for testing
     private RNode<T>? root = null;
     public List<T> Search(Mbb searchArea)
     {
@@ -22,7 +18,7 @@ public class RTree<T>(int m, int M)
     {
         if (root == null)
         {
-            RLeafNode<T> newRoot = new RLeafNode<T>(_m, M);
+            RLeafNode<T> newRoot = new RLeafNode<T>(minNodeSize, maxNodeSize);
             newRoot.LeafEntries.Add(entry);
             newRoot.Mbb = entry.GetMbb();
             root = newRoot;
