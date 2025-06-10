@@ -6,13 +6,14 @@ public class RTree<T>(int minNodeSize, int maxNodeSize)
 {
     public RNode<T> Root => root ?? new RLeafNode<T>(minNodeSize, maxNodeSize); //public for testing
     private RNode<T>? root = null;
+    private List<T> resultsList = [];
     public List<T> Search(Mbb searchArea)
     {
         if (root == null)
             return [];
-        List<T> results = [];
-        root.Search(searchArea, ref results);
-        return results;
+        resultsList.Clear();
+        root.Search(searchArea, resultsList);
+        return resultsList;
     }
     public void Insert(T entry)
     {

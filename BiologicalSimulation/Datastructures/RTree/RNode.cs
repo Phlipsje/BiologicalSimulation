@@ -14,7 +14,7 @@ public abstract class RNode<T>(int minSize, int maxSize) : IMinimumBoundable whe
     public void SetMbb(Mbb newMbb) { Mbb = newMbb; }
     
     public abstract void ForEach(Action<T> action);
-    public abstract void Search(Mbb searchArea, ref List<T> results);
+    public abstract void Search(Mbb searchArea, List<T> results);
     public abstract void Insert(T entry, ref RNode<T> root);
     public abstract void ReInsert(RNode<T> node, int level, ref RNode<T> root);
     public abstract bool Delete(T entry, ref RNode<T> root);

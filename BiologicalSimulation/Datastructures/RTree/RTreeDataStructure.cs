@@ -22,12 +22,14 @@ public class RTreeDataStructure(float moveRange) : DataStructure
             collisionBuffer[organism] = collidables;
             Vector3 oldPos = organisms[i].Position;
             organism.Step();
-            if (organisms[i].Position != oldPos)
+            Vector3 newPos = organisms[i].Position;
+            if (newPos != oldPos)
             {
                 //update data structure
                 Mbb newMbb = organism.GetMbb();
                 organism.Position = oldPos; //the entry is contained in the rTree with the oldPos so reset it to ensure the entry is found
                 rTree.UpdateMbb(organism, newMbb);
+                organism.Position = newPos;
             }
         }
     }
@@ -63,7 +65,8 @@ public class RTreeDataStructure(float moveRange) : DataStructure
     {
         if (!World.IsInBounds(position))
             return true;
-        
+
+        var jdj = collisionBuffer[organism];
         foreach (Organism otherOrganism in collisionBuffer[organism])
         {
             //Cannot be a collision with itself

@@ -19,7 +19,7 @@ public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
             action(entry);
         }
     }
-    public override void Search(Mbb searchArea, ref List<T> results)
+    public override void Search(Mbb searchArea, List<T> results)
     {
         foreach (T entry in LeafEntries)
         {

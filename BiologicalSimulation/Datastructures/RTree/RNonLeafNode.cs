@@ -15,12 +15,12 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
             NodeEntries[i].ForEach(action);
     }
 
-    public override void Search(Mbb searchArea, ref List<T> results)
+    public override void Search(Mbb searchArea, List<T> results)
     {
         for (int i = 0; i < Count; i++)
         {
             if (NodeEntries[i].Mbb.Intersects(searchArea))
-                NodeEntries[i].Search(searchArea, ref results);
+                NodeEntries[i].Search(searchArea, results);
         }
     }
 
