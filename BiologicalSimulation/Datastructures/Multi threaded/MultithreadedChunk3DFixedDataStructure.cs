@@ -191,6 +191,12 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
         (int x, int y, int z) = GetChunk(organism.Position);
         Chunks[x,y,z].DirectlyInsertOrganism(organism);
     }
+    
+    public override bool RemoveOrganism(Organism organism)
+    {
+        (int x, int y, int z) = GetChunk(organism.Position);
+        return Chunks[x, y, z].Organisms.Remove(organism);
+    }
 
     public override IEnumerable<Organism> GetOrganisms()
     {

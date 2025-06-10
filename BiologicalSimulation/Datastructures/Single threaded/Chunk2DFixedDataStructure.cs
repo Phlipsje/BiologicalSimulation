@@ -91,6 +91,12 @@ public class Chunk2DFixedDataStructure : DataStructure
         Chunks[x,y].DirectlyInsertOrganism(organism);
     }
 
+    public override bool RemoveOrganism(Organism organism)
+    {
+        (int x, int y) = GetChunk(organism.Position);
+        return Chunks[x, y].Organisms.Remove(organism);
+    }
+
     public override IEnumerable<Organism> GetOrganisms()
     {
         Organism[] organisms = new Organism[GetOrganismCount()];

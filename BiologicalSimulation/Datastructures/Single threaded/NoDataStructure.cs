@@ -89,6 +89,11 @@ public class NoDataStructure : DataStructure
         Organisms.AddFirst(organism);
     }
 
+    public override bool RemoveOrganism(Organism organism)
+    {
+        return Organisms.Remove(organism);
+    }
+
     public override IEnumerable<Organism> GetOrganisms()
     {
         return Organisms;

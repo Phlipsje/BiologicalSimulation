@@ -38,7 +38,7 @@ public class RTreeDataStructure(float moveRange) : DataStructure
         organismCount++;
     }
 
-    public bool RemoveOrganism(Organism organism)
+    public override bool RemoveOrganism(Organism organism)
     {
         if (rTree.Delete(organism))
         {
