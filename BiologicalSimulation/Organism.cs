@@ -7,7 +7,7 @@ namespace BioSim;
 /// This is an abstract class which can be extended to create a type of organism
 /// It must be given a Key, Size, Step function, ToString function and FromString function to describe it
 /// </summary>
-public abstract class Organism : IOrganism, IMinimumBoundable
+public abstract class Organism : IMinimumBoundable
 {
     public abstract string Key { get; } //Used to identify which organism it is in a file
     private Vector3 position;

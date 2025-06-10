@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using BiologicalSimulation.Datastructures.RTree;
 using BioSim.Datastructures;
 using BioSim.Simulation;
 using Implementations;
@@ -26,8 +27,7 @@ class Program
         //Choose the data structure that is used to speed up the simulation
         float worldHalfSize = 16f;
         float organismSize = 0.5f;
-        SimulationRunner.DataStructure = new MultithreadedChunk2DFixedDataStructure(new Vector2(-worldHalfSize), 
-            new Vector2(worldHalfSize), 4f, organismSize);
+        SimulationRunner.DataStructure = new RTreeDataStructure(0.1f);
         
         //Create a world which implements the data structure and defines rules such as:
         // where organisms start in the simulation, what the bounds are of the virtual environment and when to stop the simulation automatically
@@ -45,7 +45,7 @@ class Program
         SimulationExporter.ShowExportFilePath = true;
         
         //Choose in what form the simulation is run (this decides if you get a Console view, 2D view or 3D view)
-        SimulationRunner.ProgramMedium = new ConsoleApp(["tpp=500", "tps=200"]);
+        SimulationRunner.ProgramMedium = new OpenTK3DRenderer();
 
         runner.Start();
     }

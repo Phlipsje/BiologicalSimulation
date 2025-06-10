@@ -10,6 +10,7 @@
       <Compile Update="Simulation.cs">
         <DependentUpon>Organism.cs</DependentUpon>
       </Compile>
+      <Compile Remove="Datastructures\Single threaded\Datastructure.cs" />
     </ItemGroup>
 
 </Project>
