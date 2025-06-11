@@ -35,12 +35,11 @@ class Program
         
         //Decide if, and when, to save the contents of the simulation to a file
         simulation.FileWritingEnabled = false;
-        simulation.SetFileWriteFrequency(100);
+        simulation.TicksPerFileWrite = 100;
         //Also decide where to save the contents to
         simulation.WriteToSameFile = true;
         SimulationExporter.FileName = "testing";
         SimulationExporter.SaveDirectory = "Content\\Testing";
-        SimulationExporter.ClearDirectory = true;
         //This is a small debug to show the user where the save file is located
         SimulationExporter.ShowExportFilePath = true;
         

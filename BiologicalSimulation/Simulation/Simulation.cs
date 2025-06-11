@@ -46,7 +46,7 @@ public partial class Simulation
     /// Decides how many ticks the simulation should wait before saving to a file.
     /// Set to 0 or less to not write to files except for on simulation end.
     /// </summary>
-    public int TicksPerFileWrite = 0;
+    public int TicksPerFileWrite { get; set; }= 0;
     
     /// <summary>
     /// Handles the writing of a simulation's contents to file
@@ -99,6 +99,15 @@ public partial class Simulation
         //Sets culture to US-English, specific language does not matter, but because we set this, using float.Parse and writing floats to file always use '.' as decimal point.
         System.Globalization.CultureInfo ci = new System.Globalization.CultureInfo("en-US");
         System.Threading.Thread.CurrentThread.CurrentCulture = ci;
+    }
+    
+    /// <summary>
+    /// Decides which data structure the simulation uses
+    /// </summary>
+    /// <param name="dataStructure"></param>
+    public void SetDataStructure(DataStructure dataStructure)
+    {
+        this.dataStructure = dataStructure;
     }
 
     /// <summary>
