@@ -24,6 +24,24 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
         }
     }
 
+    public override void NearestNeighbour(T searchEntry, NearestNeighbour<T> nearest, Func<T,T,float> distance)
+    {
+        PriorityQueue<(RNode<T>, float), float> pq = new();
+        foreach (var node in NodeEntries)
+        {
+            float minDist = node.Mbb.MinDist(searchEntry.GetMbb().Position);
+            pq.Enqueue((node, minDist), minDist);
+        }
+
+        while (pq.Count != 0)
+        {
+            (RNode<T> node, float dist) = pq.Dequeue();
+            if (dist > nearest.Distance)
+                break; // Prune upward — no better result possible
+            node.NearestNeighbour(searchEntry, nearest, distance);
+        }
+    }
+
     public override void GetMbbsWithLevel(List<(Mbb, int)> list, RNode<T> root)
     {
         int level = GetLevel(root);

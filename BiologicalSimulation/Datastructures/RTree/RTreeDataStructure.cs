@@ -91,6 +91,16 @@ public class RTreeDataStructure(float moveRange) : DataStructure
 
     public override Organism? NearestNeighbour(Organism organism)
     {
-        throw new NotImplementedException();
+        return rTree.NearestNeighbour(organism, Distance);
+    }
+    private float Distance(Organism a, Organism b)
+    {
+        float dist = 0;
+        for (int i = 0; i < 3; i++)
+        {
+            float axisDist = a.Position[i] - b.Position[i];
+            dist += axisDist * axisDist; 
+        }
+        return dist;
     }
 }

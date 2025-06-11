@@ -27,6 +27,22 @@ public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
                 results.Add(entry);
         }
     }
+
+    public override void NearestNeighbour(T searchEntry, NearestNeighbour<T> nearest, Func<T,T,float> distance)
+    {
+        foreach (var entry in LeafEntries)
+        {
+            if(entry.Equals(searchEntry))
+                continue;
+            float dist = distance(searchEntry, entry);
+            if (dist < nearest.Distance)
+            {
+                nearest.Distance = dist;
+                nearest.Entry = entry;
+            }
+        }
+    }
+
     public override RLeafNode<T> ChooseLeaf(T entry)
     {
         return this;

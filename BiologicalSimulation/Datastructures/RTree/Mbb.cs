@@ -6,6 +6,7 @@ public struct Mbb(Vector3 minimum, Vector3 maximum)
     private const float Epsilon = 0.01f; //extra offset to contains to account for floating point errors
     public Vector3 Minimum = minimum;
     public Vector3 Maximum = maximum;
+    public Vector3 Position => Maximum - (Maximum - Minimum) / 2;
     public float Area => (Maximum.X - Minimum.X) * (Maximum.Y - Minimum.Y) * (Maximum.Z - Minimum.Z);
 
     public bool Intersects(Mbb other)
@@ -19,6 +20,20 @@ public struct Mbb(Vector3 minimum, Vector3 maximum)
     {
         return Minimum.X <= other.Minimum.X + Epsilon && Minimum.Y <= other.Minimum.Y + Epsilon && Minimum.Z <= other.Minimum.Z + Epsilon &&
                Maximum.X >= other.Maximum.X - Epsilon && Maximum.Y >= other.Maximum.Y - Epsilon && Maximum.Z >= other.Maximum.Z - Epsilon;
+    }
+    
+    //calculate as described in Nearest Neighbor Queries by Nick Roussopoulos Stephen Kelley and Frederic Vincent
+    public float MinDist(Vector3 point)
+    {
+        float minDist = 0;
+        for (int d = 0; d < 3; d++)//iterate over the 3 dimensions
+        {
+            float p = point[d];
+            float r = p < Minimum[d] ? Minimum[d] : p > Maximum[d] ? Maximum[d] : p;
+            float intermediate = p - r;
+            minDist += intermediate * intermediate;
+        }
+        return minDist;
     }
     
     //the enlargement to this minimum bounding box needed to fit the other mbb inside it. Also returns the new Mbb

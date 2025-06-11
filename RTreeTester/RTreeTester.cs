@@ -63,6 +63,13 @@ public class RTreeTester : Game
         int size = 10000;
         float spread = 50000;
         KeyboardState keyState = Keyboard.GetState();
+        if (keyState.IsKeyUp(Keys.N) && lastKeyState.IsKeyDown(Keys.N))
+        {
+            TestObject? t = rTree.NearestNeighbour(list[currentN - 1],
+                (a, b) => (a.Mbb.Position - b.Mbb.Position).LengthSquared());
+            if(t != null)
+                searchResult = [t];
+        }
         if (keyState.IsKeyUp(Keys.S) && lastKeyState.IsKeyDown(Keys.S))
         {
             Vector3 minimum = new Vector3(spread * 0.5f);
@@ -393,6 +400,9 @@ public class RTreeTester : Game
                 testObject.Mbb.Maximum + seperation * halfScale);
             DrawMbb(drawMbb, Color.Red, 2);
         }
+        
+        if(searchResult.Count > 0)
+            DrawMbb(list[currentN - 1].Mbb.Enlarged(searchResult[0].Mbb), Color.Red, 3);
         
         // TODO: Add your drawing code here
         _spriteBatch.End();
