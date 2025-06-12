@@ -5,11 +5,11 @@ namespace BioSim.Datastructures;
 
 public class MultithreadedChunk2DDataStructure : DataStructure
 {
-    protected Chunk2D[,] Chunks;
-    protected Vector2 MinPosition;
-    protected float ChunkSize;
-    protected int ChunkCountX;
-    protected int ChunkCountY;
+    private Chunk2D[,] chunks;
+    private Vector2 minPosition;
+    private float chunkSize;
+    private int chunkCountX;
+    private int chunkCountY;
     //First array stores the differing groups needed to have sets of chunks that never directly touch eachother,
     // second array stores logical cores that can do tasks, third is the actual chunks that are run
     private Chunk2D[][][] chunkGroupBatches;
@@ -19,28 +19,28 @@ public class MultithreadedChunk2DDataStructure : DataStructure
     public MultithreadedChunk2DDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize, int amountOfLogicalCoresToUse = 0)
     {
         //Chunk setup
-        ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
-        ChunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
-        Chunks = new Chunk2D[ChunkCountX, ChunkCountY];
-        MinPosition = minPosition;
-        ChunkSize = chunkSize;
+        chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
+        chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
+        chunks = new Chunk2D[chunkCountX, chunkCountY];
+        this.minPosition = minPosition;
+        this.chunkSize = chunkSize;
 
         //Create all chunks
-        for (int i = 0; i < ChunkCountX; i++)
+        for (int i = 0; i < chunkCountX; i++)
         {
-            for (int j = 0; j < ChunkCountY; j++)
+            for (int j = 0; j < chunkCountY; j++)
             {
                 Vector2 chunkCenter = minPosition + new Vector2(i, j) * chunkSize + new Vector2(chunkSize*0.5f);
-                Chunks[i, j] = new Chunk2D(chunkCenter, chunkSize);
+                chunks[i, j] = new Chunk2D(chunkCenter, chunkSize);
             }
         }
         
         //Get all connected chunks
-        for (int i = 0; i < ChunkCountX; i++)
+        for (int i = 0; i < chunkCountX; i++)
         {
-            for (int j = 0; j < ChunkCountY; j++)
+            for (int j = 0; j < chunkCountY; j++)
             {
-                Chunks[i, j].Initialize(GetConnectedChunks(i, j));
+                chunks[i, j].Initialize(GetConnectedChunks(i, j));
             }
         }
         
@@ -49,7 +49,7 @@ public class MultithreadedChunk2DDataStructure : DataStructure
         groupCount = offset.Length;
         
         //Round downwards for uneven task counts
-        int lowestTaskCount = (int)Math.Floor(ChunkCountX * ChunkCountY / (float)groupCount);
+        int lowestTaskCount = (int)Math.Floor(chunkCountX * chunkCountY / (float)groupCount);
         
         List<Chunk2D>[] chunkGroups = new List<Chunk2D>[groupCount+1];
         
@@ -61,11 +61,11 @@ public class MultithreadedChunk2DDataStructure : DataStructure
             
             //All workers are assigned a chunk where every chunk has no direct neighbour that is currently working, meaning we get a grid pattern
             //Note that x and y grow by 2 each loop
-            for (int x = 0; x < ChunkCountX; x += 2)
+            for (int x = 0; x < chunkCountX; x += 2)
             {
-                for (int y = 0; y < ChunkCountY; y += 2)
+                for (int y = 0; y < chunkCountY; y += 2)
                 {
-                    chunkGroups[group].Add(Chunks[x + offsetX, y + offsetY]);
+                    chunkGroups[group].Add(chunks[x + offsetX, y + offsetY]);
                 }
             }
         } 
@@ -103,27 +103,27 @@ public class MultithreadedChunk2DDataStructure : DataStructure
     }
     
     [Pure]
-    protected Chunk2D[] GetConnectedChunks(int chunkX, int chunkY)
+    private Chunk2D[] GetConnectedChunks(int chunkX, int chunkY)
     {
         List<Chunk2D> connectedChunks = new List<Chunk2D>(8);
         
         for (int x = -1; x <= 1; x++)
         {
             //Check bounds
-            if (chunkX + x < 0 || chunkX + x >= ChunkCountX)
+            if (chunkX + x < 0 || chunkX + x >= chunkCountX)
                 continue;
             
             for (int y = -1; y <= 1; y++)
             {
                 //Check bounds
-                if (chunkY + y < 0 || chunkY + y >= ChunkCountY)
+                if (chunkY + y < 0 || chunkY + y >= chunkCountY)
                     continue;
                 
                 //Don't add self
                 if (x == 0 && y == 0)
                     continue;
                     
-                connectedChunks.Add(Chunks[chunkX+x,chunkY+y]);
+                connectedChunks.Add(chunks[chunkX+x,chunkY+y]);
             }
         }
         
@@ -172,19 +172,19 @@ public class MultithreadedChunk2DDataStructure : DataStructure
     public override void AddOrganism(Organism organism)
     {
         (int x, int y) = GetChunk(organism.Position);
-        Chunks[x,y].DirectlyInsertOrganism(organism);
+        chunks[x,y].DirectlyInsertOrganism(organism);
     }
     
     public override bool RemoveOrganism(Organism organism)
     {
         (int x, int y) = GetChunk(organism.Position);
-        return Chunks[x, y].Organisms.Remove(organism);
+        return chunks[x, y].Organisms.Remove(organism);
     }
 
     public override IEnumerable<Organism> GetOrganisms()
     {
         LinkedList<Organism> organisms = new LinkedList<Organism>();
-        foreach (Chunk2D chunk in Chunks)
+        foreach (Chunk2D chunk in chunks)
         {
             for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
             {
@@ -199,7 +199,7 @@ public class MultithreadedChunk2DDataStructure : DataStructure
     public override int GetOrganismCount()
     {
         int organismCount = 0;
-        foreach (Chunk2D chunk2D in Chunks)
+        foreach (Chunk2D chunk2D in chunks)
         {
             organismCount += chunk2D.OrganismCount;
         }
@@ -209,18 +209,18 @@ public class MultithreadedChunk2DDataStructure : DataStructure
 
     private (int, int) GetChunk(Vector3 position)
     {
-        int chunkX = (int)Math.Floor((position.X - MinPosition.X) / ChunkSize);
-        int chunkY = (int)Math.Floor((position.Y - MinPosition.Y) / ChunkSize);
+        int chunkX = (int)Math.Floor((position.X - minPosition.X) / chunkSize);
+        int chunkY = (int)Math.Floor((position.Y - minPosition.Y) / chunkSize);
         //Math.Min because otherwise can throw error if X,Y, or Z is exactly maxValue
-        chunkX = Math.Min(chunkX, ChunkCountX - 1);
-        chunkY = Math.Min(chunkY, ChunkCountY - 1);
+        chunkX = Math.Min(chunkX, chunkCountX - 1);
+        chunkY = Math.Min(chunkY, chunkCountY - 1);
         return (chunkX, chunkY);
     }
 
     public override bool CheckCollision(Organism organism, Vector3 position)
     {
         (int cX, int cY) = GetChunk(organism.Position);
-        Chunk2D chunk = Chunks[cX, cY];
+        Chunk2D chunk = chunks[cX, cY];
         
         if (!World.IsInBounds(position))
             return true;
@@ -280,7 +280,7 @@ public class MultithreadedChunk2DDataStructure : DataStructure
     public override Organism? NearestNeighbour(Organism organism)
     {
         (int cX, int cY) = GetChunk(organism.Position);
-        Chunk2D chunk = Chunks[cX, cY];
+        Chunk2D chunk = chunks[cX, cY];
         
         float closestSquareDistance = 9999999999999f;
         Organism? knownNearest = null;
@@ -327,7 +327,7 @@ public class MultithreadedChunk2DDataStructure : DataStructure
 
     private void CheckWarnings(float largestOrganismSize, int amountOfCoresBeingUsed)
     {
-        if (ChunkSize > largestOrganismSize * 10)
+        if (chunkSize > largestOrganismSize * 10)
             Console.WriteLine("Warning: Chunk size is rather large, smaller chunk size would improve performance");
         
         if(amountOfCoresBeingUsed == 1)
@@ -339,7 +339,7 @@ public class MultithreadedChunk2DDataStructure : DataStructure
 
     private void CheckErrors(float largestOrganismSize)
     {
-        if (ChunkSize / 2f < largestOrganismSize)
+        if (chunkSize / 2f < largestOrganismSize)
             throw new ArgumentException("Chunk size must be at least twice largest organism size");
     }
     #endregion

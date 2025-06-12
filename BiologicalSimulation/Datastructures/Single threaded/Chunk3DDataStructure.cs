@@ -11,43 +11,43 @@ namespace BioSim.Datastructures;
 /// </summary>
 public class Chunk3DDataStructure : DataStructure
 {
-    protected ExtendedChunk3D[,,] Chunks;
-    protected Vector3 MinPosition;
-    protected float ChunkSize;
-    protected int ChunkCountX;
-    protected int ChunkCountY;
-    protected int ChunkCountZ;
+    private ExtendedChunk3D[,,] chunks;
+    private Vector3 minPosition;
+    private float chunkSize;
+    private int chunkCountX;
+    private int chunkCountY;
+    private int chunkCountZ;
     
     public Chunk3DDataStructure(Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize, bool multithreaded = false)
     {
-        ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
-        ChunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
-        ChunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize);
-        Chunks = new ExtendedChunk3D[ChunkCountX, ChunkCountY, ChunkCountZ];
-        MinPosition = minPosition;
-        ChunkSize = chunkSize;
+        chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
+        chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
+        chunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize);
+        chunks = new ExtendedChunk3D[chunkCountX, chunkCountY, chunkCountZ];
+        this.minPosition = minPosition;
+        this.chunkSize = chunkSize;
 
         //Create all chunks
-        for (int i = 0; i < ChunkCountX; i++)
+        for (int i = 0; i < chunkCountX; i++)
         {
-            for (int j = 0; j < ChunkCountY; j++)
+            for (int j = 0; j < chunkCountY; j++)
             {
-                for (int k = 0; k < ChunkCountZ; k++)
+                for (int k = 0; k < chunkCountZ; k++)
                 {
                     Vector3 chunkCenter = minPosition + new Vector3(i, j, k) * chunkSize + new Vector3(chunkSize*0.5f);
-                    Chunks[i, j, k] = new ExtendedChunk3D(chunkCenter, chunkSize, largestOrganismSize);
+                    chunks[i, j, k] = new ExtendedChunk3D(chunkCenter, chunkSize, largestOrganismSize);
                 }
             }
         }
         
         //Get all connected chunks
-        for (int i = 0; i < ChunkCountX; i++)
+        for (int i = 0; i < chunkCountX; i++)
         {
-            for (int j = 0; j < ChunkCountY; j++)
+            for (int j = 0; j < chunkCountY; j++)
             {
-                for (int k = 0; k < ChunkCountZ; k++)
+                for (int k = 0; k < chunkCountZ; k++)
                 {
-                    Chunks[i, j, k].Initialize(GetConnectedChunks(i, j, k));
+                    chunks[i, j, k].Initialize(GetConnectedChunks(i, j, k));
                 }
             }
         }
@@ -64,26 +64,26 @@ public class Chunk3DDataStructure : DataStructure
         for (int x = -1; x <= 1; x++)
         {
             //Check bounds
-            if (chunkX + x < 0 || chunkX + x >= ChunkCountX)
+            if (chunkX + x < 0 || chunkX + x >= chunkCountX)
                 continue;
             
             for (int y = -1; y <= 1; y++)
             {
                 //Check bounds
-                if (chunkY + y < 0 || chunkY + y >= ChunkCountY)
+                if (chunkY + y < 0 || chunkY + y >= chunkCountY)
                     continue;
                 
                 for (int z = -1; z <= 1; z++)
                 {
                     //Check bounds
-                    if (chunkZ + z < 0 || chunkZ + z >= ChunkCountZ)
+                    if (chunkZ + z < 0 || chunkZ + z >= chunkCountZ)
                         continue;
 
                     //Don't add self
                     if (x == 0 && y == 0 && z == 0)
                         continue;
                     
-                    connectedChunks.Add(Chunks[chunkX+x,chunkY+y,chunkZ+z]);
+                    connectedChunks.Add(chunks[chunkX+x,chunkY+y,chunkZ+z]);
                 }
             }
         }
@@ -93,7 +93,7 @@ public class Chunk3DDataStructure : DataStructure
 
     public override Task Step()
     {
-        foreach (ExtendedChunk3D chunk3D in Chunks)
+        foreach (ExtendedChunk3D chunk3D in chunks)
         {
             chunk3D.Step();
         }
@@ -104,20 +104,20 @@ public class Chunk3DDataStructure : DataStructure
     public override void AddOrganism(Organism organism)
     {
         (int x, int y, int z) = GetChunk(organism.Position);
-        Chunks[x,y,z].DirectlyInsertOrganism(organism);
+        chunks[x,y,z].DirectlyInsertOrganism(organism);
     }
     
     public override bool RemoveOrganism(Organism organism)
     {
         (int x, int y, int z) = GetChunk(organism.Position);
-        return Chunks[x, y, z].Organisms.Remove(organism);
+        return chunks[x, y, z].Organisms.Remove(organism);
     }
 
     public override IEnumerable<Organism> GetOrganisms()
     {
         Organism[] organisms = new Organism[GetOrganismCount()];
         int i = 0;
-        foreach (ExtendedChunk3D chunk in Chunks)
+        foreach (ExtendedChunk3D chunk in chunks)
         {
             foreach (Organism organism in chunk.Organisms)
             {
@@ -132,7 +132,7 @@ public class Chunk3DDataStructure : DataStructure
     public override int GetOrganismCount()
     {
         int organismCount = 0;
-        foreach (ExtendedChunk3D chunk3D in Chunks)
+        foreach (ExtendedChunk3D chunk3D in chunks)
         {
             organismCount += chunk3D.OrganismCount;
         }
@@ -142,20 +142,20 @@ public class Chunk3DDataStructure : DataStructure
 
     private (int, int, int) GetChunk(Vector3 position)
     {
-        int chunkX = (int)Math.Floor((position.X - MinPosition.X) / ChunkSize);
-        int chunkY = (int)Math.Floor((position.Y - MinPosition.Y) / ChunkSize);
-        int chunkZ = (int)Math.Floor((position.Z - MinPosition.Z) / ChunkSize);
+        int chunkX = (int)Math.Floor((position.X - minPosition.X) / chunkSize);
+        int chunkY = (int)Math.Floor((position.Y - minPosition.Y) / chunkSize);
+        int chunkZ = (int)Math.Floor((position.Z - minPosition.Z) / chunkSize);
         //Math.Min because otherwise can throw error if X,Y, or Z is exactly maxValue
-        chunkX = Math.Min(chunkX, ChunkCountX - 1);
-        chunkY = Math.Min(chunkY, ChunkCountY - 1);
-        chunkZ = Math.Min(chunkZ, ChunkCountZ - 1);
+        chunkX = Math.Min(chunkX, chunkCountX - 1);
+        chunkY = Math.Min(chunkY, chunkCountY - 1);
+        chunkZ = Math.Min(chunkZ, chunkCountZ - 1);
         return (chunkX, chunkY, chunkZ);
     }
     
     public override bool CheckCollision(Organism organism, Vector3 position)
     {
         (int cX, int cY, int cZ) = GetChunk(organism.Position);
-        ExtendedChunk3D chunk = Chunks[cX, cY, cZ];
+        ExtendedChunk3D chunk = chunks[cX, cY, cZ];
         
         if (!World.IsInBounds(position))
             return true;
@@ -212,7 +212,7 @@ public class Chunk3DDataStructure : DataStructure
     public override Organism? NearestNeighbour(Organism organism)
     {
         (int cX, int cY, int cZ) = GetChunk(organism.Position);
-        ExtendedChunk3D chunk = Chunks[cX, cY, cZ];
+        ExtendedChunk3D chunk = chunks[cX, cY, cZ];
         
         float closestSquareDistance = 9999999999999f;
         Organism? knownNearest = null;
@@ -259,13 +259,13 @@ public class Chunk3DDataStructure : DataStructure
 
     private void CheckWarnings(float largestOrganismSize)
     {
-        if (ChunkSize > largestOrganismSize * 10)
+        if (chunkSize > largestOrganismSize * 10)
             Console.WriteLine("Warning: Chunk size is rather large, smaller chunk size would improve performance");
     }
 
     private void CheckErrors(float largestOrganismSize)
     {
-        if (ChunkSize / 2f < largestOrganismSize)
+        if (chunkSize / 2f < largestOrganismSize)
             throw new ArgumentException("Chunk size must be at least twice largest organism size");
     }
     #endregion

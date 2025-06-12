@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace BioSim.Datastructures;
 
-public class Chunk2D
+internal class Chunk2D
 {
     public Vector2 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
