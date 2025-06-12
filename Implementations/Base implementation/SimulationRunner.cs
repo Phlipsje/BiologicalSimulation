@@ -30,9 +30,9 @@ public class SimulationRunner : IDisposable
     /// <summary>
     /// This will start the simulation.
     /// </summary>
-    public void Start()
+    public void Start(int randomSeed = 0)
     {
-        Random random = new Random(); //Can enter seed here
+        Random random = randomSeed == 0 ? new Random() : new Random(randomSeed);
         Simulation.CreateSimulation(World, random);
         Simulation.SetDataStructure(DataStructure);
         
