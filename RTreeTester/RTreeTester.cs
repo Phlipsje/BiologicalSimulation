@@ -15,8 +15,8 @@ public class RTreeTester : Game
 {
     private const int screenWidth = 1920;
     private const int screenHeight = 1200;
-    private const int m = 2, M = 20;
-    private const float Scale = 0.0115f;
+    private const int m = 2, M = 8;
+    private const float Scale = 1.115f;
     private const int TestSize = 10;
     private Random random = new Random(33419680);
     private KeyboardState lastKeyState;
@@ -61,7 +61,7 @@ public class RTreeTester : Game
             Exit();
         
         int size = 10000;
-        float spread = 50000;
+        float spread = 500;
         KeyboardState keyState = Keyboard.GetState();
         if (keyState.IsKeyUp(Keys.N) && lastKeyState.IsKeyDown(Keys.N))
         {
@@ -89,7 +89,7 @@ public class RTreeTester : Game
         if (keyState.IsKeyUp(Keys.A) && lastKeyState.IsKeyDown(Keys.A))
         {
             Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
-                random.NextSingle() * spread);
+                random.NextSingle() * spread * 0f);
             Mbb mbb = new Mbb(pos, pos + new Vector3(TestSize));
             TestObject obj = new TestObject(currentN++, mbb); 
             rTree.Insert(obj);
@@ -101,7 +101,7 @@ public class RTreeTester : Game
             for (int i = 0; i < size; i++)
             {
                 Vector3 pos = new Vector3(random.NextSingle() * spread, random.NextSingle() * spread,
-                    random.NextSingle() * spread);
+                    random.NextSingle() * spread * 0f);
                 Mbb mbb = new Mbb(pos, pos + new Vector3(TestSize));
                 TestObject obj = new TestObject(currentN++, mbb);
                 rTree.Insert(obj);
@@ -369,7 +369,7 @@ public class RTreeTester : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.Black);
+        GraphicsDevice.Clear(Color.White);
         _spriteBatch.Begin();
         List<(Mbb,int)> mbbs = rTree.GetMbbsWithLevel();
         int maxLevel = 0;
@@ -377,17 +377,29 @@ public class RTreeTester : Game
         {
             maxLevel = Math.Max(maxLevel, level);
         }
-        foreach (var (mbb, level) in mbbs)
+        float[] levelCounts = new float[maxLevel + 1];
+        foreach (var (_, level) in mbbs)
         {
-            float colorStep = maxLevel != 0 ? 1f / maxLevel : 0;
-            Color color = new Color(1 - level * colorStep, 1, 1);
-            if (level == maxLevel)
-                color = new Color(0, 1f, 0);
-            DrawMbb(mbb, color);
+            levelCounts[level]++;
         }
-        
+        float[] levelWidths = levelCounts;
+        for (int i = 0; i < levelWidths.Length; i++)
+        {
+            levelWidths[i] = screenWidth / 2f / levelWidths[i];
+        }
+
+        for (var i = mbbs.Count - 1; i >= 0; i--)
+        {
+            var (mbb, level) = mbbs[i];
+            float colorStep = maxLevel != 0 ? 1f / maxLevel : 0;
+            Color color = new Color(level * colorStep, level * colorStep, level * colorStep, 0.8f);
+            if (level == maxLevel)
+                color = new Color(1f, 0f, 0);
+            DrawMbb(mbb, color, 2);
+        }
+
         //draw graph representation.
-        DrawNode(rTree.Root, 0, 0, Vector2.Zero);
+        DrawNode(rTree.Root, 0, 0, Vector2.Zero, levelWidths);
 
         //draw search query
         DrawMbb(searchArea, Color.Red, 2);
@@ -409,18 +421,19 @@ public class RTreeTester : Game
         base.Draw(gameTime);
     }
 
-    void DrawNode(RNode<TestObject> node, int level, float offset, Vector2 parentPos)
+    void DrawNode(RNode<TestObject> node, int level, float offset, Vector2 parentPos, float[] levelWidths)
     {
-        float levelHeight = 50;
+        float levelHeight = screenHeight / 2f / (levelWidths.Length - 1);
         float totalWidth = screenWidth / 2f;
-        float levelWidth = totalWidth / MathF.Pow(M, level);
+        //float levelWidth = totalWidth / (MathF.Pow(M, level));
+        float levelWidth = levelWidths[level];
         Vector2 graphOrigin = new Vector2(3 * (screenWidth / 4f), screenHeight / 2f);
         Vector2 drawPos = graphOrigin + new Vector2(offset, level * levelHeight);
         Vector2 halfSize = new Vector2(5f);
         if (node is RLeafNode<TestObject>)
         {
             //draw 
-            Color color = Color.Green;
+            Color color = Color.Red;
             float searchSizeMultiplier = 1f;
             foreach (var testObject in searchResult)
             {
@@ -430,22 +443,22 @@ public class RTreeTester : Game
                     searchSizeMultiplier = 1.4f;
                 }
             }
-            DrawRectangle(drawPos - halfSize * searchSizeMultiplier, drawPos + halfSize * searchSizeMultiplier, color);
+            DrawRectangle(drawPos - halfSize * searchSizeMultiplier, drawPos + halfSize * searchSizeMultiplier, color, 2);
         }
         else
         {
             //draw node
-            Color color = Color.White;
+            Color color = Color.Black;
             DrawRectangle(drawPos - halfSize, drawPos + halfSize, color);
             RNonLeafNode<TestObject> nonLeaf = (RNonLeafNode<TestObject>)node;
             for(int i = 0; i < nonLeaf.NodeEntries.Count; i++)
             {
-                DrawNode(nonLeaf.NodeEntries[i], level + 1, offset + i * (levelWidth / nonLeaf.NodeEntries.Count) - levelWidth / 2f, drawPos);
+                DrawNode(nonLeaf.NodeEntries[i], level + 1, offset + (i + 0.5f) * (levelWidth / nonLeaf.NodeEntries.Count) - levelWidth / 2f, drawPos, levelWidths);
             }
         }
         if (level != 0)
         {
-            DrawLine(drawPos, parentPos, Color.Aqua);
+            DrawLine(drawPos, parentPos, Color.Black, 2);
         }
     }
     void DrawMbb(Mbb mbb, Microsoft.Xna.Framework.Color color, int thickness = 1)
