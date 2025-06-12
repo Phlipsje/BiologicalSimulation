@@ -116,8 +116,8 @@ public partial class Simulation
     /// </summary>
     public void StartSimulation()
     {
-        world.StartingDistribution(random);
         world.Initialize();
+        world.StartingDistribution(random);
         
         CheckWarnings();
         CheckErrors();
@@ -140,8 +140,8 @@ public partial class Simulation
         }
         
         Tick++;
-        await dataStructure.Step();
         world.Step();
+        await dataStructure.Step();
         OnTick?.Invoke(world);
 
         //Save file and invoke event letting know that it happened
