@@ -18,7 +18,7 @@ public class Chunk3DDataStructure : DataStructure
     private int chunkCountY;
     private int chunkCountZ;
     
-    public Chunk3DDataStructure(Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize, bool multithreaded = false)
+    public Chunk3DDataStructure(Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize)
     {
         chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
         chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);

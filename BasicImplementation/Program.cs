@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using BiologicalSimulation.Datastructures.RTree;
+using BioSim;
 using BioSim.Datastructures;
 using BioSim.Simulation;
 using Implementations;
