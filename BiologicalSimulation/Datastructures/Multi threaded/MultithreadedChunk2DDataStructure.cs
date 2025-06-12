@@ -3,27 +3,25 @@ using System.Numerics;
 
 namespace BioSim.Datastructures;
 
-public class MultithreadedChunk3DFixedDataStructure : DataStructure
+public class MultithreadedChunk2DDataStructure : DataStructure
 {
-    protected Chunk3D[,,] Chunks;
-    protected Vector3 MinPosition;
+    protected Chunk2D[,] Chunks;
+    protected Vector2 MinPosition;
     protected float ChunkSize;
     protected int ChunkCountX;
     protected int ChunkCountY;
-    protected int ChunkCountZ;
     //First array stores the differing groups needed to have sets of chunks that never directly touch eachother,
     // second array stores logical cores that can do tasks, third is the actual chunks that are run
-    private Chunk3D[][][] chunkGroupBatches;
+    private Chunk2D[][][] chunkGroupBatches;
     private int groupCount;
     private bool stepping = false;
     
-    public MultithreadedChunk3DFixedDataStructure(Vector3 minPosition, Vector3 maxPosition, float chunkSize, float largestOrganismSize, int amountOfLogicalCoresToUse = 0)
+    public MultithreadedChunk2DDataStructure(Vector2 minPosition, Vector2 maxPosition, float chunkSize, float largestOrganismSize, int amountOfLogicalCoresToUse = 0)
     {
         //Chunk setup
         ChunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
         ChunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
-        ChunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize);
-        Chunks = new Chunk3D[ChunkCountX, ChunkCountY, ChunkCountZ];
+        Chunks = new Chunk2D[ChunkCountX, ChunkCountY];
         MinPosition = minPosition;
         ChunkSize = chunkSize;
 
@@ -32,11 +30,8 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
         {
             for (int j = 0; j < ChunkCountY; j++)
             {
-                for (int k = 0; k < ChunkCountZ; k++)
-                {
-                    Vector3 chunkCenter = minPosition + new Vector3(i, j, k) * chunkSize + new Vector3(chunkSize * 0.5f);
-                    Chunks[i, j, k] = new Chunk3D(chunkCenter, chunkSize);
-                }
+                Vector2 chunkCenter = minPosition + new Vector2(i, j) * chunkSize + new Vector2(chunkSize*0.5f);
+                Chunks[i, j] = new Chunk2D(chunkCenter, chunkSize);
             }
         }
         
@@ -45,27 +40,24 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
         {
             for (int j = 0; j < ChunkCountY; j++)
             {
-                for (int k = 0; k < ChunkCountZ; k++)
-                {
-                    Chunks[i, j, k].Initialize(GetConnectedChunks(i, j, k));
-                }
+                Chunks[i, j].Initialize(GetConnectedChunks(i, j));
             }
         }
         
         //Multithreading setup
-        (int, int, int)[] offset = [(0, 0, 0), (0, 1, 0), (1, 0, 0), (1, 1, 0), (0, 0, 1), (0, 1, 1), (1, 0, 1), (1, 1, 1)];
+        (int, int)[] offset = [(0, 0), (0, 1), (1, 0), (1, 1)];
         groupCount = offset.Length;
         
         //Round downwards for uneven task counts
-        int lowestTaskCount = (int)Math.Floor(ChunkCountX * ChunkCountY * ChunkCountZ / (float)groupCount);
+        int lowestTaskCount = (int)Math.Floor(ChunkCountX * ChunkCountY / (float)groupCount);
         
-        List<Chunk3D>[] chunkGroups = new List<Chunk3D>[groupCount+1];
+        List<Chunk2D>[] chunkGroups = new List<Chunk2D>[groupCount+1];
         
         //First we find all the chunks in a group
         for (int group = 0; group < groupCount; group++)
         {
-            chunkGroups[group] = new List<Chunk3D>(lowestTaskCount);
-            (int offsetX, int offsetY, int offsetZ) = offset[group];
+            chunkGroups[group] = new List<Chunk2D>(lowestTaskCount);
+            (int offsetX, int offsetY) = offset[group];
             
             //All workers are assigned a chunk where every chunk has no direct neighbour that is currently working, meaning we get a grid pattern
             //Note that x and y grow by 2 each loop
@@ -73,25 +65,22 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
             {
                 for (int y = 0; y < ChunkCountY; y += 2)
                 {
-                    for (int z = 0; z < ChunkCountZ; z += 2)
-                    {
-                        chunkGroups[group].Add(Chunks[x + offsetX, y + offsetY, z + offsetZ]);
-                    }
+                    chunkGroups[group].Add(Chunks[x + offsetX, y + offsetY]);
                 }
             }
         } 
         
+        //Next we assign them to every logical core
         //Next we assign them to every logical core (and respect defined amount of cores if done)
-        //We always keep one logical core free to work on other tasks (mainly controlling the rest of the program)
-        int allowedCores = amountOfLogicalCoresToUse == 0 ? (Environment.ProcessorCount - 1) : amountOfLogicalCoresToUse;
-        chunkGroupBatches = new Chunk3D[groupCount][][];
+        int allowedCores = amountOfLogicalCoresToUse == 0 ? Environment.ProcessorCount : amountOfLogicalCoresToUse;
+        chunkGroupBatches = new Chunk2D[groupCount][][];
         for (int group = 0; group < groupCount; group++)
         {
             int index = 0;
             int chunkGroupCount = chunkGroups[group].Count;
             //Note: most physical cores have multiple logical cores (want rounded down task count, so that there is always at least 1 task per logical core)
             int logicalCores = Math.Min(allowedCores, chunkGroupCount);
-            chunkGroupBatches[group] = new Chunk3D[logicalCores][];
+            chunkGroupBatches[group] = new Chunk2D[logicalCores][];
             for (int core = 0; core < Math.Min(logicalCores, chunkGroupCount); core++)
             {
                 //Divide all assigned chunks to a group to different logical cores
@@ -99,7 +88,7 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
                 int batchesWithExtraChunk = chunkGroups[group].Count % logicalCores;
                 bool extraChunk = batchesWithExtraChunk > core;
                 int batchSize = chunksPerCore + (extraChunk ? 1: 0);
-                chunkGroupBatches[group][core] = new Chunk3D[batchSize];
+                chunkGroupBatches[group][core] = new Chunk2D[batchSize];
 
                 for (int i = 0; i < batchSize; i++)
                 {
@@ -108,15 +97,15 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
                 }
             }
         }
-
+        
         CheckWarnings(largestOrganismSize, allowedCores);
         CheckErrors(largestOrganismSize);
     }
     
     [Pure]
-    protected Chunk3D[] GetConnectedChunks(int chunkX, int chunkY, int chunkZ)
+    protected Chunk2D[] GetConnectedChunks(int chunkX, int chunkY)
     {
-        List<Chunk3D> connectedChunks = new List<Chunk3D>(26);
+        List<Chunk2D> connectedChunks = new List<Chunk2D>(8);
         
         for (int x = -1; x <= 1; x++)
         {
@@ -129,18 +118,12 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
                 //Check bounds
                 if (chunkY + y < 0 || chunkY + y >= ChunkCountY)
                     continue;
-                for (int z = -1; z <= 1; z++)
-                {
-                    //Check bounds
-                    if (chunkZ + z < 0 || chunkZ + z >= ChunkCountZ)
-                        continue;
+                
+                //Don't add self
+                if (x == 0 && y == 0)
+                    continue;
                     
-                    //Don't add self
-                    if (x == 0 && y == 0 && z == 0)
-                        continue;
-                    
-                    connectedChunks.Add(Chunks[chunkX+x,chunkY+y, chunkZ+z]);
-                }
+                connectedChunks.Add(Chunks[chunkX+x,chunkY+y]);
             }
         }
         
@@ -169,11 +152,11 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
         stepping = false;
     }
     
-    private Task ChunkStepTask(Chunk3D[] coordBatch)
+    private Task ChunkStepTask(Chunk2D[] coordBatch)
     {
         return Task.Run(() =>
         {
-            foreach (Chunk3D chunk in coordBatch)
+            foreach (Chunk2D chunk in coordBatch)
             {
                 chunk.Step();
             }
@@ -188,20 +171,20 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
 
     public override void AddOrganism(Organism organism)
     {
-        (int x, int y, int z) = GetChunk(organism.Position);
-        Chunks[x,y,z].DirectlyInsertOrganism(organism);
+        (int x, int y) = GetChunk(organism.Position);
+        Chunks[x,y].DirectlyInsertOrganism(organism);
     }
     
     public override bool RemoveOrganism(Organism organism)
     {
-        (int x, int y, int z) = GetChunk(organism.Position);
-        return Chunks[x, y, z].Organisms.Remove(organism);
+        (int x, int y) = GetChunk(organism.Position);
+        return Chunks[x, y].Organisms.Remove(organism);
     }
 
     public override IEnumerable<Organism> GetOrganisms()
     {
         LinkedList<Organism> organisms = new LinkedList<Organism>();
-        foreach (Chunk3D chunk in Chunks)
+        foreach (Chunk2D chunk in Chunks)
         {
             for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
             {
@@ -216,30 +199,28 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
     public override int GetOrganismCount()
     {
         int organismCount = 0;
-        foreach (Chunk3D chunk in Chunks)
+        foreach (Chunk2D chunk2D in Chunks)
         {
-            organismCount += chunk.OrganismCount;
+            organismCount += chunk2D.OrganismCount;
         }
 
         return organismCount;
     }
 
-    private (int, int, int) GetChunk(Vector3 position)
+    private (int, int) GetChunk(Vector3 position)
     {
         int chunkX = (int)Math.Floor((position.X - MinPosition.X) / ChunkSize);
         int chunkY = (int)Math.Floor((position.Y - MinPosition.Y) / ChunkSize);
-        int chunkZ = (int)Math.Floor((position.Z - MinPosition.Z) / ChunkSize);
         //Math.Min because otherwise can throw error if X,Y, or Z is exactly maxValue
         chunkX = Math.Min(chunkX, ChunkCountX - 1);
         chunkY = Math.Min(chunkY, ChunkCountY - 1);
-        chunkZ = Math.Min(chunkZ, ChunkCountZ - 1);
-        return (chunkX, chunkY, chunkZ);
+        return (chunkX, chunkY);
     }
 
     public override bool CheckCollision(Organism organism, Vector3 position)
     {
-        (int cX, int cY, int cZ) = GetChunk(organism.Position);
-        Chunk3D chunk = Chunks[cX, cY, cZ];
+        (int cX, int cY) = GetChunk(organism.Position);
+        Chunk2D chunk = Chunks[cX, cY];
         
         if (!World.IsInBounds(position))
             return true;
@@ -265,7 +246,7 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
         }
 
         //Check all organisms in neighbouring chunks
-        foreach (Chunk3D neighbouringChunk in chunk.ConnectedChunks)
+        foreach (Chunk2D neighbouringChunk in chunk.ConnectedChunks)
         {
             for (LinkedListNode<Organism> node = neighbouringChunk.Organisms.First!; node != null; node = node.Next!)
             {
@@ -298,8 +279,8 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
     /// <exception cref="NotImplementedException"></exception>
     public override Organism? NearestNeighbour(Organism organism)
     {
-        (int cX, int cY, int cZ) = GetChunk(organism.Position);
-        Chunk3D chunk = Chunks[cX, cY, cZ];
+        (int cX, int cY) = GetChunk(organism.Position);
+        Chunk2D chunk = Chunks[cX, cY];
         
         float closestSquareDistance = 9999999999999f;
         Organism? knownNearest = null;
@@ -321,7 +302,7 @@ public class MultithreadedChunk3DFixedDataStructure : DataStructure
         }
 
         //Check all organisms in neighbouring chunks
-        foreach (Chunk3D neighbouringChunk in chunk.ConnectedChunks)
+        foreach (Chunk2D neighbouringChunk in chunk.ConnectedChunks)
         {
             for (LinkedListNode<Organism> node = neighbouringChunk.Organisms.First!; node != null; node = node.Next!)
             {

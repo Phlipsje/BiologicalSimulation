@@ -27,7 +27,7 @@ class Program
         //Choose the data structure that is used to speed up the simulation
         float worldHalfSize = 16f;
         float organismSize = 0.5f;
-        SimulationRunner.DataStructure = new MultithreadedChunk3DFixedDataStructure(new Vector3(-worldHalfSize), new Vector3(worldHalfSize), 4f, organismSize);
+        SimulationRunner.DataStructure = new MultithreadedChunk3DDataStructure(new Vector3(-worldHalfSize), new Vector3(worldHalfSize), 4f, organismSize);
         
         //Create a world which implements the data structure and defines rules such as:
         // where organisms start in the simulation, what the bounds are of the virtual environment and when to stop the simulation automatically
