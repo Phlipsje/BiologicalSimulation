@@ -20,7 +20,7 @@ public class ConsoleApp : IProgramMedium
     public World World { get; set; }
     public DataStructure DataStructure { get; set; }
     private bool looping = true;
-    private bool stepLocked = false; //Lock for multithreading
+    private int startOrganismCount = 0;
     
     //We have a separate thread for input, because otherwise Console.ReadLine() would block running the simulation
     private Thread inputThread;
@@ -80,6 +80,8 @@ public class ConsoleApp : IProgramMedium
     
     public void StartProgram()
     {
+        startOrganismCount = World.GetOrganismCount();
+        
         Console.WriteLine("Running Biological Simulation");
         
         PrintSimulationInfo();
@@ -184,7 +186,7 @@ public class ConsoleApp : IProgramMedium
         Console.WriteLine($"[{DateTime.Now}]");
         Console.WriteLine($"Simulating world: {World.GetType()}");
         Console.WriteLine($"Using data structure: {DataStructure.GetType()}");
-        Console.WriteLine($"Starting organism count: {World.GetOrganismCount()}");
+        Console.WriteLine($"Starting organism count: {startOrganismCount}");
         if (Simulation.FileWritingEnabled)
         {
             Console.WriteLine($"Data will be written to file every: {Simulation.TicksPerFileWrite} ticks");

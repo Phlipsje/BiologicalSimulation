@@ -9,8 +9,15 @@ namespace BioSim;
 /// </summary>
 public abstract class Organism : IMinimumBoundable
 {
-    public abstract string Key { get; } //Used to identify which organism it is in a file
+    /// <summary>
+    /// Used to identify type of organism in a file.
+    /// </summary>
+    public abstract string Key { get; }
     private Vector3 position;
+    
+    /// <summary>
+    /// The position of the organism.
+    /// </summary>
     public Vector3 Position
     {
         get => position;
@@ -20,11 +27,33 @@ public abstract class Organism : IMinimumBoundable
             SetMbb(position);
         } 
     }
-    public float Size { get; } //Organism is a sphere, so this is the radius
-    public virtual Vector3 Color { get; } = Vector3.Zero; //Used to identify which organism it is in any visual representation, has no effect besides visual clarity
-    protected World World { get; } //Needs this to check if it is in bounds
-    protected DataStructure DataStructure { get; } //Needs this to understand where other organisms are
-    protected Random Random;
+    
+    /// <summary>
+    /// Organism is a sphere, so this is the radius.
+    /// </summary>
+    public float Size { get; }
+    
+    /// <summary>
+    /// Used to identify which organism it is in any visual representation, has no effect besides visual clarity.
+    /// </summary>
+    public virtual Vector3 Color { get; } = Vector3.Zero;
+    
+    /// <summary>
+    /// Needs this to check if it is in bounds
+    /// </summary>
+    protected World World { get; }
+    
+    /// <summary>
+    /// Needs this to understand where other organisms are
+    /// </summary>
+    protected DataStructure DataStructure { get; }
+    
+    /// <summary>
+    /// Needs this to assist in random value generation.
+    /// This is the same random class passed when Simulation was made and thus makes use of the same starting seed.
+    /// This means that all actions in Organism are deterministic with seed (as long as multithreaded data structure is not being used).
+    /// </summary>
+    protected Random Random { get; }
 
     public Organism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random)
     {
@@ -37,12 +66,36 @@ public abstract class Organism : IMinimumBoundable
         DataStructure.AddOrganism(this);
     }
 
+    /// <summary>
+    /// Helper function that is used to copy over any unique, non-standard values to the contents of a new organism.
+    /// </summary>
+    /// <param name="startingPosition"></param>
+    /// <returns></returns>
     public abstract Organism CreateNewOrganism(Vector3 startingPosition);
+    
+    
+    /// <summary>
+    /// Gets called every tick by the active data structure, used to express all the logic of an organism.
+    /// </summary>
     public abstract void Step();
+    
+    /// <summary>
+    /// Turns the contents of this organism into a string used for writing to file.
+    /// </summary>
+    /// <returns></returns>
     public new abstract string ToString();
+    
+    /// <summary>
+    /// Gets a string and uses it to set the contents of this organism.
+    /// </summary>
+    /// <param name="s"></param>
     public abstract void FromString(string s);
 
-    public void Move(Vector3 direction)
+    /// <summary>
+    /// Moves the organism towards a given location, also accounts for collision checks.
+    /// </summary>
+    /// <param name="direction"></param>
+    public virtual void Move(Vector3 direction)
     {
         //Simply add movement towards direction if there is no collision there
         Vector3 newPosition = Position + direction;
@@ -54,7 +107,12 @@ public abstract class Organism : IMinimumBoundable
         }
     }
 
-    public Organism Reproduce()
+    /// <summary>
+    /// Looks for room to try to create a new organism of the same type.
+    /// Note that if there is no room then no organism will be created and this returns null.
+    /// </summary>
+    /// <returns></returns>
+    public virtual Organism Reproduce()
     {
         //Will do a maximum of 5 attempts
         for (int i = 0; i < 5; i++)
@@ -103,24 +161,43 @@ public abstract class Organism : IMinimumBoundable
         return null;
     }
 
+    /// <summary>
+    /// Checks if this organism would collide with another organism if it would move to the given position
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns></returns>
     private bool CheckCollision(Vector3 position)
     {
         return DataStructure.CheckCollision(this, position);
     }
 
+    /// <summary>
+    /// Get minimum bounding box
+    /// </summary>
+    /// <returns></returns>
     public Mbb GetMbb()
     {
         return _mbb;
     }
+    
+    /// <summary>
+    /// Set minimum bounding box
+    /// </summary>
+    /// <param name="mbb"></param>
     public void SetMbb(Mbb mbb)
     {
         mbb = _mbb;
         Position = mbb.Minimum + new Vector3(Size);
     }
+    
+    /// <summary>
+    /// Set minimum bounding box
+    /// </summary>
+    /// <param name="position"></param>
     private void SetMbb(Vector3 position)
     {
         Vector3 sizeVector = new Vector3(Size);
-        _mbb = new Mbb(Position - sizeVector, Position + sizeVector);
+        _mbb = new Mbb(position - sizeVector, position + sizeVector);
     }
     private Mbb _mbb;
 }

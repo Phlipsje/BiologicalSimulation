@@ -10,7 +10,7 @@ namespace BioSim.Datastructures;
 /// the larger size is an extension overlapping with neighbouring chunks that is of minimal size to include all organisms in other chunks that are relevant for collision within this chunk.
 /// Organisms are checked for inclusion/removal every frame, but are only actually removed/inserted if it falls outside the boundaries.
 /// </summary>
-public class ExtendedChunk3D
+internal class ExtendedChunk3D
 {
     public Vector3 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)

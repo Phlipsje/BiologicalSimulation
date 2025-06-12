@@ -4,17 +4,27 @@ namespace BioSim.Simulation;
 
 public class SimulationExporter
 {
+    /// <summary>
+    /// The name of the file the simulation contents are stored in.
+    /// </summary>
     public static string FileName { get; set; }
+    
+    /// <summary>
+    /// The directory in which the save file is stored.
+    /// </summary>
     public static string SaveDirectory { get; set; }
+    
+    /// <summary>
+    /// Used as a debugging tool, if true will print the absolute path where the file is stored in the console.
+    /// </summary>
     public static bool ShowExportFilePath { get; set; } = false;
-    public static bool ClearDirectory { get; set; } = false;
 
     /// <summary>
     /// Saves all organisms in the simulation to a file
     /// </summary>
     /// <param name="world"></param>
     /// <returns>Returns 2 strings, first is the file path, second is the file contents</returns>
-    public (string, string) SaveToSeparateFiles(World world, Simulation simulation)
+    internal (string, string) SaveToSeparateFiles(World world, Simulation simulation)
     {
         StringBuilder sb = new StringBuilder();
         
@@ -32,17 +42,6 @@ public class SimulationExporter
         if (!Directory.Exists(SaveDirectory))
         {
             Directory.CreateDirectory(SaveDirectory);
-        }
-        else
-        {
-            if (ClearDirectory) //Only do this is the directory exists and we want it to be empty
-            {
-                ClearDirectory = false; //Don't repeat
-                
-                //Quickest way to clear everything
-                Directory.Delete(SaveDirectory, true);
-                Directory.CreateDirectory(SaveDirectory);
-            }
         }
 
         //Get file path
@@ -62,12 +61,12 @@ public class SimulationExporter
     }
 
     /// <summary>
-    /// Adds all save data of every given timestep to the same file
+    /// Saves the simulation and writes all save data of all previously occured time steps to the same file.
     /// </summary>
     /// <param name="world"></param>
     /// <param name="simulation"></param>
-    /// <returns></returns>
-    public (string, string) SaveToSameFile(World world, Simulation simulation)
+    /// <returns>Returns 2 strings, first is the file path, second is the file contents</returns>
+    internal (string, string) SaveToSameFile(World world, Simulation simulation)
     {
         StringBuilder sb = new StringBuilder();
         
