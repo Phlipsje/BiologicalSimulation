@@ -45,7 +45,7 @@ public class TestOrganism : Organism
             reproductionCounter = 0;
         }
     }
-
+    
     public override string ToString()
     {
         //Save position 2 decimal points precise
@@ -54,7 +54,7 @@ public class TestOrganism : Organism
         int z = (int)(Position.Z * 100);
         return $" {x/100f} {y/100f} {z/100f}";
     }
-
+    
     public override void FromString(string s)
     {
         string[] values = s.Split(' ');
