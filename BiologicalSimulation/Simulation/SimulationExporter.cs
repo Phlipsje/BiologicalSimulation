@@ -24,7 +24,7 @@ public class SimulationExporter
     /// </summary>
     /// <param name="world"></param>
     /// <returns>Returns 2 strings, first is the file path, second is the file contents</returns>
-    public (string, string) SaveToSeparateFiles(World world, Simulation simulation)
+    internal (string, string) SaveToSeparateFiles(World world, Simulation simulation)
     {
         StringBuilder sb = new StringBuilder();
         
@@ -66,7 +66,7 @@ public class SimulationExporter
     /// <param name="world"></param>
     /// <param name="simulation"></param>
     /// <returns>Returns 2 strings, first is the file path, second is the file contents</returns>
-    public (string, string) SaveToSameFile(World world, Simulation simulation)
+    internal (string, string) SaveToSameFile(World world, Simulation simulation)
     {
         StringBuilder sb = new StringBuilder();
         

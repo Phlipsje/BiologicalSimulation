@@ -12,15 +12,11 @@ public abstract class DataStructure
     /// </summary>
     protected World World { get; private set; }
 
-    public DataStructure()
-    {
-    }
-
     /// <summary>
-    /// Sets the world to keep as a reference, already called for you by the simulation.
+    /// Sets the world to keep as a reference.
     /// </summary>
     /// <param name="world"></param>
-    public void SetWorld(World world)
+    internal void SetWorld(World world)
     {
         World = world;
     }
