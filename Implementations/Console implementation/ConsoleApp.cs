@@ -26,6 +26,7 @@ public class ConsoleApp : IProgramMedium
     private Thread inputThread;
     
     private int ticksPerPrint; //Set to 0 to disable (only used when file writing is disabled)
+    private bool print = true;
     
     //For tracking fps performance
     private Stopwatch stopwatch;
@@ -59,6 +60,9 @@ public class ConsoleApp : IProgramMedium
                 {
                     case "tpp":
                         ticksPerPrint = int.Parse(value);
+                        break;
+                    case "print":
+                        print = value is "true" or "t";
                         break;
                     default:
                         Console.WriteLine("Invalid argument: " + s);
@@ -125,7 +129,8 @@ public class ConsoleApp : IProgramMedium
                 tallyFps = 0;
             }
 
-            if (!Simulation.FileWritingEnabled && Simulation.Tick % ticksPerPrint == 0)
+            //Does not run on FileWritingEnabled as that is already handled by FileWriten()
+            if (print && !Simulation.FileWritingEnabled && ticksPerPrint > 0 && Simulation.Tick % ticksPerPrint == 0)
                 PrintSimulationStats();
         }
 
@@ -240,6 +245,7 @@ public class ConsoleApp : IProgramMedium
 
     public void FileWriten(string filePath, string fileContents)
     {
-        PrintSimulationStats();
+        if(print)
+            PrintSimulationStats();
     }
 }
