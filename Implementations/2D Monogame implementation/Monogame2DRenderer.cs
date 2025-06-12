@@ -115,7 +115,7 @@ public class Monogame2DRenderer : Game, IProgramMedium
         //Now can write average fps in render manager
         #endregion
 
-        Simulation.Step();
+        Simulation.Step().Wait();
         
         base.Update(gameTime);
     }

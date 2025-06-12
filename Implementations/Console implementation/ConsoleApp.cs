@@ -106,12 +106,8 @@ public class ConsoleApp : IProgramMedium
 
     private void CoreLoop()
     {
-        Stopwatch tickWatch = new Stopwatch();
-
         while (looping)
         {
-            tickWatch.Restart();
-
             Simulation.Step().Wait();
 
             // Performance Tracking
