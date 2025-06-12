@@ -198,30 +198,32 @@ public class MultithreadedChunk3DDataStructure : DataStructure
         return chunks[x, y, z].Organisms.Remove(organism);
     }
 
-    public override IEnumerable<Organism> GetOrganisms()
+    public override Task GetOrganisms(out IEnumerable<Organism> organisms)
     {
-        LinkedList<Organism> organisms = new LinkedList<Organism>();
+        LinkedList<Organism> o = new LinkedList<Organism>();
         foreach (Chunk3D chunk in chunks)
         {
             for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
             {
                 Organism organism = node.Value;
-                organisms.AddLast(organism);
+                o.AddLast(organism);
             }
         }
-        
-        return organisms;
+
+        organisms = o;
+        return Task.CompletedTask;
     }
 
-    public override int GetOrganismCount()
+    public override Task GetOrganismCount(out int count)
     {
         int organismCount = 0;
-        foreach (Chunk3D chunk in chunks)
+        foreach (Chunk3D chunk2D in chunks)
         {
-            organismCount += chunk.OrganismCount;
+            organismCount += chunk2D.OrganismCount;
         }
 
-        return organismCount;
+        count = organismCount;
+        return Task.CompletedTask;
     }
 
     private (int, int, int) GetChunk(Vector3 position)

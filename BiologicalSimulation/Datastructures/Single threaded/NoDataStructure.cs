@@ -96,13 +96,15 @@ public class NoDataStructure : DataStructure
         return Organisms.Remove(organism);
     }
 
-    public override IEnumerable<Organism> GetOrganisms()
+    public override Task GetOrganisms(out IEnumerable<Organism> organisms)
     {
-        return Organisms;
+        organisms = Organisms;
+        return Task.CompletedTask;
     }
     
-    public override int GetOrganismCount()
+    public override Task GetOrganismCount(out int count)
     {
-        return Organisms.Count;
+        count = Organisms.Count;
+        return Task.CompletedTask;
     }
 }

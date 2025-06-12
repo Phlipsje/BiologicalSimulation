@@ -84,7 +84,8 @@ public class ConsoleApp : IProgramMedium
     
     public void StartProgram()
     {
-        startOrganismCount = World.GetOrganismCount();
+        World.GetOrganismCount(out int count).Wait();
+        startOrganismCount = count;
         
         Console.WriteLine("Running Biological Simulation");
         
@@ -200,11 +201,12 @@ public class ConsoleApp : IProgramMedium
 
     public void PrintSimulationStats()
     {
+        World.GetOrganismCount(out int count).Wait();
         string[] lines =
         [
             $"|[{DateTime.Now.ToString("HH:mm:ss")}]|",
             $"|Tick: {Simulation.Tick}|",
-            $"|Organisms: {World.GetOrganismCount()}|",
+            $"|Organisms: {count}|",
             $"|Runtime: {Math.Round(TimeRunning, 2)}s|",
             $"|Tick/Sec: {Math.Round(AverageFps, 2)}/s|",
             $"|Sec/Tick: {Math.Round(1/AverageFps, 3)}s|"

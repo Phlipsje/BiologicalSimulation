@@ -44,13 +44,13 @@ public abstract class DataStructure
     /// Gets a list of all currently active organisms.
     /// </summary>
     /// <returns></returns>
-    public abstract IEnumerable<Organism> GetOrganisms();
+    public abstract Task GetOrganisms(out IEnumerable<Organism> organisms);
     
     /// <summary>
     /// Gets the total amount of organisms currently active.
     /// </summary>
     /// <returns></returns>
-    public abstract int GetOrganismCount();
+    public abstract Task GetOrganismCount(out int count);
     
     /// <summary>
     /// Checks if an organisms would collide with the world bounds or another organisms by moving to the newly given position.

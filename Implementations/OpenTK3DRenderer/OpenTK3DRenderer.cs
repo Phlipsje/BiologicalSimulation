@@ -192,7 +192,8 @@ public class OpenTK3DRenderer : GameWindow, IProgramMedium
     
     void UpdateSphereBuffer()
     {
-        Spheres = World.GetOrganisms().Select(o =>
+        World.GetOrganisms(out var organisms);
+        Spheres = organisms.Select(o =>
         {
             Vector3 pos = new Vector3(o.Position.X, o.Position.Y, o.Position.Z);
             Vector3 color = new Vector3(o.Color.X, o.Color.Y, o.Color.Z);

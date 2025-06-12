@@ -99,23 +99,23 @@ public class Chunk2DDataStructure : DataStructure
         return chunks[x, y].Organisms.Remove(organism);
     }
 
-    public override IEnumerable<Organism> GetOrganisms()
+    public override Task GetOrganisms(out IEnumerable<Organism> organisms)
     {
-        Organism[] organisms = new Organism[GetOrganismCount()];
-        int i = 0;
+        LinkedList<Organism> o = new LinkedList<Organism>();
         foreach (ExtendedChunk2D chunk in chunks)
         {
-            foreach (Organism organism in chunk.Organisms)
+            for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
             {
-                organisms[i] = organism;
-                i++;
+                Organism organism = node.Value;
+                o.AddLast(organism);
             }
         }
-        
-        return organisms;
+
+        organisms = o;
+        return Task.CompletedTask;
     }
 
-    public override int GetOrganismCount()
+    public override Task GetOrganismCount(out int count)
     {
         int organismCount = 0;
         foreach (ExtendedChunk2D chunk2D in chunks)
@@ -123,7 +123,8 @@ public class Chunk2DDataStructure : DataStructure
             organismCount += chunk2D.OrganismCount;
         }
 
-        return organismCount;
+        count = organismCount;
+        return Task.CompletedTask;
     }
 
     private (int, int) GetChunk(Vector3 position)
