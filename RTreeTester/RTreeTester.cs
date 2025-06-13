@@ -59,7 +59,6 @@ public class RTreeTester : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
-        
         int size = 10000;
         float spread = 500;
         KeyboardState keyState = Keyboard.GetState();
@@ -124,7 +123,8 @@ public class RTreeTester : Game
         {
             for (int i = 0; i < size && currentN > 0; i++)
             {
-                rTree.Delete(list[--currentN]);
+                if (!rTree.Delete(list[--currentN]))
+                    throw new Exception();
                 //list.Remove(list[currentN]);
             }
             list = [];

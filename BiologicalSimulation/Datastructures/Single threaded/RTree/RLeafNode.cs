@@ -6,7 +6,7 @@ namespace BiologicalSimulation.Datastructures.RTree;
 public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
     where T : IMinimumBoundable
 {
-    private const float Epsilon = 0.01f; //a small value to check whether an MBB lies on this mbb's edge
+    private const float Epsilon = 0.1f; //a small value to check whether an MBB lies on this mbb's edge
     public override int Count => LeafEntries.Count;
     protected override IEnumerable<IMinimumBoundable> Children => LeafEntries.Cast<IMinimumBoundable>();
 
@@ -91,8 +91,9 @@ public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
     public override bool UpdateMbb(T entry, Mbb newMbb, ref RNode<T> root)
     {
         //leaf was found by findLeaf so entry is guaranteed to be contained in this leaf
+        Mbb oldMbb = entry.GetMbb();
         entry.SetMbb(newMbb);
-        if (Mbb.Enlarged(newMbb).Area > Mbb.Area)
+        if (Mbb.Enlargement(newMbb) > 0)
         {
             LeafEntries.Remove(entry);
             CondenseTree(ref root, []);
@@ -100,9 +101,9 @@ public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
             return true;
         }
 
-        //if entry's mbb is not near the edge moving it inwards can not lower the area of the nodes mbb since it is delimited by other entry's mbbs
+        //if entry's mbb was not near the edge moving it inwards can not lower the area of the nodes mbb since it is delimited by other entry's mbbs
         Vector3 smallVector = new Vector3(Epsilon);
-        if (new Mbb(Mbb.Minimum + smallVector, Mbb.Maximum - smallVector).Contains(Mbb))
+        if (new Mbb(Mbb.Minimum + smallVector, Mbb.Maximum - smallVector).Contains(oldMbb))
         {
             return true;
         }

@@ -9,27 +9,31 @@ public class RTreeDataStructure(float moveRange) : DataStructure
     private RTree<Organism> rTree = new RTree<Organism>(2, 10);
     private int organismCount;
     private Dictionary<Organism, List<Organism>> collisionBuffer = [];
+    private HashSet<Organism> removedOrganisms = [];
     
     public override Task Step()
     {
+        removedOrganisms.Clear();
         List<Organism> organisms = rTree.ToList(); //can't apply step directly to data structure as it contents will change
+        
         for (int i = 0; i < organisms.Count; i++)
         {
-            Organism organism = organisms[i];
-            Vector3 collisionRange = new Vector3(organism.Size * 2 + moveRange);
-            Mbb possibleCollisionArea = new Mbb(organism.Position - collisionRange, organism.Position + collisionRange);
+            if(removedOrganisms.Contains(organisms[i])) //Make sure not to apply step to already removed organisms
+                continue;
+            //extra 0.1f for floating point errors in bounding boxes
+            Vector3 collisionRange = new Vector3(organisms[i].Size * 2 + moveRange + 0.1f);
+            Mbb possibleCollisionArea = new Mbb(organisms[i].Position - collisionRange, organisms[i].Position + collisionRange);
             List<Organism> collidables = rTree.Search(possibleCollisionArea);
-            collisionBuffer[organism] = collidables;
+            collisionBuffer[organisms[i]] = collidables;
             Vector3 oldPos = organisms[i].Position;
-            organism.Step();
+            organisms[i].Step();
             Vector3 newPos = organisms[i].Position;
             if (newPos != oldPos)
             {
-                //update data structure
-                Mbb newMbb = organism.GetMbb();
-                organism.Position = oldPos; //the entry is contained in the rTree with the oldPos so reset it to ensure the entry is found
-                rTree.UpdateMbb(organism, newMbb);
-                organism.Position = newPos;
+                //update tree structure
+                Mbb newMbb = organisms[i].GetMbb();
+                organisms[i].Position = oldPos; //the entry is contained in the rTree with the oldPos so reset it to ensure the entry is found
+                rTree.UpdateMbb(organisms[i], newMbb);
             }
         }
 
@@ -52,6 +56,7 @@ public class RTreeDataStructure(float moveRange) : DataStructure
     {
         if (rTree.Delete(organism))
         {
+            removedOrganisms.Add(organism);
             organismCount--;
             return true;
         }

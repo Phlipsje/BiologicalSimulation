@@ -72,12 +72,10 @@ public class RTree<T>(int minNodeSize, int maxNodeSize)
     public T? NearestNeighbour(T searchEntry, Func<T,T,float> distanceFunc)
     {
         if (root == null)
-            return default(T);
+            return default;
         T? dummy = default(T); 
         NearestNeighbour<T> initial = new NearestNeighbour<T>(dummy, float.MaxValue);
         root.NearestNeighbour(searchEntry, initial, distanceFunc);
-        if(initial.Entry != null)
-            Console.WriteLine(distanceFunc(initial.Entry, searchEntry));
         return initial.Entry; //contains result of query now
     }
 
