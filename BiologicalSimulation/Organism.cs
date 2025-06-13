@@ -200,4 +200,26 @@ public abstract class Organism : IMinimumBoundable
         _mbb = new Mbb(position - sizeVector, position + sizeVector);
     }
     private Mbb _mbb;
+
+    public bool CheckCollision(Vector3 position, IEnumerable<Organism> otherOrganisms)
+    {
+        foreach (Organism otherOrganism in otherOrganisms)
+        {
+            if (this == otherOrganism)
+                continue;
+            
+            //Checks collision by checking distance between circles
+            float x = position.X - otherOrganism.Position.X;
+            float x2 = x * x;
+            float y = position.Y - otherOrganism.Position.Y;
+            float y2 = y * y;
+            float z = position.Z - otherOrganism.Position.Z;
+            float z2 = z * z;
+            float sizes = Size + otherOrganism.Size;
+            if (x2 + y2 + z2 <= sizes * sizes)
+                return true;
+        }
+
+        return false;
+    }
 }

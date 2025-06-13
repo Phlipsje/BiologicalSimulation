@@ -73,4 +73,51 @@ public abstract class DataStructure
     /// <param name="organism"></param>
     /// <returns></returns>
     public abstract Organism? NearestNeighbour(Organism organism);
+    
+    /// <summary>
+    /// Helper function for collision checks with spheres
+    /// </summary>
+    /// <param name="rayOrigin"></param>
+    /// <param name="rayDir"></param>
+    /// <param name="maxDistance"></param>
+    /// <param name="sphereCenter"></param>
+    /// <param name="sphereRadius"></param>
+    /// <param name="tHit"></param>
+    /// <returns></returns>
+    protected static bool RayIntersects(Vector3 rayOrigin, Vector3 rayDir, float maxDistance,
+        Vector3 sphereCenter, float sphereRadius, out float tHit)
+    {
+        Vector3 oc = rayOrigin - sphereCenter;
+        float r = sphereRadius;
+
+        float a = Vector3.Dot(rayDir, rayDir);
+        float b = 2.0f * Vector3.Dot(oc, rayDir);
+        float c = Vector3.Dot(oc, oc) - r * r;
+
+        float discriminant = b * b - 4 * a * c;
+        if (discriminant < 0)
+        {
+            tHit = float.MaxValue;
+            return false;
+        }
+
+        float sqrtDiscriminant = MathF.Sqrt(discriminant);
+        float t0 = (-b - sqrtDiscriminant) / (2 * a);
+        float t1 = (-b + sqrtDiscriminant) / (2 * a);
+
+        // Find the first valid hit within range
+        if (t0 >= 0 && t0 <= maxDistance)
+        {
+            tHit = t0;
+            return true;
+        }
+        if (t1 >= 0 && t1 <= maxDistance)
+        {
+            tHit = t1;
+            return true;
+        }
+
+        tHit = float.MaxValue;
+        return false;
+    }
 }

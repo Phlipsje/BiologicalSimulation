@@ -156,44 +156,12 @@ public class Chunk2DDataStructure : DataStructure
             return true;
         
         //Check for organisms within the chunk
-        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
-        {
-            Organism otherOrganism = node.Value;
-            
-            if (organism == otherOrganism)
-                continue;
-            
-            //Checks collision by checking distance between circles
-            float x = position.X - otherOrganism.Position.X;
-            float x2 = x * x;
-            float y = position.Y - otherOrganism.Position.Y;
-            float y2 = y * y;
-            float z = position.Z - otherOrganism.Position.Z;
-            float z2 = z * z;
-            float sizes = organism.Size + otherOrganism.Size;
-            if (x2 + y2 + z2 <= sizes * sizes)
-                return true;
-        }
+        if(organism.CheckCollision(position, chunk.Organisms))
+            return true;
         
         //Check for any organisms within neighbouring chunks that are within distance of possibly touching with this
-        for (LinkedListNode<Organism> node = chunk.ExtendedCheck.First!; node != null; node = node.Next!)
-        {
-            Organism otherOrganism = node.Value;
-            
-            if (organism == otherOrganism)
-                continue;
-            
-            //Checks collision by checking distance between circles
-            float x = position.X - otherOrganism.Position.X;
-            float x2 = x * x;
-            float y = position.Y - otherOrganism.Position.Y;
-            float y2 = y * y;
-            float z = position.Z - otherOrganism.Position.Z;
-            float z2 = z * z;
-            float sizes = organism.Size + otherOrganism.Size;
-            if (x2 + y2 + z2 <= sizes * sizes)
-                return true;
-        }
+        if (organism.CheckCollision(position, chunk.ExtendedCheck))
+            return true;
 
         return false;
     }
