@@ -71,6 +71,18 @@ public class NoDataStructure : DataStructure
         //If we reach this, then no collision
         return false;
     }
+
+    public override bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length, out float t)
+    {
+        if (!World.IsInBounds(organism.Position + normalizedDirection * length))
+        {
+            //Still block movement normally upon hitting world limit
+            t = 0;
+            return true;
+        }
+        
+        return FindMinimumIntersection(organism, normalizedDirection, length, Organisms, out t);
+    }
     
     public override Task Clear()
     {

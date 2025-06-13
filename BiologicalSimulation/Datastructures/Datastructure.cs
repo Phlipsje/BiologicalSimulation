@@ -73,6 +73,36 @@ public abstract class DataStructure
     /// <param name="organism"></param>
     /// <returns></returns>
     public abstract Organism? NearestNeighbour(Organism organism);
+
+    /// <summary>
+    /// Find the first intersection when the organism tries to move in the given direction up to the given length.
+    /// Returns a boolean based on if an intersection takes place at all.
+    /// The outed value t is where the collision took place.
+    /// </summary>
+    /// <param name="organism"></param>
+    /// <param name="normalizedDirection"></param>
+    /// <param name="length"></param>
+    /// <param name="t"></param>
+    /// <returns></returns>
+    public abstract bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length,
+        out float t);
+
+    protected static bool FindMinimumIntersection(Organism organism, Vector3 normalizedDirection, float length, IEnumerable<Organism> otherOrganisms, out float t)
+    {
+        t = float.MaxValue;
+        foreach (Organism otherOrganism in otherOrganisms)
+        {
+            if (RayIntersects(organism.Position, normalizedDirection, length, otherOrganism.Position,
+                    organism.Size + otherOrganism.Size, out float tHit))
+            {
+                if (tHit < t)
+                    t = tHit;
+            }
+        }
+        
+        //Return if there even was a collision
+        return Math.Abs(t - float.MaxValue) > 1f;
+    }
     
     /// <summary>
     /// Helper function for collision checks with spheres

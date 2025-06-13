@@ -181,6 +181,38 @@ public class Chunk3DDataStructure : DataStructure
 
         return false;
     }
+    
+    public override bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length, out float t)
+    {
+        t = float.MaxValue;
+        
+        if (!World.IsInBounds(organism.Position + normalizedDirection * length))
+        {
+            //Still block movement normally upon hitting world limit
+            t = 0;
+            return true;
+        }
+        
+        (int cX, int cY, int cZ) = GetChunk(organism.Position);
+        ExtendedChunk3D chunk = chunks[cX, cY, cZ];
+
+        //Check within own chunk
+        if (FindMinimumIntersection(organism, normalizedDirection, length, chunk.Organisms, out float hitT1))
+        {
+            if(hitT1 < t)
+                t = hitT1;
+        }
+        
+        //Check edges of other chunks
+        if (FindMinimumIntersection(organism, normalizedDirection, length, chunk.ExtendedCheck, out float hitT2))
+        {
+            if(hitT2 < t)
+                t = hitT2;
+        }
+        
+        //Return if there even was a collision
+        return Math.Abs(t - float.MaxValue) > 1f;
+    }
 
     /// <summary>
     /// Returns the closest neighbour within reason: will return nothing if there is no Organism within this and all neighbouring chunks

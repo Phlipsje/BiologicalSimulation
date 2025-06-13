@@ -82,6 +82,18 @@ public class RTreeDataStructure(float moveRange) : DataStructure
         
         return false;
     }
+    
+    public override bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length, out float t)
+    {
+        if (!World.IsInBounds(organism.Position + normalizedDirection * length))
+        {
+            //Still block movement normally upon hitting world limit
+            t = 0;
+            return true;
+        }
+        
+        return FindMinimumIntersection(organism, normalizedDirection, length, collisionBuffer[organism], out t);
+    }
 
     public override Organism? NearestNeighbour(Organism organism)
     {

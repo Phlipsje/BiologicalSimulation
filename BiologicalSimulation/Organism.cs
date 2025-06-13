@@ -95,7 +95,15 @@ public abstract class Organism : IMinimumBoundable
     /// Moves the organism towards a given location, also accounts for collision checks.
     /// </summary>
     /// <param name="direction"></param>
-    public virtual void Move(Vector3 direction)
+    public void Move(Vector3 direction)
+    {
+        if(World.PreciseMovement)
+            MoveExact(direction);
+        else
+            MoveDirect(direction);
+    }
+
+    private void MoveDirect(Vector3 direction)
     {
         //Simply add movement towards direction if there is no collision there
         Vector3 newPosition = Position + direction;
@@ -105,6 +113,29 @@ public abstract class Organism : IMinimumBoundable
             //Otherwise no collision, so update position
             Position = newPosition;
         }
+    }
+
+    private void MoveExact(Vector3 direction)
+    {
+        float length = direction.Length();
+        if (length == 0) return;
+
+        //Normalize
+        direction /= length;
+
+        float minHit = length;
+
+        if (DataStructure.FindFirstCollision(this, direction, length, out float t))
+        {
+            if (t < minHit)
+                minHit = t;
+        }
+        
+        // Small buffer to prevent interpenetration
+        float epsilon = 0.001f;
+        float moveDist = MathF.Max(0, minHit - epsilon);
+        //Actual movement
+        Position += direction * moveDist;
     }
 
     /// <summary>

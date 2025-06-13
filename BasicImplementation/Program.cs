@@ -32,7 +32,7 @@ class Program
         
         //Create a world which implements the data structure and defines rules such as:
         // where organisms start in the simulation, what the bounds are of the virtual environment and when to stop the simulation automatically
-        SimulationRunner.World = new TestWorld(SimulationRunner.DataStructure, simulation, worldHalfSize);
+        SimulationRunner.World = new TestWorld(SimulationRunner.DataStructure, simulation, worldHalfSize, true);
         
         //Decide if, and when, to save the contents of the simulation to a file
         simulation.FileWritingEnabled = false;
