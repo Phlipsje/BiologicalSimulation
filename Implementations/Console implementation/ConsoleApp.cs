@@ -109,11 +109,11 @@ public class ConsoleApp : IProgramMedium
         CoreLoop();
     }
 
-    private void CoreLoop()
+    private async void CoreLoop()
     {
         while (looping)
         {
-            Simulation.Step().Wait();
+            await Simulation.Step();
 
             // Performance Tracking
             TimeRunning += (float)stopwatch.Elapsed.TotalSeconds;
