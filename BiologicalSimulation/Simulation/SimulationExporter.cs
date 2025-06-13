@@ -28,7 +28,7 @@ public class SimulationExporter
     {
         StringBuilder sb = new StringBuilder();
         
-        IEnumerable<Organism> organisms = world.GetOrganisms();
+        world.GetOrganisms(out var organisms).Wait();
         foreach (Organism organism in organisms)
         {
             //A string builder is a lot faster at concatenating a lot of string together than using the + operation on strings
@@ -70,7 +70,7 @@ public class SimulationExporter
     {
         StringBuilder sb = new StringBuilder();
         
-        IEnumerable<Organism> organisms = world.GetOrganisms();
+        world.GetOrganisms(out var organisms).Wait();
         foreach (Organism organism in organisms)
         {
             //A string builder is a lot faster at concatenating a lot of string together than using the + operation on strings

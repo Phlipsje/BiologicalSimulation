@@ -36,6 +36,14 @@ public abstract class World
     }
 
     /// <summary>
+    /// Removes all Organisms from the simulation.
+    /// </summary>
+    public void Clear()
+    {
+        DataStructure.Clear().Wait();
+    }
+
+    /// <summary>
     /// Adds an organism to the simulation.
     /// This method is specifically meant for adding from file, not for normal adding.
     /// </summary>
@@ -58,18 +66,22 @@ public abstract class World
     /// Get a list of all organisms currently in the simulation.
     /// </summary>
     /// <returns></returns>
-    public IEnumerable<Organism> GetOrganisms()
+    public Task GetOrganisms(out IEnumerable<Organism> organisms)
     {
-        return DataStructure.GetOrganisms();
+        DataStructure.GetOrganisms(out var o).Wait();
+        organisms = o;
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Gets the current amount of active organisms in the simulation.
     /// </summary>
     /// <returns></returns>
-    public int GetOrganismCount()
+    public Task GetOrganismCount(out int count)
     {
-        return DataStructure.GetOrganismCount();
+        DataStructure.GetOrganismCount(out int c).Wait();
+        count = c;
+        return Task.CompletedTask;
     }
 
     /// <summary>

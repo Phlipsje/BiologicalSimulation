@@ -169,6 +169,15 @@ public class MultithreadedChunk2DDataStructure : DataStructure
         await Task.WhenAll(tasks);
     }
 
+    public override Task Clear()
+    {
+        foreach (Chunk2D chunk in chunks)
+        {
+            chunk.Organisms.Clear();
+        }
+        return Task.CompletedTask;
+    }
+
     public override void AddOrganism(Organism organism)
     {
         (int x, int y) = GetChunk(organism.Position);
@@ -181,22 +190,23 @@ public class MultithreadedChunk2DDataStructure : DataStructure
         return chunks[x, y].Organisms.Remove(organism);
     }
 
-    public override IEnumerable<Organism> GetOrganisms()
+    public override Task GetOrganisms(out IEnumerable<Organism> organisms)
     {
-        LinkedList<Organism> organisms = new LinkedList<Organism>();
+        LinkedList<Organism> o = new LinkedList<Organism>();
         foreach (Chunk2D chunk in chunks)
         {
             for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
             {
                 Organism organism = node.Value;
-                organisms.AddLast(organism);
+                o.AddLast(organism);
             }
         }
-        
-        return organisms;
+
+        organisms = o;
+        return Task.CompletedTask;
     }
 
-    public override int GetOrganismCount()
+    public override Task GetOrganismCount(out int count)
     {
         int organismCount = 0;
         foreach (Chunk2D chunk2D in chunks)
@@ -204,7 +214,8 @@ public class MultithreadedChunk2DDataStructure : DataStructure
             organismCount += chunk2D.OrganismCount;
         }
 
-        return organismCount;
+        count = organismCount;
+        return Task.CompletedTask;
     }
 
     private (int, int) GetChunk(Vector3 position)

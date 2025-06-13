@@ -37,7 +37,8 @@ public class RenderManager
 
     public void Render(SpriteBatch spriteBatch, World world, ViewingInformation viewingInformation)
     {
-        Organism[] organisms = world.GetOrganisms().ToArray();
+        world.GetOrganisms(out var organismsList).Wait();
+        Organism[] organisms = organismsList.ToArray();
         
         //First let every render target be formed
         foreach (Renderer renderer in renderers)

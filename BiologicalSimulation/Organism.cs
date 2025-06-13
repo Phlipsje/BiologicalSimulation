@@ -54,7 +54,7 @@ public abstract class Organism : IMinimumBoundable
     /// This means that all actions in Organism are deterministic with seed (as long as multithreaded data structure is not being used).
     /// </summary>
     protected Random Random { get; }
-
+    
     public Organism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random)
     {
         World = world;

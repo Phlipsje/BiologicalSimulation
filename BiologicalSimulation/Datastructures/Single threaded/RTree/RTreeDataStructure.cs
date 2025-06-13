@@ -36,6 +36,12 @@ public class RTreeDataStructure(float moveRange) : DataStructure
         return Task.CompletedTask;
     }
 
+    public override Task Clear()
+    {
+        rTree.Clear();
+        return Task.CompletedTask;
+    }
+
     public override void AddOrganism(Organism organism)
     {
         rTree.Insert(organism);
@@ -53,14 +59,16 @@ public class RTreeDataStructure(float moveRange) : DataStructure
         return false;
     }
     
-    public override IEnumerable<Organism> GetOrganisms() //warning: do not perform spatial operations on the organisms through the IEnumerable, the datastructure will become stale
+    public override Task GetOrganisms(out IEnumerable<Organism> organisms) //warning: do not perform spatial operations on the organisms through the IEnumerable, the datastructure will become stale
     {
-        return rTree.ToList();
+        organisms = rTree.ToList();
+        return Task.CompletedTask;
     }
     
-    public override int GetOrganismCount()
+    public override Task GetOrganismCount(out int count)
     {
-        return organismCount;
+        count = organismCount;
+        return Task.CompletedTask;
     }
 
     public override bool CheckCollision(Organism organism, Vector3 position)

@@ -2,7 +2,7 @@ using BioSim.Datastructures;
 
 namespace BioSim.Simulation;
 
-public partial class Simulation
+public class Simulation
 {
     /// <summary>
     /// Defines the rules that the organisms in the simulation follow

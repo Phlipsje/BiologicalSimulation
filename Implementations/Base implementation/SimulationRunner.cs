@@ -7,7 +7,7 @@ using BioSim.Simulation;
 namespace Implementations;
 
 /// <summary>
-/// This class does the setup for a world and data structure and chooses a medium to run it in
+/// This class does all the less interesting setup for a simulation and connects it to a type of program that can run it.
 /// </summary>
 public class SimulationRunner : IDisposable
 {
@@ -25,10 +25,14 @@ public class SimulationRunner : IDisposable
         
         Simulation = new Simulation();
     }
+    
 
-    public void Initialize()
+    /// <summary>
+    /// This will start the simulation.
+    /// </summary>
+    public void Start(int randomSeed = 0)
     {
-        Random random = new Random(); //Can enter seed here
+        Random random = randomSeed == 0 ? new Random() : new Random(randomSeed);
         Simulation.CreateSimulation(World, random);
         Simulation.SetDataStructure(DataStructure);
         
@@ -36,11 +40,6 @@ public class SimulationRunner : IDisposable
         Simulation.OnFileWrite += FileWriten;
         
         Simulation.StartSimulation();
-    }
-
-    public void Start()
-    {
-        Initialize();
         
         ProgramMedium.Simulation = Simulation;
         ProgramMedium.DataStructure = DataStructure;
@@ -49,17 +48,30 @@ public class SimulationRunner : IDisposable
         ProgramMedium.StartProgram();
     }
     
+    /// <summary>
+    /// When the simulation has ended, this will cause the program medium to stop as well.
+    /// </summary>
+    /// <param name="world"></param>
     private void StopProgram(World world)
     {
         //Simulation has already stopped before this
         ProgramMedium.StopProgram();
     }
 
+    /// <summary>
+    /// When the simulation writes to a file, this will cause the program medium to be able to react to it.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <param name="fileContents"></param>
     private void FileWriten(string filePath, string fileContents)
     {
         ProgramMedium.FileWriten(filePath, fileContents);
     }
     
+    /// <summary>
+    /// This gets called on cleanup, is needed because this can run executables.
+    /// Should not be called by the user.
+    /// </summary>
     public void Dispose()
     {
         

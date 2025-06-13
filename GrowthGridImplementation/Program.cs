@@ -52,7 +52,9 @@ class Program
         SimulationRunner.ProgramMedium = new Monogame2DRenderer();
 
         SimulationRunner.Simulation.OnTick += Step;
-
+        
+        //Starts the simulation, add an integer value as a parameter to set a seed,
+        // doing so will cause the simulation to play out exactly the same every time (with exception to multithreading data structures due to race conditions).
         runner.Start();
     }
 
