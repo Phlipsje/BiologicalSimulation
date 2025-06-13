@@ -36,6 +36,14 @@ public abstract class World
     }
 
     /// <summary>
+    /// Removes all Organisms from the simulation.
+    /// </summary>
+    public void Clear()
+    {
+        DataStructure.Clear().Wait();
+    }
+
+    /// <summary>
     /// Adds an organism to the simulation.
     /// This method is specifically meant for adding from file, not for normal adding.
     /// </summary>

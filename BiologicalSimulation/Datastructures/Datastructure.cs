@@ -28,6 +28,12 @@ public abstract class DataStructure
     public abstract Task Step();
     
     /// <summary>
+    /// Removes all Organisms from the simulation.
+    /// </summary>
+    /// <returns></returns>
+    public abstract Task Clear();
+    
+    /// <summary>
     /// Adds a new organism to the simulation.
     /// </summary>
     /// <param name="organism"></param>

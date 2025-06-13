@@ -80,4 +80,10 @@ public class RTree<T>(int minNodeSize, int maxNodeSize)
             Console.WriteLine(distanceFunc(initial.Entry, searchEntry));
         return initial.Entry; //contains result of query now
     }
+
+    public void Clear()
+    {
+        //No more references to root, so entire tree gets garbage collected
+        root = null;
+    }
 }

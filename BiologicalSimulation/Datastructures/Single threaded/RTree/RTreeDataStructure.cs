@@ -36,6 +36,12 @@ public class RTreeDataStructure(float moveRange) : DataStructure
         return Task.CompletedTask;
     }
 
+    public override Task Clear()
+    {
+        rTree.Clear();
+        return Task.CompletedTask;
+    }
+
     public override void AddOrganism(Organism organism)
     {
         rTree.Insert(organism);

@@ -100,6 +100,16 @@ public class Chunk3DDataStructure : DataStructure
         
         return Task.CompletedTask;
     }
+    
+    public override Task Clear()
+    {
+        foreach (ExtendedChunk3D chunk in chunks)
+        {
+            chunk.Organisms.Clear();
+        }
+        return Task.CompletedTask;
+    }
+
 
     public override void AddOrganism(Organism organism)
     {

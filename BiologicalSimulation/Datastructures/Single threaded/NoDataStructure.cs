@@ -85,6 +85,13 @@ public class NoDataStructure : DataStructure
         //If we reach this, then no collision
         return false;
     }
+    
+    public override Task Clear()
+    {
+        Organisms.Clear();
+        return Task.CompletedTask;
+    }
+
 
     public override void AddOrganism(Organism organism)
     {

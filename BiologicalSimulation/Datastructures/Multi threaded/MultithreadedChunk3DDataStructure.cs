@@ -185,6 +185,16 @@ public class MultithreadedChunk3DDataStructure : DataStructure
         var tasks = taskFuncs.Select(f => f()).ToArray();
         await Task.WhenAll(tasks);
     }
+    
+    public override Task Clear()
+    {
+        foreach (Chunk3D chunk in chunks)
+        {
+            chunk.Organisms.Clear();
+        }
+        return Task.CompletedTask;
+    }
+
 
     public override void AddOrganism(Organism organism)
     {

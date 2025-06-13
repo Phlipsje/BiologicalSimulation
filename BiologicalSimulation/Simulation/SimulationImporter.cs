@@ -24,7 +24,7 @@ public class SimulationImporter
 
     public static void FromStringToOrganisms(string s, World world, int timestampIndex)
     {
-        //TODO remove old organisms from world
+        world.Clear();
         
         string[] timeStampStrings = s.Split('\n');
         string timeStamp = timeStampStrings[timestampIndex];

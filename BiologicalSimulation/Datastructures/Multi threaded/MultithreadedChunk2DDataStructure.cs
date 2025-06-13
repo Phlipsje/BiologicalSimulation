@@ -169,6 +169,15 @@ public class MultithreadedChunk2DDataStructure : DataStructure
         await Task.WhenAll(tasks);
     }
 
+    public override Task Clear()
+    {
+        foreach (Chunk2D chunk in chunks)
+        {
+            chunk.Organisms.Clear();
+        }
+        return Task.CompletedTask;
+    }
+
     public override void AddOrganism(Organism organism)
     {
         (int x, int y) = GetChunk(organism.Position);

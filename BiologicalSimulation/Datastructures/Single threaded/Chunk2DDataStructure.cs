@@ -86,6 +86,16 @@ public class Chunk2DDataStructure : DataStructure
 
         return Task.CompletedTask;
     }
+    
+    public override Task Clear()
+    {
+        foreach (ExtendedChunk2D chunk in chunks)
+        {
+            chunk.Organisms.Clear();
+        }
+        return Task.CompletedTask;
+    }
+
 
     public override void AddOrganism(Organism organism)
     {
