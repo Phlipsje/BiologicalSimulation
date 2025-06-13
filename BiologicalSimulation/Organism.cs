@@ -13,18 +13,19 @@ public abstract class Organism : IMinimumBoundable
     /// Used to identify type of organism in a file.
     /// </summary>
     public abstract string Key { get; }
-    private Vector3 position;
+    private Vector3 _position;
+    private Mbb _mbb;
     
     /// <summary>
     /// The position of the organism.
     /// </summary>
     public Vector3 Position
     {
-        get => position;
+        get => _position;
         set
         {
-            position = value;
-            SetMbb(position);
+            _position = value;
+            SetMbb(_position);
         } 
     }
     
@@ -58,8 +59,8 @@ public abstract class Organism : IMinimumBoundable
     public Organism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random)
     {
         World = world;
+        Size = size; //first assign size so mbb is correctly calculated
         Position = startingPosition;
-        Size = size;
         
         DataStructure = dataStructure;
         Random = random;
@@ -149,8 +150,8 @@ public abstract class Organism : IMinimumBoundable
         for (int i = 0; i < 5; i++)
         {
             //Get a direction in a 3D circular radius, length is exactly 1
-            float phi = (float)(MathF.Acos(2 * (float)Random.NextDouble() - 1) - Math.PI / 2);
-            float lambda = (float)(2 * Math.PI * Random.NextDouble());
+            float phi = MathF.Acos(2 * Random.NextSingle() - 1) - MathF.PI / 2f;
+            float lambda = 2 * MathF.PI * Random.NextSingle();
             float x = MathF.Cos(phi) * MathF.Cos(lambda);
             float y = MathF.Cos(phi) * MathF.Sin(lambda);
             float z = MathF.Sin(phi);
@@ -208,17 +209,18 @@ public abstract class Organism : IMinimumBoundable
     /// <returns></returns>
     public Mbb GetMbb()
     {
-        return _mbb;
+        return new Mbb(Position - new Vector3(Size), Position + new Vector3(Size));
+        //return _mbb;
     }
     
     /// <summary>
     /// Set minimum bounding box
     /// </summary>
     /// <param name="mbb"></param>
-    public void SetMbb(Mbb mbb)
+    public void SetMbb(Mbb mbb) //assumes size does not change
     {
-        mbb = _mbb;
-        Position = mbb.Minimum + new Vector3(Size);
+        _position = mbb.Minimum + new Vector3(Size);
+        _mbb = mbb;
     }
     
     /// <summary>
@@ -229,8 +231,8 @@ public abstract class Organism : IMinimumBoundable
     {
         Vector3 sizeVector = new Vector3(Size);
         _mbb = new Mbb(position - sizeVector, position + sizeVector);
+        _position = position;
     }
-    private Mbb _mbb;
 
     public bool CheckCollision(Vector3 position, IEnumerable<Organism> otherOrganisms)
     {

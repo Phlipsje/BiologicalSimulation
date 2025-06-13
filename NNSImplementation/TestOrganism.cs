@@ -1,4 +1,4 @@
-namespace BasicImplementation;
+﻿namespace NNSImplementation;
 
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,6 @@ public class TestOrganism : Organism
     private static readonly Vector3 color = new Vector3(0.15f, 0.5f, 0.15f);
     public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
-        Program.OrganismACount++;
         ticksForReproduction = random.Next(210, 250);
     }
 
@@ -29,8 +28,17 @@ public class TestOrganism : Organism
     {
         //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
         //Also known as brownian motion
-        Vector3 direction = new Vector3((Random.NextSingle() * 0.02f - 0.01f),
-            (float)(Random.NextDouble() * 0.02 - 0.01), (Random.NextSingle() * 0.02f - 0.01f));
+        Organism? other = DataStructure.NearestNeighbour(this);
+        Vector3 direction;
+        float magnitude = 0.1f;
+        if (other != null)
+        {
+            direction = (this.Position - other.Position);
+            direction /= direction.Length(); //normalise
+            direction *= magnitude;
+        }
+        else direction = new Vector3((float)(Random.NextDouble() * 0.02 - 0.01),
+            (float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01));
         Move(direction);
         
         Reproduction();

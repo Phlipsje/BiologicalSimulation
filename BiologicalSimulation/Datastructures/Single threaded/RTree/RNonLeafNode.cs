@@ -5,9 +5,12 @@ namespace BiologicalSimulation.Datastructures.RTree;
 public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize) where T : IMinimumBoundable
 {
     public List<RNode<T>> NodeEntries = new(maxSize);
-
+    //private List<(float, RNode<T>)>? activeBranchList;
+    private PriorityQueue<(RNode<T>, float), float>? activeBranchList;
+    
     public override int Count => NodeEntries.Count;
     protected override IEnumerable<IMinimumBoundable> Children => NodeEntries;
+    
 
     public override void ForEach(Action<T> action)
     {
@@ -26,20 +29,24 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
 
     public override void NearestNeighbour(T searchEntry, NearestNeighbour<T> nearest, Func<T,T,float> distance)
     {
-        PriorityQueue<(RNode<T>, float), float> pq = new();
+        if (activeBranchList == null)
+            activeBranchList = new(maxSize);
         foreach (var node in NodeEntries)
         {
             float minDist = node.Mbb.MinDist(searchEntry.GetMbb().Position);
-            pq.Enqueue((node, minDist), minDist);
+            activeBranchList.Enqueue((node, minDist), minDist);
         }
-
-        while (pq.Count != 0)
+        while (activeBranchList.Count != 0)
         {
-            (RNode<T> node, float dist) = pq.Dequeue();
+            (RNode<T> node, float dist) = activeBranchList.Dequeue();
             if (dist > nearest.Distance)
+            {
+                activeBranchList.Clear();
                 break; // Prune upward — no better result possible
+            }
             node.NearestNeighbour(searchEntry, nearest, distance);
         }
+        activeBranchList.Clear();
     }
 
     public override void GetMbbsWithLevel(List<(Mbb, int)> list, RNode<T> root)
@@ -136,7 +143,6 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
                     return result;
             }
         }
-
         return null;
     }
 
