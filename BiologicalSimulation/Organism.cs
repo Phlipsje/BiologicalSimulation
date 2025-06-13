@@ -219,7 +219,8 @@ public abstract class Organism : IMinimumBoundable
     /// <param name="mbb"></param>
     public void SetMbb(Mbb mbb) //assumes size does not change
     {
-        Position = mbb.Minimum + new Vector3(Size);
+        _position = mbb.Minimum + new Vector3(Size);
+        _mbb = mbb;
     }
     
     /// <summary>
@@ -230,6 +231,7 @@ public abstract class Organism : IMinimumBoundable
     {
         Vector3 sizeVector = new Vector3(Size);
         _mbb = new Mbb(position - sizeVector, position + sizeVector);
+        _position = position;
     }
 
     public bool CheckCollision(Vector3 position, IEnumerable<Organism> otherOrganisms)
