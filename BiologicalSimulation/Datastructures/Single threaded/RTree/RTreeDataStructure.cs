@@ -80,26 +80,24 @@ public class RTreeDataStructure(float moveRange) : DataStructure
     {
         if (!World.IsInBounds(position))
             return true;
-
-        var jdj = collisionBuffer[organism];
-        foreach (Organism otherOrganism in collisionBuffer[organism])
-        {
-            //Cannot be a collision with itself
-            if(otherOrganism == organism)
-                continue;
-            
-            //Checks collision by checking distance between spheres
-            float x = position.X - otherOrganism.Position.X;
-            float xSquared = x * x;
-            float y = position.Y - otherOrganism.Position.Y;
-            float ySquared = y * y;
-            float z = position.Z - otherOrganism.Position.Z;
-            float zSquared = z * z;
-            float sizes = organism.Size + otherOrganism.Size;
-            if (xSquared + ySquared + zSquared <= sizes * sizes)
-                return true;
-        }
+        
+        //Check for other organisms
+        if(organism.CheckCollision(position, collisionBuffer[organism]))
+            return true;
+        
         return false;
+    }
+    
+    public override bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length, out float t)
+    {
+        if (!World.IsInBounds(organism.Position + normalizedDirection * length))
+        {
+            //Still block movement normally upon hitting world limit
+            t = 0;
+            return true;
+        }
+        
+        return FindMinimumIntersection(organism, normalizedDirection, length, collisionBuffer[organism], out t);
     }
 
     public override Organism? NearestNeighbour(Organism organism)

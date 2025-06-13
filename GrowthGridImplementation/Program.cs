@@ -32,7 +32,7 @@ class Program
         
         //Create a world which implements the data structure and defines rules such as:
         // where organisms start in the simulation, what the bounds are of the virtual environment and when to stop the simulation automatically
-        SimulationRunner.World = new TestWorld(SimulationRunner.DataStructure, simulation, worldHalfSize);
+        SimulationRunner.World = new TestWorld(SimulationRunner.DataStructure, simulation, worldHalfSize, true);
         
         //For this specific simulation we have made use of an extra class for which we also do the setup here, this is not needed for every type of simulation
         GrowthGrid.Initialize(new Vector3(-worldHalfSize), 

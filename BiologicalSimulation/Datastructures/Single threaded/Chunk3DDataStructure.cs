@@ -172,46 +172,46 @@ public class Chunk3DDataStructure : DataStructure
             return true;
         
         //Check for organisms within the chunk
-        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
-        {
-            Organism otherOrganism = node.Value;
-
-            if (organism == otherOrganism)
-                continue;
-            
-            //Checks collision by checking distance between spheres
-            float x = position.X - otherOrganism.Position.X;
-            float x2 = x * x;
-            float y = position.Y - otherOrganism.Position.Y;
-            float y2 = y * y;
-            float z = position.Z - otherOrganism.Position.Z;
-            float z2 = z * z;
-            float sizes = organism.Size + otherOrganism.Size;
-            if (x2 + y2 + z2 <= sizes * sizes)
-                return true;
-        }
+        if(organism.CheckCollision(position, chunk.Organisms))
+            return true;
         
         //Check for any organisms within neighbouring chunks that are within distance of possibly touching with this
-        for (LinkedListNode<Organism> node = chunk.ExtendedCheck.First!; node != null; node = node.Next!)
-        {
-            Organism otherOrganism = node.Value;
-
-            if (organism == otherOrganism)
-                continue;
-            
-            //Checks collision by checking distance between circles
-            float x = position.X - otherOrganism.Position.X;
-            float x2 = x * x;
-            float y = position.Y - otherOrganism.Position.Y;
-            float y2 = y * y;
-            float z = position.Z - otherOrganism.Position.Z;
-            float z2 = z * z;
-            float sizes = organism.Size + otherOrganism.Size;
-            if (x2 + y2 + z2 <= sizes * sizes)
-                return true;
-        }
+        if (organism.CheckCollision(position, chunk.ExtendedCheck))
+            return true;
 
         return false;
+    }
+    
+    public override bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length, out float t)
+    {
+        t = float.MaxValue;
+        
+        if (!World.IsInBounds(organism.Position + normalizedDirection * length))
+        {
+            //Still block movement normally upon hitting world limit
+            t = 0;
+            return true;
+        }
+        
+        (int cX, int cY, int cZ) = GetChunk(organism.Position);
+        ExtendedChunk3D chunk = chunks[cX, cY, cZ];
+
+        //Check within own chunk
+        if (FindMinimumIntersection(organism, normalizedDirection, length, chunk.Organisms, out float hitT1))
+        {
+            if(hitT1 < t)
+                t = hitT1;
+        }
+        
+        //Check edges of other chunks
+        if (FindMinimumIntersection(organism, normalizedDirection, length, chunk.ExtendedCheck, out float hitT2))
+        {
+            if(hitT2 < t)
+                t = hitT2;
+        }
+        
+        //Return if there even was a collision
+        return Math.Abs(t - float.MaxValue) > 1f;
     }
 
     /// <summary>

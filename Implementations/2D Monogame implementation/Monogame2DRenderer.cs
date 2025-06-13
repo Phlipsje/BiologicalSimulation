@@ -92,7 +92,7 @@ public class Monogame2DRenderer : Game, IProgramMedium
         renderManager.LoadContent(Content);
     }
 
-    protected override void Update(GameTime gameTime)
+    protected override async void Update(GameTime gameTime)
     {
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
         {
@@ -115,7 +115,7 @@ public class Monogame2DRenderer : Game, IProgramMedium
         //Now can write average fps in render manager
         #endregion
 
-        Simulation.Step().Wait();
+        await Simulation.Step();
         
         base.Update(gameTime);
     }

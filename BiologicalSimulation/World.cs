@@ -11,10 +11,13 @@ public abstract class World
     /// </summary>
     public DataStructure DataStructure { get; }
     
-    public World(DataStructure dataStructure)
+    internal bool PreciseMovement { get; }
+    
+    public World(DataStructure dataStructure, bool preciseMovement)
     {
         DataStructure = dataStructure;
         dataStructure.SetWorld(this);
+        PreciseMovement = preciseMovement;
     }
 
     /// <summary>
