@@ -87,6 +87,15 @@ public abstract class DataStructure
     public abstract bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length,
         out float t);
 
+    /// <summary>
+    /// Finds the closest intersection out of a list of organisms
+    /// </summary>
+    /// <param name="organism"></param>
+    /// <param name="normalizedDirection"></param>
+    /// <param name="length"></param>
+    /// <param name="otherOrganisms"></param>
+    /// <param name="t"></param>
+    /// <returns></returns>
     protected static bool FindMinimumIntersection(Organism organism, Vector3 normalizedDirection, float length, IEnumerable<Organism> otherOrganisms, out float t)
     {
         t = float.MaxValue;
