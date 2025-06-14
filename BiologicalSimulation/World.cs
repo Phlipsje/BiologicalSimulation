@@ -12,12 +12,14 @@ public abstract class World
     public DataStructure DataStructure { get; }
     
     internal bool PreciseMovement { get; }
+    internal bool RandomisedExecutionOrder { get; }
     
-    public World(DataStructure dataStructure, bool preciseMovement)
+    public World(DataStructure dataStructure, bool preciseMovement, bool randomisedExecutionOrder)
     {
         DataStructure = dataStructure;
         dataStructure.SetWorld(this);
         PreciseMovement = preciseMovement;
+        RandomisedExecutionOrder = randomisedExecutionOrder;
     }
 
     /// <summary>
