@@ -253,6 +253,28 @@ public class Chunk2DDataStructure : DataStructure
         return knownNearest;
     }
     
+    
+    public override IEnumerable<Organism> OrganismsWithinRange(Organism organism, float range)
+    {
+        List<Organism> organismsWithinRange = new List<Organism>(50);
+        foreach (ExtendedChunk2D chunk2D in chunks)
+        {
+            if (Vector2.DistanceSquared(new Vector2(organism.Position.X, organism.Position.Y), chunk2D.Center) <=
+                (range + chunk2D.HalfDimension) * (range + chunk2D.HalfDimension))
+            {
+                foreach (Organism otherOrganism in chunk2D.Organisms)
+                {
+                    if (Vector3.DistanceSquared(organism.Position, otherOrganism.Position) <= range * range)
+                    {
+                        organismsWithinRange.Add(otherOrganism);
+                    }
+                }
+            }
+        }
+
+        return organismsWithinRange;
+    }
+    
     #region Warnings and errors
 
     private void CheckWarnings(float largestOrganismSize)

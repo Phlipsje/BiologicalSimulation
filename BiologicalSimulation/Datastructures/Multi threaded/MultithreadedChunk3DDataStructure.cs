@@ -404,6 +404,12 @@ public class MultithreadedChunk3DDataStructure : DataStructure
         return knownNearest;
     }
     
+    
+    public override IEnumerable<Organism> OrganismsWithinRange(Organism organism, float range)
+    {
+        throw new NotSupportedException();
+    }
+    
     #region Warnings and errors
 
     private void CheckWarnings(float largestOrganismSize, int amountOfCoresBeingUsed)

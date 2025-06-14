@@ -75,6 +75,14 @@ public abstract class DataStructure
     /// <param name="organism"></param>
     /// <returns></returns>
     public abstract Organism? NearestNeighbour(Organism organism);
+    
+    /// <summary>
+    /// Finds all organisms within a range
+    /// </summary>
+    /// <param name="organism"></param>
+    /// <param name="radius"></param>
+    /// <returns></returns>
+    public abstract IEnumerable<Organism> OrganismsWithinRange(Organism organism, float radius);
 
     /// <summary>
     /// Find the first intersection when the organism tries to move in the given direction up to the given length.
