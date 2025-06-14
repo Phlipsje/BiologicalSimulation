@@ -5,6 +5,8 @@ namespace BioSim.Datastructures;
 
 public class MultithreadedChunk3DDataStructure : DataStructure
 {
+    public override bool IsMultithreaded { get; } = true;
+    
     private Chunk3D[,,] chunks;
     private Vector3 minPosition;
     private float chunkSize;

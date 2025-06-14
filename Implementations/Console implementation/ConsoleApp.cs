@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using BioSim;
 using BioSim.Datastructures;
 using BioSim.Simulation;
@@ -106,10 +107,14 @@ public class ConsoleApp : IProgramMedium
         stopwatch.Start();
         
         //Actually start program
-        CoreLoop();
+
+        if (DataStructure.IsMultithreaded)
+            CoreLoop().Wait();
+        else
+            CoreLoop();
     }
 
-    private async void CoreLoop()
+    private async Task CoreLoop()
     {
         while (looping)
         {

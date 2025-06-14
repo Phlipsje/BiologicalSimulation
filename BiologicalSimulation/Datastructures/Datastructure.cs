@@ -7,6 +7,8 @@ namespace BioSim.Datastructures;
 /// </summary>
 public abstract class DataStructure
 {
+    public abstract bool IsMultithreaded { get; }
+    
     /// <summary>
     /// To connect with what is happening in the world.
     /// </summary>

@@ -12,6 +12,8 @@ namespace BioSim.Datastructures.Datastructures;
 /// </summary>
 public class Chunk2DDataStructure : DataStructure
 {
+    public override bool IsMultithreaded { get; } = false;
+    
     private ExtendedChunk2D[,] chunks;
     private Vector2 minPosition;
     private float chunkSize;

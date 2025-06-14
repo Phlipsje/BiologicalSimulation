@@ -6,6 +6,8 @@ namespace BiologicalSimulation.Datastructures.RTree;
 
 public class RTreeDataStructure(float moveRange) : DataStructure
 {
+    public override bool IsMultithreaded { get; } = false;
+    
     private RTree<Organism> rTree = new RTree<Organism>(2, 10);
     private int organismCount;
     private Dictionary<Organism, List<Organism>> collisionBuffer = [];
