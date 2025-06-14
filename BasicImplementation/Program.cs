@@ -49,9 +49,10 @@ class Program
         
         //Choose in what form the simulation is run (this decides if you get a Console view, 2D view or 3D view)
         SimulationRunner.ProgramMedium = new ConsoleApp();
-
+        
         //Starts the simulation, add an integer value as a parameter to set a seed,
         // doing so will cause the simulation to play out exactly the same every time (with exception to multithreading data structures due to race conditions).
+        Randomiser.SetSeed(500);
         runner.Start();
     }
 }

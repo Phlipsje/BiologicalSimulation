@@ -63,7 +63,7 @@ internal class ExtendedChunk2D
             
             CheckPosition(organism, organismNode);
         }
-        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
+        for (LinkedListNode<Organism> organismNode = ExtendedCheck.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             //Get organism at this index
             Organism organism = organismNode.Value;
@@ -146,7 +146,7 @@ internal class ExtendedChunk2D
     private void CheckRemoveFromExtension(Organism organism, LinkedListNode<Organism> organismNode)
     {
         //Set the largest of the distances per axis, that is enough to check if it should be within or not
-        float singleAxisDistance = Math.Max(Math.Abs(organism.Position.X - Center.X), Math.Abs(organism.Position.Y - Center.Y));
+        float singleAxisDistance = SingleAxisDistance(organism);
         
         //Remove if too far gone, don't try to add to neighbours because they already have it
         if (singleAxisDistance > HalfDimension + dimenstionExtensionForCheck)
