@@ -235,23 +235,32 @@ public abstract class Organism : IMinimumBoundable
 
     public bool CheckCollision(Vector3 position, IEnumerable<Organism> otherOrganisms)
     {
+        return CheckCollision(position, otherOrganisms, otherOrganism => this == otherOrganism);
+    }
+    public bool CheckCollision(Vector3 position, IEnumerable<Organism> otherOrganisms, Func<Organism, bool> shouldSkip)
+    {
         foreach (Organism otherOrganism in otherOrganisms)
         {
-            if (this == otherOrganism)
+            if (shouldSkip(otherOrganism))
                 continue;
-            
-            //Checks collision by checking distance between circles
-            float x = position.X - otherOrganism.Position.X;
-            float x2 = x * x;
-            float y = position.Y - otherOrganism.Position.Y;
-            float y2 = y * y;
-            float z = position.Z - otherOrganism.Position.Z;
-            float z2 = z * z;
-            float sizes = Size + otherOrganism.Size;
-            if (x2 + y2 + z2 <= sizes * sizes)
+            if (CheckCollision(position, otherOrganism))
                 return true;
         }
+        return false;
+    }
 
+    public bool CheckCollision(Vector3 position, Organism otherOrganism)
+    {
+        //Checks collision by checking distance between circles
+        float x = position.X - otherOrganism.Position.X;
+        float x2 = x * x;
+        float y = position.Y - otherOrganism.Position.Y;
+        float y2 = y * y;
+        float z = position.Z - otherOrganism.Position.Z;
+        float z2 = z * z;
+        float sizes = Size + otherOrganism.Size;
+        if (x2 + y2 + z2 <= sizes * sizes)
+            return true;
         return false;
     }
 }

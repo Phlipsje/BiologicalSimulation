@@ -17,7 +17,7 @@ public class TestOrganism : Organism
     public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
         Program.OrganismACount++;
-        ticksForReproduction = random.Next(210, 250);
+        ticksForReproduction = 20; //random.Next(210, 250);
     }
 
     public override TestOrganism CreateNewOrganism(Vector3 startingPosition)

@@ -7,22 +7,23 @@ using BioSim.Datastructures;
 using Microsoft.Xna.Framework;
 using Vector3 = System.Numerics.Vector3;
 
-public class TestOrganism : Organism
+public class TestOrganismB : Organism
 {
-    private const float Speed = 0.02f;
-    public override string Key => "A";
+    private const float Speed = 0.018f;
+    private const float KillRange = 0.2f;
+    public override string Key => "B";
     private int reproductionCounter = 0;
     private int ticksForReproduction = 0;
     public override Vector3 Color => color;
-    private static readonly Vector3 color = new Vector3(0.15f, 0.5f, 0.15f);
-    public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
+    private static readonly Vector3 color = new Vector3(0.5f, 0.15f, 0.15f);
+    public TestOrganismB(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
     {
         ticksForReproduction = random.Next(210, 250);
     }
 
-    public override TestOrganism CreateNewOrganism(Vector3 startingPosition)
+    public override TestOrganismB CreateNewOrganism(Vector3 startingPosition)
     {
-        return new TestOrganism(startingPosition, Size, World, DataStructure, Random);
+        return new TestOrganismB(startingPosition, Size, World, DataStructure, Random);
     }
 
     public override void Step()
@@ -32,15 +33,30 @@ public class TestOrganism : Organism
         Organism? other = DataStructure.NearestNeighbour(this);
         Vector3 direction;
         float magnitude = Speed;
-        if (other != null)
+        if (other == null)
+        {
+            direction = new Vector3((float)(Random.NextDouble() * 0.02 - 0.01), 
+                (float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01));
+        }
+        else if (other is TestOrganismB)
         {
             direction = (this.Position - other.Position);
             direction /= direction.Length(); //normalise
             direction *= magnitude;
         }
-        else direction = new Vector3((float)(Random.NextDouble() * 0.02 - 0.01),
-            (float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01));
+        else
+        {
+            direction = (other.Position - this.Position);
+            direction /= direction.Length(); //normalise
+            direction *= magnitude;
+        }
         Move(direction);
+        float killRadius = this.Size + other.Size + KillRange;
+        if (other is TestOrganism && (other.Position - Position).LengthSquared() < killRadius * killRadius)
+        {
+            if (!DataStructure.RemoveOrganism(other))
+                throw new Exception();
+        }
         
         Reproduction();
         reproductionCounter++;

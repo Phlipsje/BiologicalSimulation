@@ -67,11 +67,7 @@ public class NoDataStructure : DataStructure
             return true;
 
         //Check other organisms for collision
-        if(organism.CheckCollision(position, Organisms))
-            return true;
-
-        //If we reach this, then no collision
-        return false;
+        return organism.CheckCollision(position, Organisms);
     }
 
     public override bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length, out float t)

@@ -29,6 +29,13 @@ public class TestWorld : World
                 new Vector3(random.NextSingle() * range - range / 2, random.NextSingle() * range - range / 2,
                     random.NextSingle() * range - range / 2), 0.5f, this, DataStructure, random);
         }
+        //This spawns 8 organisms of type B in random position in world
+        for (int i = 0; i < 8; i++)
+        {
+            new TestOrganismB(
+                new Vector3(random.NextSingle() * range - range / 2, random.NextSingle() * range - range / 2,
+                    random.NextSingle() * range - range / 2), 0.5f, this, DataStructure, random);
+        }
     }
 
     public override bool IsInBounds(Vector3 position)

@@ -162,10 +162,7 @@ public class Chunk2DDataStructure : DataStructure
             return true;
         
         //Check for any organisms within neighbouring chunks that are within distance of possibly touching with this
-        if (organism.CheckCollision(position, chunk.ExtendedCheck))
-            return true;
-
-        return false;
+        return organism.CheckCollision(position, chunk.ExtendedCheck);
     }
     
     public override bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length, out float t)

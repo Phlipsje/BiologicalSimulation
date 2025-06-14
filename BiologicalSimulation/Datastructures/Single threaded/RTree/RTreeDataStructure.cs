@@ -4,7 +4,7 @@ using BioSim.Datastructures;
 
 namespace BiologicalSimulation.Datastructures.RTree;
 
-public class RTreeDataStructure(float moveRange) : DataStructure
+public class RTreeDataStructure(float orthogonalMoveRange) : DataStructure
 {
     public override bool IsMultithreaded { get; } = false;
     
@@ -20,22 +20,22 @@ public class RTreeDataStructure(float moveRange) : DataStructure
         
         for (int i = 0; i < organisms.Count; i++)
         {
-            if(removedOrganisms.Contains(organisms[i])) //Make sure not to apply step to already removed organisms
+            Organism organism = organisms[i];
+            if(removedOrganisms.Contains(organism)) //Make sure not to apply step to already removed organisms
                 continue;
-            //extra 0.1f for floating point errors in bounding boxes
-            Vector3 collisionRange = new Vector3(organisms[i].Size * 2 + moveRange + 0.1f);
-            Mbb possibleCollisionArea = new Mbb(organisms[i].Position - collisionRange, organisms[i].Position + collisionRange);
+            Vector3 collisionRange = new Vector3(organism.Size * 3 + orthogonalMoveRange);
+            Mbb possibleCollisionArea = new Mbb(organism.Position - collisionRange, organism.Position + collisionRange);
             List<Organism> collidables = rTree.Search(possibleCollisionArea);
-            collisionBuffer[organisms[i]] = collidables;
-            Vector3 oldPos = organisms[i].Position;
-            organisms[i].Step();
-            Vector3 newPos = organisms[i].Position;
+            collisionBuffer[organism] = collidables;
+            Vector3 oldPos = organism.Position;
+            organism.Step();
+            Vector3 newPos = organism.Position;
             if (newPos != oldPos)
             {
                 //update tree structure
-                Mbb newMbb = organisms[i].GetMbb();
-                organisms[i].Position = oldPos; //the entry is contained in the rTree with the oldPos so reset it to ensure the entry is found
-                rTree.UpdateMbb(organisms[i], newMbb);
+                Mbb newMbb = organism.GetMbb();
+                organism.Position = oldPos; //the entry is contained in the rTree with the oldPos so reset it to ensure the entry is found
+                rTree.UpdateMbb(organism, newMbb);
             }
         }
 
@@ -84,10 +84,8 @@ public class RTreeDataStructure(float moveRange) : DataStructure
             return true;
         
         //Check for other organisms
-        if(organism.CheckCollision(position, collisionBuffer[organism]))
-            return true;
-        
-        return false;
+        return organism.CheckCollision(position, collisionBuffer[organism],
+            otherOrganism => organism == otherOrganism || removedOrganisms.Contains(otherOrganism));
     }
     
     public override bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length, out float t)
