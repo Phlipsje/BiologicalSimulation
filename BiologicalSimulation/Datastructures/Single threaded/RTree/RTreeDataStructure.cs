@@ -4,11 +4,11 @@ using BioSim.Datastructures;
 
 namespace BiologicalSimulation.Datastructures.RTree;
 
-public class RTreeDataStructure(float orthogonalMoveRange) : DataStructure
+public class RTreeDataStructure(float orthogonalMoveRange, int minimumBranchingFactor = 2, int maximumBranchingFactor = 10) : DataStructure
 {
     public override bool IsMultithreaded { get; } = false;
     
-    private RTree<Organism> rTree = new RTree<Organism>(2, 10);
+    private RTree<Organism> rTree = new RTree<Organism>(minimumBranchingFactor, maximumBranchingFactor);
     private int organismCount;
     private Dictionary<Organism, List<Organism>> collisionBuffer = [];
     private HashSet<Organism> removedOrganisms = [];
