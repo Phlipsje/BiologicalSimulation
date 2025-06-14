@@ -209,8 +209,7 @@ public abstract class Organism : IMinimumBoundable
     /// <returns></returns>
     public Mbb GetMbb()
     {
-        return new Mbb(Position - new Vector3(Size), Position + new Vector3(Size));
-        //return _mbb;
+        return _mbb;
     }
     
     /// <summary>
