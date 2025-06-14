@@ -87,7 +87,7 @@ public class RTreeDataStructure(float orthogonalMoveRange) : DataStructure
         return organism.CheckCollision(position, collisionBuffer[organism],
             otherOrganism => organism == otherOrganism || removedOrganisms.Contains(otherOrganism));
     }
-    
+
     public override bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length, out float t)
     {
         if (!World.IsInBounds(organism.Position + normalizedDirection * length))
@@ -96,8 +96,9 @@ public class RTreeDataStructure(float orthogonalMoveRange) : DataStructure
             t = 0;
             return true;
         }
-        
-        return FindMinimumIntersection(organism, normalizedDirection, length, collisionBuffer[organism], out t);
+
+        return FindMinimumIntersection(organism, normalizedDirection, length, collisionBuffer[organism], 
+            otherOragism => organism == otherOragism || removedOrganisms.Contains(otherOragism) , out t);
     }
 
     public override Organism? NearestNeighbour(Organism organism)
