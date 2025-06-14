@@ -112,6 +112,7 @@ public class Simulation
     {
         world.Initialize();
         world.StartingDistribution();
+        dataStructure.Initialize();
         
         CheckWarnings();
         CheckErrors();

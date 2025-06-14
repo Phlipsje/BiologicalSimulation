@@ -2,6 +2,7 @@
 using BiologicalSimulation.Datastructures.RTree;
 using BioSim;
 using BioSim.Datastructures;
+using BioSim.Datastructures.Datastructures;
 using BioSim.Simulation;
 using Implementations;
 using Implementations.Console_implementation;
@@ -35,7 +36,7 @@ class Program
         
         //Create a world which implements the data structure and defines rules such as:
         // where organisms start in the simulation, what the bounds are of the virtual environment and when to stop the simulation automatically
-        SimulationRunner.World = new TestWorld(SimulationRunner.DataStructure, simulation, worldHalfSize, true);
+        SimulationRunner.World = new TestWorld(SimulationRunner.DataStructure, simulation, worldHalfSize, true, true);
         
         //Decide if, and when, to save the contents of the simulation to a file
         simulation.FileWritingEnabled = false;
@@ -52,7 +53,6 @@ class Program
         
         //Starts the simulation, add an integer value as a parameter to set a seed,
         // doing so will cause the simulation to play out exactly the same every time (with exception to multithreading data structures due to race conditions).
-        Randomiser.SetSeed(500);
         runner.Start();
     }
 }

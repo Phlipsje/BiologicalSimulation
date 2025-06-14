@@ -22,6 +22,14 @@ public abstract class DataStructure
     {
         World = world;
     }
+
+    /// <summary>
+    /// Gets called once on simulation start
+    /// </summary>
+    public virtual void Initialize()
+    {
+        
+    }
     
     /// <summary>
     /// Gets called every tick, after the updating of World.cs

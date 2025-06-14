@@ -14,11 +14,12 @@ namespace BioSim.Datastructures;
 /// </summary>
 internal class ExtendedChunk2D
 {
+    internal World World { get; set; }
     public Vector2 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
     private float dimenstionExtensionForCheck;
     public int OrganismCount { get; private set; }
-    public LinkedList<Organism> Organisms { get; }
+    public List<Organism> Organisms { get; }
     public LinkedList<Organism> ExtendedCheck;
     public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     public ExtendedChunk2D[] ConnectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
@@ -27,7 +28,7 @@ internal class ExtendedChunk2D
     {
         Center = center;
         HalfDimension = size/2f;
-        Organisms = new LinkedList<Organism>();
+        Organisms = new List<Organism>(50);
         ExtendedCheck = new LinkedList<Organism>();
         CheckToBeAdded = new Queue<Organism>();
         dimenstionExtensionForCheck = largestOrganismSize * 2;
@@ -45,24 +46,25 @@ internal class ExtendedChunk2D
         //No removals happen during this
         CheckNewPossibleAdditions();
         
+        if (World.RandomisedExecutionOrder)
+            HelperFunctions.KnuthShuffle(Organisms);
+        
         //Run update loop
-        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
+        for (int i = 0; i < Organisms.Count; i++)
         {
-            Organism organism = organismNode.Value;
-            
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
-            organism.Step();
+            Organisms[i].Step();
         }
         
         //Update what should and should not be in this chunk
         //No additions happen during this (to this chunk)
-        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
+        for (int i = 0; i < Organisms.Count; i++)
         {
-            //Get organism at this index
-            Organism organism = organismNode.Value;
-            
-            CheckPosition(organism, organismNode);
+            bool removed = CheckPosition(Organisms[i]);
+            if (removed)
+                i--;
         }
+        
         for (LinkedListNode<Organism> organismNode = ExtendedCheck.First!; organismNode != null; organismNode = organismNode.Next!)
         {
             //Get organism at this index
@@ -86,7 +88,7 @@ internal class ExtendedChunk2D
 
             if (singleAxisDistance <= HalfDimension && !Organisms.Contains(organism))
             {
-                Organisms.AddLast(organism);
+                Organisms.Add(organism);
                 OrganismCount++;
                 continue;
             }
@@ -103,8 +105,7 @@ internal class ExtendedChunk2D
     /// O(#connectedChunks) = O(26)
     /// </summary>
     /// <param name="organism"></param>
-    /// <param name="organismNode"></param>
-    private void CheckPosition(Organism organism, LinkedListNode<Organism> organismNode)
+    private bool CheckPosition(Organism organism)
     {
         //Set the largest of the distances per axis, that is enough to check if it should be within or not
         float singleAxisDistance = SingleAxisDistance(organism);
@@ -117,12 +118,10 @@ internal class ExtendedChunk2D
                 chunk.CheckToBeAdded.Enqueue(organism);
             }
             
-            if (organismNode.Previous == null && organismNode.Next == null)
-                return;
-            
             //Removing via node if faster
-            Organisms.Remove(organismNode);
+            Organisms.Remove(organism);
             OrganismCount--;
+            return true;
         }
         else //If a bit deeper within chunk, then only send for check, not for removal (so that neighbouring chunks can add to extended range)
         {
@@ -135,6 +134,8 @@ internal class ExtendedChunk2D
                 }
             }
         }
+
+        return false;
     }
 
     /// <summary>
@@ -168,7 +169,7 @@ internal class ExtendedChunk2D
     /// <param name="organism"></param>
     public void DirectlyInsertOrganism(Organism organism)
     {
-        Organisms.AddLast(organism);
+        Organisms.Add(organism);
         OrganismCount++;
     }
 }

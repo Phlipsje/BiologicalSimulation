@@ -78,6 +78,14 @@ public class Chunk2DDataStructure : DataStructure
         
         return connectedChunks.ToArray();
     }
+    
+    public override void Initialize()
+    {
+        foreach (ExtendedChunk2D chunk in chunks)
+        {
+            chunk.World = World;
+        }
+    }
 
     public override Task Step()
     {
@@ -116,9 +124,8 @@ public class Chunk2DDataStructure : DataStructure
         LinkedList<Organism> o = new LinkedList<Organism>();
         foreach (ExtendedChunk2D chunk in chunks)
         {
-            for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
+            foreach (Organism organism in chunk.Organisms)
             {
-                Organism organism = node.Value;
                 o.AddLast(organism);
             }
         }
@@ -220,10 +227,8 @@ public class Chunk2DDataStructure : DataStructure
         Organism? knownNearest = null;
         
         //Check for organisms within the chunk
-        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
+        foreach (Organism otherOrganism in chunk.Organisms)
         {
-            Organism otherOrganism = node.Value;
-            
             if (organism == otherOrganism)
                 continue;
             
@@ -238,13 +243,8 @@ public class Chunk2DDataStructure : DataStructure
         //Check all organisms in neighbouring chunks
         foreach (ExtendedChunk2D neighbouringChunk in chunk.ConnectedChunks)
         {
-            for (LinkedListNode<Organism> node = neighbouringChunk.Organisms.First!; node != null; node = node.Next!)
+            foreach (Organism otherOrganism in neighbouringChunk.Organisms)
             {
-                Organism otherOrganism = node.Value;
-            
-                if (organism == otherOrganism)
-                    continue;
-            
                 float distanceSquared = Vector3.DistanceSquared(organism.Position, otherOrganism.Position);
                 if (distanceSquared < closestSquareDistance)
                 {
