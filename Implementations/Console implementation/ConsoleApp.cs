@@ -114,11 +114,14 @@ public class ConsoleApp : IProgramMedium
             CoreLoop();
     }
 
-    private async Task CoreLoop()
+    private Task CoreLoop()
     {
         while (looping)
         {
-            await Simulation.Step();
+            if (DataStructure.IsMultithreaded)
+                Simulation.Step().Wait();
+            else
+                Simulation.Step();
 
             // Performance Tracking
             TimeRunning += (float)stopwatch.Elapsed.TotalSeconds;
@@ -141,6 +144,8 @@ public class ConsoleApp : IProgramMedium
         }
 
         stopwatch.Stop();
+
+        return Task.CompletedTask;
     }
 
     private void ReadInput()
