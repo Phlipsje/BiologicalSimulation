@@ -71,7 +71,11 @@ public abstract class World
     /// <returns></returns>
     public Task GetOrganisms(out IEnumerable<Organism> organisms)
     {
-        DataStructure.GetOrganisms(out var o).Wait();
+        IEnumerable<Organism> o;
+        if (DataStructure.IsMultithreaded)
+            DataStructure.GetOrganisms(out o).Wait();
+        else
+            DataStructure.GetOrganisms(out o);
         organisms = o;
         return Task.CompletedTask;
     }
@@ -82,7 +86,11 @@ public abstract class World
     /// <returns></returns>
     public Task GetOrganismCount(out int count)
     {
-        DataStructure.GetOrganismCount(out int c).Wait();
+        int c;
+        if (DataStructure.IsMultithreaded)
+            DataStructure.GetOrganismCount(out c).Wait();
+        else
+            DataStructure.GetOrganismCount(out c);
         count = c;
         return Task.CompletedTask;
     }
