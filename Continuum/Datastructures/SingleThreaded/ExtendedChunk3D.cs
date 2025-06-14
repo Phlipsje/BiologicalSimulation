@@ -16,7 +16,6 @@ internal class ExtendedChunk3D
     public Vector3 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
     private float dimenstionExtensionForCheck;
-    public int OrganismCount { get; private set; }
     public List<Organism> Organisms { get; }
     public LinkedList<Organism> ExtendedCheck;
     public Queue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
@@ -90,7 +89,6 @@ internal class ExtendedChunk3D
             if (singleAxisDistance <= HalfDimension && !Organisms.Contains(organism))
             {
                 Organisms.Add(organism);
-                OrganismCount++;
                 continue;
             }
             
@@ -121,7 +119,6 @@ internal class ExtendedChunk3D
             
             //Removing via node if faster
             Organisms.Remove(organism);
-            OrganismCount--;
             return true;
         }
         else //If a bit deeper within chunk, then only send for check, not for removal (so that neighbouring chunks can add to extended range)
@@ -171,6 +168,5 @@ internal class ExtendedChunk3D
     public void DirectlyInsertOrganism(Organism organism)
     {
         Organisms.Add(organism);
-        OrganismCount++;
     }
 }

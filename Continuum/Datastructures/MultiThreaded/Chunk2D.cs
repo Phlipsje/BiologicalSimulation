@@ -9,7 +9,6 @@ internal class Chunk2D
     internal World World { get; set; }
     public Vector2 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
-    public int OrganismCount { get; private set; }
     public List<Organism> Organisms { get; }
     public ConcurrentQueue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     public Chunk2D[] ConnectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
@@ -85,7 +84,6 @@ internal class Chunk2D
             if (singleAxisDistance <= HalfDimension && !Organisms.Contains(organism))
             {
                 Organisms.Add(organism);
-                OrganismCount++;
             }
         }
     }
@@ -110,7 +108,6 @@ internal class Chunk2D
             
             //Removing via node if faster
             Organisms.Remove(organism);
-            OrganismCount--;
             return true;
         }
 
@@ -130,6 +127,5 @@ internal class Chunk2D
     public void DirectlyInsertOrganism(Organism organism)
     {
         Organisms.Add(organism);
-        OrganismCount++;
     }
 }

@@ -224,7 +224,7 @@ public class MultithreadedChunk3DDataStructure : MultiThreadedDataStructure
         LinkedList<Organism> o = new LinkedList<Organism>();
         foreach (Chunk3D chunk in chunks)
         {
-            for (int i = 0; i < chunk.OrganismCount; i++)
+            for (int i = 0; i < chunk.Organisms.Count; i++)
             {
                 o.AddLast(chunk.Organisms[i]);
             }
@@ -239,7 +239,7 @@ public class MultithreadedChunk3DDataStructure : MultiThreadedDataStructure
         int organismCount = 0;
         foreach (Chunk3D chunk2D in chunks)
         {
-            organismCount += chunk2D.OrganismCount;
+            organismCount += chunk2D.Organisms.Count;
         }
 
         count = organismCount;
@@ -267,7 +267,7 @@ public class MultithreadedChunk3DDataStructure : MultiThreadedDataStructure
             return true;
         
         //Check for organisms within the chunk
-        for (int i = 0; i < chunk.OrganismCount; i++)
+        for (int i = 0; i < chunk.Organisms.Count; i++)
         {
             Organism otherOrganism = chunk.Organisms[i];
             
@@ -289,7 +289,7 @@ public class MultithreadedChunk3DDataStructure : MultiThreadedDataStructure
         //Check all organisms in neighbouring chunks
         foreach (Chunk3D neighbouringChunk in chunk.ConnectedChunks)
         {
-            for (int i = 0; i < neighbouringChunk.OrganismCount; i++)
+            for (int i = 0; i < neighbouringChunk.Organisms.Count; i++)
             {
                 Organism otherOrganism = neighbouringChunk.Organisms[i];
             
@@ -328,7 +328,7 @@ public class MultithreadedChunk3DDataStructure : MultiThreadedDataStructure
         bool hit = false;
 
         //Check within own chunk
-        for (int i = 0; i < chunk.OrganismCount; i++)
+        for (int i = 0; i < chunk.Organisms.Count; i++)
         {
             Organism otherOrganism = chunk.Organisms[i];
 
@@ -346,7 +346,7 @@ public class MultithreadedChunk3DDataStructure : MultiThreadedDataStructure
         //Check edges of other chunks
         foreach (Chunk3D neighbouringChunk in chunk.ConnectedChunks)
         {
-            for (int i = 0; i < neighbouringChunk.OrganismCount; i++)
+            for (int i = 0; i < neighbouringChunk.Organisms.Count; i++)
             {
                 Organism otherOrganism = neighbouringChunk.Organisms[i];
 
@@ -384,7 +384,7 @@ public class MultithreadedChunk3DDataStructure : MultiThreadedDataStructure
         Organism? knownNearest = null;
         
         //Check for organisms within the chunk
-        for (int i = 0; i < chunk.OrganismCount; i++)
+        for (int i = 0; i < chunk.Organisms.Count; i++)
         {
             Organism otherOrganism = chunk.Organisms[i];
             
@@ -402,7 +402,7 @@ public class MultithreadedChunk3DDataStructure : MultiThreadedDataStructure
         //Check all organisms in neighbouring chunks
         foreach (Chunk3D neighbouringChunk in chunk.ConnectedChunks)
         {
-            for (int i = 0; i < neighbouringChunk.OrganismCount; i++)
+            for (int i = 0; i < neighbouringChunk.Organisms.Count; i++)
             {
                 Organism otherOrganism = neighbouringChunk.Organisms[i];
             

@@ -140,7 +140,7 @@ public class Chunk2DDataStructure : SingleThreadedDataStructure
         int organismCount = 0;
         foreach (ExtendedChunk2D chunk2D in chunks)
         {
-            organismCount += chunk2D.OrganismCount;
+            organismCount += chunk2D.Organisms.Count;
         }
 
         return organismCount;
