@@ -34,6 +34,7 @@ public class OpenTK3DRenderer : GameWindow, IProgramMedium
         Size = new Vector2i(800, 600);
         GL.Viewport(0, 0, 800, 600);
         Title = "Biological Simulation 3D Renderer";
+        
     }
 
     protected override void OnLoad()
@@ -91,8 +92,11 @@ public class OpenTK3DRenderer : GameWindow, IProgramMedium
         base.OnUpdateFrame(args);
         
         HandleInput(args);
-        
-        await Simulation.Step();
+
+        if (DataStructure.IsMultithreaded)
+            Simulation.Step().Wait();
+        else
+            Simulation.Step();
         
         UpdateSphereBuffer();
     }

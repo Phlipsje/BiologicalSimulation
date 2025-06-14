@@ -8,6 +8,8 @@ namespace BioSim.Datastructures;
 /// </summary>
 public class NoDataStructure : DataStructure
 {
+    public override bool IsMultithreaded { get; } = false;
+    
     public LinkedList<Organism> Organisms { get; }
 
     public NoDataStructure()
