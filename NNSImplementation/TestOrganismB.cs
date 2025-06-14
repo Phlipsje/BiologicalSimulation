@@ -1,9 +1,10 @@
-﻿namespace NNSImplementation;
+﻿using Continuum;
+using Continuum.Datastructures;
+
+namespace NNSImplementation;
 
 using System;
 using System.Collections.Generic;
-using BioSim;
-using BioSim.Datastructures;
 using Microsoft.Xna.Framework;
 using Vector3 = System.Numerics.Vector3;
 

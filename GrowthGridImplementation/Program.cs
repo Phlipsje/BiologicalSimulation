@@ -1,8 +1,9 @@
 ﻿using System.Numerics;
-using BioSim;
-using BioSim.Datastructures;
-using BioSim.Simulation;
+using Continuum;
+using Continuum.Datastructures.MultiThreaded;
+using Continuum.Simulation;
 using Implementations;
+using Implementations.BaseImplementation;
 using Implementations.Monogame2DRenderer;
 
 namespace GrowthGridImplementation;

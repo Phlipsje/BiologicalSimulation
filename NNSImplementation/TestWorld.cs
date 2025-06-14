@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
-using BioSim;
-using BioSim.Datastructures;
-using BioSim.Simulation;
+using Continuum;
+using Continuum.Datastructures;
+using Continuum.Simulation;
 
 namespace NNSImplementation;
 

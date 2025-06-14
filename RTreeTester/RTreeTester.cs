@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using BiologicalSimulation.Datastructures.RTree;
-using BioSim.Datastructures;
+using Continuum.Datastructures.SingleThreaded.RTree;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;

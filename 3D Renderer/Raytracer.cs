@@ -1,8 +1,7 @@
 using System.Net.Mime;
 using System.Runtime.InteropServices;
 using _3D_Renderer;
-using BioSim;
-using BioSim.Simulation;
+using Continuum.Simulation;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;

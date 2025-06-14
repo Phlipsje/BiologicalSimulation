@@ -1,11 +1,9 @@
 ﻿using System.Numerics;
-using BiologicalSimulation.Datastructures.RTree;
-using BioSim;
-using BioSim.Datastructures;
-using BioSim.Datastructures.Datastructures;
-using BioSim.Simulation;
+using Continuum.Datastructures.SingleThreaded;
+using Continuum.Simulation;
 using Implementations;
-using Implementations.Console_implementation;
+using Implementations.BaseImplementation;
+using Implementations.ConsoleImplementation;
 using Implementations.Monogame2DRenderer;
 using Implementations.OpenTK3DRenderer;
 

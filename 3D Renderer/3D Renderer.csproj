@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BiologicalSimulation\BiologicalSimulation.csproj" />
+      <ProjectReference Include="..\Continuum\Continuum.csproj" />
     </ItemGroup>
 
     <ItemGroup>

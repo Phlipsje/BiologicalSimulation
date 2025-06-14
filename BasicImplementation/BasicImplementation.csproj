@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BiologicalSimulation\BiologicalSimulation.csproj" />
+      <ProjectReference Include="..\Continuum\Continuum.csproj" />
       <ProjectReference Include="..\Implementations\Implementations.csproj" />
     </ItemGroup>
 

@@ -20,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\BiologicalSimulation\BiologicalSimulation.csproj" />
+        <ProjectReference Include="..\Continuum\Continuum.csproj" />
     </ItemGroup>
 
     <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
