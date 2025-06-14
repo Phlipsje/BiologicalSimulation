@@ -1,4 +1,5 @@
 using System.Text;
+using Continuum.Datastructures;
 
 namespace Continuum.Simulation;
 
@@ -22,13 +23,22 @@ public class SimulationExporter
     /// <summary>
     /// Saves all organisms in the simulation to a file
     /// </summary>
+    /// <param name="dataStructure"></param>
     /// <param name="world"></param>
     /// <returns>Returns 2 strings, first is the file path, second is the file contents</returns>
-    internal (string, string) SaveToSeparateFiles(World world, Simulation simulation)
+    internal (string, string) SaveToSeparateFiles(DataStructure dataStructure, World world, Simulation simulation)
     {
         StringBuilder sb = new StringBuilder();
         
-        world.GetOrganisms(out var organisms).Wait();
+        IEnumerable<Organism> organisms;
+        if (dataStructure.IsMultithreaded)
+        {
+            world.GetOrganismsAsync(out var o).Wait();
+            organisms = o;
+        }
+        else
+            organisms = world.GetOrganisms();
+        
         foreach (Organism organism in organisms)
         {
             //A string builder is a lot faster at concatenating a lot of string together than using the + operation on strings
@@ -63,14 +73,23 @@ public class SimulationExporter
     /// <summary>
     /// Saves the simulation and writes all save data of all previously occured time steps to the same file.
     /// </summary>
+    /// <param name="dataStructure"></param>
     /// <param name="world"></param>
     /// <param name="simulation"></param>
     /// <returns>Returns 2 strings, first is the file path, second is the file contents</returns>
-    internal (string, string) SaveToSameFile(World world, Simulation simulation)
+    internal (string, string) SaveToSameFile(DataStructure dataStructure, World world, Simulation simulation)
     {
         StringBuilder sb = new StringBuilder();
         
-        world.GetOrganisms(out var organisms).Wait();
+        IEnumerable<Organism> organisms;
+        if (dataStructure.IsMultithreaded)
+        {
+            world.GetOrganismsAsync(out var o).Wait();
+            organisms = o;
+        }
+        else
+            organisms = world.GetOrganisms();
+        
         foreach (Organism organism in organisms)
         {
             //A string builder is a lot faster at concatenating a lot of string together than using the + operation on strings

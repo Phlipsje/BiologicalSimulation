@@ -1,10 +1,7 @@
-using System.Collections;
 using System.Numerics;
 
 namespace Continuum.Datastructures;
-/// <summary>
-/// An abstract class used to define an object that can help in more efficiently running position based queries
-/// </summary>
+
 public abstract class DataStructure
 {
     public abstract bool IsMultithreaded { get; }
@@ -22,7 +19,7 @@ public abstract class DataStructure
     {
         World = world;
     }
-
+    
     /// <summary>
     /// Gets called once on simulation start
     /// </summary>
@@ -30,18 +27,6 @@ public abstract class DataStructure
     {
         
     }
-    
-    /// <summary>
-    /// Gets called every tick, after the updating of World.cs
-    /// </summary>
-    /// <returns></returns>
-    public abstract Task Step();
-    
-    /// <summary>
-    /// Removes all Organisms from the simulation.
-    /// </summary>
-    /// <returns></returns>
-    public abstract Task Clear();
     
     /// <summary>
     /// Adds a new organism to the simulation.
@@ -55,18 +40,6 @@ public abstract class DataStructure
     /// <param name="organism"></param>
     /// <returns></returns>
     public abstract bool RemoveOrganism(Organism organism);
-    
-    /// <summary>
-    /// Gets a list of all currently active organisms.
-    /// </summary>
-    /// <returns></returns>
-    public abstract Task GetOrganisms(out IEnumerable<Organism> organisms);
-    
-    /// <summary>
-    /// Gets the total amount of organisms currently active.
-    /// </summary>
-    /// <returns></returns>
-    public abstract Task GetOrganismCount(out int count);
     
     /// <summary>
     /// Checks if an organisms would collide with the world bounds or another organisms by moving to the newly given position.

@@ -9,7 +9,7 @@ namespace Continuum.Datastructures.SingleThreaded;
 /// Chunks stored in arrays to make access very quick.
 /// 3D version of this exists for more general usecase
 /// </summary>
-public class Chunk2DDataStructure : DataStructure
+public class Chunk2DDataStructure : SingleThreadedDataStructure
 {
     public override bool IsMultithreaded { get; } = false;
     
@@ -89,7 +89,7 @@ public class Chunk2DDataStructure : DataStructure
         }
     }
 
-    public override Task Step()
+    public override void Step()
     {
         if(World.RandomisedExecutionOrder)
             HelperFunctions.KnuthShuffle(chunkExecutionOrder);
@@ -98,17 +98,14 @@ public class Chunk2DDataStructure : DataStructure
         {
             chunk2D.Step();
         }
-
-        return Task.CompletedTask;
     }
     
-    public override Task Clear()
+    public override void Clear()
     {
         foreach (ExtendedChunk2D chunk in chunks)
         {
             chunk.Organisms.Clear();
         }
-        return Task.CompletedTask;
     }
 
 
@@ -124,22 +121,21 @@ public class Chunk2DDataStructure : DataStructure
         return chunks[x, y].Organisms.Remove(organism);
     }
 
-    public override Task GetOrganisms(out IEnumerable<Organism> organisms)
+    public override IEnumerable<Organism> GetOrganisms()
     {
-        LinkedList<Organism> o = new LinkedList<Organism>();
+        LinkedList<Organism> organisms = new LinkedList<Organism>();
         foreach (ExtendedChunk2D chunk in chunks)
         {
             foreach (Organism organism in chunk.Organisms)
             {
-                o.AddLast(organism);
+                organisms.AddLast(organism);
             }
         }
 
-        organisms = o;
-        return Task.CompletedTask;
+        return organisms;
     }
 
-    public override Task GetOrganismCount(out int count)
+    public override int GetOrganismCount()
     {
         int organismCount = 0;
         foreach (ExtendedChunk2D chunk2D in chunks)
@@ -147,8 +143,7 @@ public class Chunk2DDataStructure : DataStructure
             organismCount += chunk2D.OrganismCount;
         }
 
-        count = organismCount;
-        return Task.CompletedTask;
+        return organismCount;
     }
 
     private (int, int) GetChunk(Vector3 position)

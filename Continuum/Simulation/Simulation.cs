@@ -1,4 +1,5 @@
 using Continuum.Datastructures;
+using Continuum.Datastructures.MultiThreaded;
 using Continuum.Datastructures.SingleThreaded;
 
 namespace Continuum.Simulation;
@@ -13,7 +14,10 @@ public class Simulation
     /// <summary>
     /// Holds the data structure that the simulation makes use of.
     /// </summary>
+    private bool isMultithreaded;
     private DataStructure dataStructure;
+    private SingleThreadedDataStructure singleThreadedDataStructure;
+    private MultiThreadedDataStructure multiThreadedDataStructure;
     
     /// <summary>
     /// Used to stop the simulation.
@@ -84,11 +88,12 @@ public class Simulation
     /// After this the DataStructure still has to be set (or it defaults to NoDataStructure).
     /// </summary>
     /// <param name="world"></param>
-    /// <param name="random"></param>
     public void CreateSimulation(World world)
     {
         this.world = world;
-        dataStructure = new NoDataStructure(); //Default data structure has no optimizations
+        isMultithreaded = false;
+        singleThreadedDataStructure = new NoDataStructure(); //Default data structure has no optimizations
+        dataStructure = singleThreadedDataStructure;
         simulationExporter = new SimulationExporter();
         
         //Sets culture to US-English, specific language does not matter, but because we set this, using float.Parse and writing floats to file always use '.' as decimal point.
@@ -102,6 +107,10 @@ public class Simulation
     /// <param name="dataStructure"></param>
     public void SetDataStructure(DataStructure dataStructure)
     {
+        if (dataStructure.IsMultithreaded)
+            multiThreadedDataStructure = (MultiThreadedDataStructure)dataStructure;
+        else
+            singleThreadedDataStructure = (SingleThreadedDataStructure)dataStructure;
         this.dataStructure = dataStructure;
     }
 
@@ -126,8 +135,9 @@ public class Simulation
 
     /// <summary>
     /// Moves the simulation one timestep forward, meaning all organisms get to do 1 'action'.
+    /// This version should be used if the data structure is single threaded!
     /// </summary>
-    public async Task Step()
+    public void Step()
     {
         if (abort || world.StopCondition())
         {
@@ -137,10 +147,10 @@ public class Simulation
         
         Tick++;
         world.Step();
-        if(dataStructure.IsMultithreaded)
-            dataStructure.Step().Wait();
+        if (dataStructure.IsMultithreaded)
+            throw new ArgumentException("Running non asynchronous step while using multi threading!");
         else
-            dataStructure.Step();
+            singleThreadedDataStructure.Step();
         OnTick?.Invoke(world);
 
         //Save file and invoke event letting know that it happened
@@ -148,6 +158,35 @@ public class Simulation
         {
             Save();
         }
+    }
+    
+    /// <summary>
+    /// Moves the simulation one timestep forward, meaning all organisms get to do 1 'action'.
+    /// This version should be used if the data structure is multi threaded!
+    /// </summary>
+    public Task StepAsync()
+    {
+        if (abort || world.StopCondition())
+        {
+            OnSimulationEnd();
+            return Task.CompletedTask;
+        }
+        
+        Tick++;
+        world.Step();
+        if(dataStructure.IsMultithreaded)
+            multiThreadedDataStructure.Step().Wait();
+        else
+            throw new ArgumentException("Running asynchronous step while using single threading!");
+        OnTick?.Invoke(world);
+
+        //Save file and invoke event letting know that it happened
+        if (FileWritingEnabled && TicksPerFileWrite > 0 && Tick % TicksPerFileWrite == 0)
+        {
+            Save();
+        }
+        
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -180,7 +219,7 @@ public class Simulation
     /// </summary>
     public void Save()
     {
-        (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(world, this) : simulationExporter.SaveToSeparateFiles(world, this);
+        (string filePath, string fileContents) = WriteToSameFile ? simulationExporter.SaveToSameFile(dataStructure, world, this) : simulationExporter.SaveToSeparateFiles(dataStructure, world, this);
         OnFileWrite?.Invoke(filePath, fileContents);
     }
 

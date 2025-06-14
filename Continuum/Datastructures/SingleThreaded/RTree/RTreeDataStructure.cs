@@ -3,7 +3,7 @@ using Continuum;
 
 namespace Continuum.Datastructures.SingleThreaded.RTree;
 
-public class RTreeDataStructure(float orthogonalMoveRange, int minimumBranchingFactor = 2, int maximumBranchingFactor = 10) : DataStructure
+public class RTreeDataStructure(float orthogonalMoveRange, int minimumBranchingFactor = 2, int maximumBranchingFactor = 10) : SingleThreadedDataStructure
 {
     public override bool IsMultithreaded { get; } = false;
     
@@ -13,7 +13,7 @@ public class RTreeDataStructure(float orthogonalMoveRange, int minimumBranchingF
     private HashSet<Organism> removedOrganisms = [];
     private List<Organism> organismsInRangeResult = [];
     
-    public override Task Step()
+    public override void Step()
     {
         removedOrganisms.Clear();
         List<Organism> organisms = rTree.ToList(); //can't apply step directly to data structure as it contents will change
@@ -39,14 +39,11 @@ public class RTreeDataStructure(float orthogonalMoveRange, int minimumBranchingF
                 rTree.UpdateMbb(organism, newMbb);
             }
         }
-
-        return Task.CompletedTask;
     }
 
-    public override Task Clear()
+    public override void Clear()
     {
         rTree.Clear();
-        return Task.CompletedTask;
     }
 
     public override void AddOrganism(Organism organism)
@@ -67,16 +64,14 @@ public class RTreeDataStructure(float orthogonalMoveRange, int minimumBranchingF
         return false;
     }
     
-    public override Task GetOrganisms(out IEnumerable<Organism> organisms) //warning: do not perform spatial operations on the organisms through the IEnumerable, the datastructure will become stale
+    public override IEnumerable<Organism> GetOrganisms() //warning: do not perform spatial operations on the organisms through the IEnumerable, the datastructure will become stale
     {
-        organisms = rTree.ToList();
-        return Task.CompletedTask;
+        return rTree.ToList();
     }
     
-    public override Task GetOrganismCount(out int count)
+    public override int GetOrganismCount()
     {
-        count = organismCount;
-        return Task.CompletedTask;
+        return organismCount;
     }
 
     public override bool CheckCollision(Organism organism, Vector3 position)

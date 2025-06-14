@@ -89,7 +89,7 @@ public class Monogame2DRenderer : Game, IProgramMedium
         renderManager.LoadContent(Content);
     }
 
-    protected override async void Update(GameTime gameTime)
+    protected override void Update(GameTime gameTime)
     {
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
         {
@@ -113,7 +113,7 @@ public class Monogame2DRenderer : Game, IProgramMedium
         #endregion
 
         if (DataStructure.IsMultithreaded)
-            Simulation.Step().Wait();
+            Simulation.StepAsync().Wait();
         else
             Simulation.Step();
         
@@ -124,7 +124,7 @@ public class Monogame2DRenderer : Game, IProgramMedium
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        renderManager.Render(spriteBatch, World, viewingInformation);
+        renderManager.Render(spriteBatch, DataStructure, World, viewingInformation);
         
         base.Draw(gameTime);
     }

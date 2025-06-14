@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Numerics;
 using Continuum.Datastructures;
+using Continuum.Datastructures.MultiThreaded;
 
 namespace Continuum;
 
@@ -10,6 +11,8 @@ public abstract class World
     /// The data structure being used in the simulation.
     /// </summary>
     public DataStructure DataStructure { get; }
+    private SingleThreadedDataStructure singleThreadedDataStructure;
+    private MultiThreadedDataStructure multiThreadedDataStructure;
     
     internal bool PreciseMovement { get; }
     internal bool RandomisedExecutionOrder { get; }
@@ -17,6 +20,10 @@ public abstract class World
     public World(DataStructure dataStructure, bool preciseMovement, bool randomisedExecutionOrder)
     {
         DataStructure = dataStructure;
+        if (dataStructure.IsMultithreaded)
+            multiThreadedDataStructure = (MultiThreadedDataStructure)dataStructure;
+        else
+            singleThreadedDataStructure = (SingleThreadedDataStructure)dataStructure;
         dataStructure.SetWorld(this);
         PreciseMovement = preciseMovement;
         RandomisedExecutionOrder = randomisedExecutionOrder;
@@ -45,7 +52,10 @@ public abstract class World
     /// </summary>
     public void Clear()
     {
-        DataStructure.Clear().Wait();
+        if (DataStructure.IsMultithreaded)
+            multiThreadedDataStructure.Clear().Wait();
+        else 
+            singleThreadedDataStructure.Clear();
     }
 
     /// <summary>
@@ -71,13 +81,26 @@ public abstract class World
     /// Get a list of all organisms currently in the simulation.
     /// </summary>
     /// <returns></returns>
-    public Task GetOrganisms(out IEnumerable<Organism> organisms)
+    public IEnumerable<Organism> GetOrganisms()
     {
         IEnumerable<Organism> o;
         if (DataStructure.IsMultithreaded)
-            DataStructure.GetOrganisms(out o).Wait();
+            throw new ArgumentException("Running non asynchronous method while using multi threading!");
         else
-            DataStructure.GetOrganisms(out o);
+            return singleThreadedDataStructure.GetOrganisms();
+    }
+    
+    /// <summary>
+    /// Get a list of all organisms currently in the simulation.
+    /// </summary>
+    /// <returns></returns>
+    public Task GetOrganismsAsync(out IEnumerable<Organism> organisms)
+    {
+        IEnumerable<Organism> o;
+        if (DataStructure.IsMultithreaded)
+            multiThreadedDataStructure.GetOrganisms(out o).Wait();
+        else
+            throw new ArgumentException("Running asynchronous method while using single threading!");
         organisms = o;
         return Task.CompletedTask;
     }
@@ -86,13 +109,25 @@ public abstract class World
     /// Gets the current amount of active organisms in the simulation.
     /// </summary>
     /// <returns></returns>
-    public Task GetOrganismCount(out int count)
+    public int GetOrganismCount()
+    {
+        if (DataStructure.IsMultithreaded)
+            throw new ArgumentException("Running non asynchronous method while using multi threading!");
+        else
+            return singleThreadedDataStructure.GetOrganismCount();
+    }
+    
+    /// <summary>
+    /// Gets the current amount of active organisms in the simulation.
+    /// </summary>
+    /// <returns></returns>
+    public Task GetOrganismCountAsync(out int count)
     {
         int c;
         if (DataStructure.IsMultithreaded)
-            DataStructure.GetOrganismCount(out c).Wait();
+            multiThreadedDataStructure.GetOrganismCount(out c).Wait();
         else
-            DataStructure.GetOrganismCount(out c);
+            throw new ArgumentException("Running asynchronous method while using single threading!");
         count = c;
         return Task.CompletedTask;
     }

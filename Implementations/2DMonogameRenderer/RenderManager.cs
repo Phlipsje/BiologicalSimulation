@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Continuum;
+using Continuum.Datastructures;
 using Implementations.BaseImplementation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -35,10 +36,18 @@ public class RenderManager
         font = content.Load<SpriteFont>("Font");
     }
 
-    public void Render(SpriteBatch spriteBatch, World world, ViewingInformation viewingInformation)
+    public void Render(SpriteBatch spriteBatch, DataStructure dataStructure, World world, ViewingInformation viewingInformation)
     {
-        world.GetOrganisms(out var organismsList).Wait();
-        Organism[] organisms = organismsList.ToArray();
+        IEnumerable<Organism> organismList;
+        if (dataStructure.IsMultithreaded)
+        {
+            world.GetOrganismsAsync(out var o).Wait();
+            organismList = o;
+        }
+        else
+            organismList = world.GetOrganisms();
+        
+        Organism[] organisms = organismList.ToArray();
         
         //First let every render target be formed
         foreach (Renderer renderer in renderers)

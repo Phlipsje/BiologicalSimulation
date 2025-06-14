@@ -6,7 +6,7 @@ namespace Continuum.Datastructures.SingleThreaded;
 /// This implements DataStructure (because that is required), but isn't a data structure
 /// It simply stores all organisms in a list, used as a fallback if no data structure is given
 /// </summary>
-public class NoDataStructure : DataStructure
+public class NoDataStructure : SingleThreadedDataStructure
 {
     public override bool IsMultithreaded { get; } = false;
     
@@ -17,7 +17,7 @@ public class NoDataStructure : DataStructure
         Organisms = new LinkedList<Organism>();
     }
     
-    public override Task Step()
+    public override void Step()
     {
         for (LinkedListNode<Organism> organismNode = Organisms.First; organismNode != null; organismNode = organismNode.Next)
         {
@@ -26,8 +26,6 @@ public class NoDataStructure : DataStructure
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
             organism.Step();
         }
-        
-        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -86,10 +84,9 @@ public class NoDataStructure : DataStructure
         return hit;
     }
     
-    public override Task Clear()
+    public override void Clear()
     {
         Organisms.Clear();
-        return Task.CompletedTask;
     }
 
 
@@ -103,16 +100,14 @@ public class NoDataStructure : DataStructure
         return Organisms.Remove(organism);
     }
 
-    public override Task GetOrganisms(out IEnumerable<Organism> organisms)
+    public override IEnumerable<Organism> GetOrganisms()
     {
-        organisms = Organisms;
-        return Task.CompletedTask;
+        return Organisms;
     }
     
-    public override Task GetOrganismCount(out int count)
+    public override int GetOrganismCount()
     {
-        count = Organisms.Count;
-        return Task.CompletedTask;
+        return Organisms.Count;
     }
     
     public override IEnumerable<Organism> OrganismsWithinRange(Organism organism, float range)

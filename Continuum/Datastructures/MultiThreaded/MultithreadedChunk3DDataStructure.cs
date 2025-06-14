@@ -3,10 +3,8 @@ using System.Numerics;
 
 namespace Continuum.Datastructures.MultiThreaded;
 
-public class MultithreadedChunk3DDataStructure : DataStructure
+public class MultithreadedChunk3DDataStructure : MultiThreadedDataStructure
 {
-    public override bool IsMultithreaded { get; } = true;
-    
     private Chunk3D[,,] chunks;
     private Vector3 minPosition;
     private float chunkSize;

@@ -86,7 +86,14 @@ public class ConsoleApp : IProgramMedium
     
     public void StartProgram()
     {
-        World.GetOrganismCount(out int count).Wait();
+        int count;
+        if (DataStructure.IsMultithreaded)
+        {
+            World.GetOrganismCountAsync(out int c).Wait();
+            count = c;
+        }
+        else
+            count = World.GetOrganismCount();
         startOrganismCount = count;
         
         Console.WriteLine("Running Biological Simulation");
@@ -110,19 +117,45 @@ public class ConsoleApp : IProgramMedium
         //Actually start program
 
         if (DataStructure.IsMultithreaded)
-            CoreLoop().Wait();
+            CoreLoopAsync().Wait();
         else
             CoreLoop();
     }
 
-    private Task CoreLoop()
+    private void CoreLoop()
     {
         while (looping)
         {
-            if (DataStructure.IsMultithreaded)
-                Simulation.Step().Wait();
-            else
-                Simulation.Step();
+            Simulation.Step();
+
+            // Performance Tracking
+            TimeRunning += (float)stopwatch.Elapsed.TotalSeconds;
+            tallyFps += 1 / (float)stopwatch.Elapsed.TotalSeconds;
+            stopwatch.Restart();
+
+            fpsCounter++;
+            if (fpsCounter >= ticksPerUpdate)
+            {
+                AverageFps = tallyFps / fpsCounter;
+                if (AverageFps is float.PositiveInfinity)
+                    AverageFps = 0;
+                fpsCounter = 0;
+                tallyFps = 0;
+            }
+
+            //Does not run on FileWritingEnabled as that is already handled by FileWriten()
+            if (print && !Simulation.FileWritingEnabled && ticksPerPrint > 0 && Simulation.Tick % ticksPerPrint == 0)
+                PrintSimulationStats();
+        }
+
+        stopwatch.Stop();
+    }
+    
+    private Task CoreLoopAsync()
+    {
+        while (looping)
+        {
+            Simulation.StepAsync().Wait();
 
             // Performance Tracking
             TimeRunning += (float)stopwatch.Elapsed.TotalSeconds;
@@ -212,7 +245,15 @@ public class ConsoleApp : IProgramMedium
 
     public void PrintSimulationStats()
     {
-        World.GetOrganismCount(out int count).Wait();
+        int count;
+        if (DataStructure.IsMultithreaded)
+        {
+            World.GetOrganismCountAsync(out int c).Wait();
+            count = c;
+        }
+        else
+            count = World.GetOrganismCount();
+        startOrganismCount = count;
         string[] lines =
         [
             $"|[{DateTime.Now.ToString("HH:mm:ss")}]|",

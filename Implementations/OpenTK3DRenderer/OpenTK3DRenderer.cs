@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -88,14 +90,14 @@ public class OpenTK3DRenderer : GameWindow, IProgramMedium
         return Path.Combine(Path.GetDirectoryName(callerFile), relativePath);
     }
     
-    protected override async void OnUpdateFrame(FrameEventArgs args)
+    protected override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
         
         HandleInput(args);
 
         if (DataStructure.IsMultithreaded)
-            Simulation.Step().Wait();
+            Simulation.StepAsync().Wait();
         else
             Simulation.Step();
         
@@ -197,7 +199,15 @@ public class OpenTK3DRenderer : GameWindow, IProgramMedium
     
     void UpdateSphereBuffer()
     {
-        World.GetOrganisms(out var organisms);
+        IEnumerable<Organism> organisms;
+        if (DataStructure.IsMultithreaded)
+        {
+            World.GetOrganismsAsync(out var o).Wait();
+            organisms = o;
+        }
+        else
+            organisms = World.GetOrganisms();
+        
         Spheres = organisms.Select(o =>
         {
             Vector3 pos = new Vector3(o.Position.X, o.Position.Y, o.Position.Z);

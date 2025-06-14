@@ -9,7 +9,7 @@ namespace Continuum.Datastructures.SingleThreaded;
 /// Chunks stored in arrays to make access very quick.
 /// 2D version of this exists for groups of organisms that grow mostly in 2 dimensions, such as biofilms
 /// </summary>
-public class Chunk3DDataStructure : DataStructure
+public class Chunk3DDataStructure : SingleThreadedDataStructure
 {
     public override bool IsMultithreaded { get; } = false;
     
@@ -104,7 +104,7 @@ public class Chunk3DDataStructure : DataStructure
         }
     }
 
-    public override Task Step()
+    public override void Step()
     {
         if(World.RandomisedExecutionOrder)
             HelperFunctions.KnuthShuffle(chunkExecutionOrder);
@@ -113,17 +113,14 @@ public class Chunk3DDataStructure : DataStructure
         {
             chunk3D.Step();
         }
-        
-        return Task.CompletedTask;
     }
     
-    public override Task Clear()
+    public override void Clear()
     {
         foreach (ExtendedChunk3D chunk in chunks)
         {
             chunk.Organisms.Clear();
         }
-        return Task.CompletedTask;
     }
 
 
@@ -139,22 +136,21 @@ public class Chunk3DDataStructure : DataStructure
         return chunks[x, y, z].Organisms.Remove(organism);
     }
 
-    public override Task GetOrganisms(out IEnumerable<Organism> organisms)
+    public override IEnumerable<Organism> GetOrganisms()
     {
-        LinkedList<Organism> o = new LinkedList<Organism>();
+        LinkedList<Organism> organisms = new LinkedList<Organism>();
         foreach (ExtendedChunk3D chunk in chunks)
         {
             foreach (Organism organism in chunk.Organisms)
             {
-                o.AddLast(organism);
+                organisms.AddLast(organism);
             }
         }
 
-        organisms = o;
-        return Task.CompletedTask;
+        return organisms;
     }
 
-    public override Task GetOrganismCount(out int count)
+    public override int GetOrganismCount()
     {
         int organismCount = 0;
         foreach (ExtendedChunk3D chunk2D in chunks)
@@ -162,8 +158,7 @@ public class Chunk3DDataStructure : DataStructure
             organismCount += chunk2D.OrganismCount;
         }
 
-        count = organismCount;
-        return Task.CompletedTask;
+        return organismCount;
     }
 
     private (int, int, int) GetChunk(Vector3 position)
