@@ -79,7 +79,11 @@ public class NoDataStructure : DataStructure
             return true;
         }
         
-        return FindMinimumIntersection(organism, normalizedDirection, length, Organisms, out t);
+        bool hit = FindMinimumIntersection(organism, normalizedDirection, length, Organisms, out t);
+            
+        float epsilon = 0.01f;
+        t -= epsilon;
+        return hit;
     }
     
     public override Task Clear()
@@ -109,5 +113,19 @@ public class NoDataStructure : DataStructure
     {
         count = Organisms.Count;
         return Task.CompletedTask;
+    }
+    
+    public override IEnumerable<Organism> OrganismsWithinRange(Organism organism, float range)
+    {
+        List<Organism> organismsWithinRange = new List<Organism>(50);
+        foreach (Organism otherOrganism in Organisms)
+        {
+            if (Vector3.DistanceSquared(organism.Position, otherOrganism.Position) <= range * range)
+            {
+                organismsWithinRange.Add(otherOrganism);
+            }
+        }
+        
+        return organismsWithinRange;
     }
 }

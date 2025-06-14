@@ -114,4 +114,10 @@ public class RTreeDataStructure(float orthogonalMoveRange) : DataStructure
         }
         return dist;
     }
+    
+    
+    public override IEnumerable<Organism> OrganismsWithinRange(Organism organism, float range)
+    {
+        throw new NotImplementedException();
+    }
 }

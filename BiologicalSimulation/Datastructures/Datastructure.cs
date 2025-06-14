@@ -75,6 +75,14 @@ public abstract class DataStructure
     /// <param name="organism"></param>
     /// <returns></returns>
     public abstract Organism? NearestNeighbour(Organism organism);
+    
+    /// <summary>
+    /// Finds all organisms within a range
+    /// </summary>
+    /// <param name="organism"></param>
+    /// <param name="radius"></param>
+    /// <returns></returns>
+    public abstract IEnumerable<Organism> OrganismsWithinRange(Organism organism, float radius);
 
     /// <summary>
     /// Find the first intersection when the organism tries to move in the given direction up to the given length.
@@ -100,19 +108,30 @@ public abstract class DataStructure
     /// <returns></returns>
     protected static bool FindMinimumIntersection(Organism organism, Vector3 normalizedDirection, float length, IEnumerable<Organism> otherOrganisms, out float t)
     {
+        bool hit = false;
         t = float.MaxValue;
         foreach (Organism otherOrganism in otherOrganisms)
         {
+            if (organism == otherOrganism)
+                continue;
+            
             if (RayIntersects(organism.Position, normalizedDirection, length, otherOrganism.Position,
                     organism.Size + otherOrganism.Size, out float tHit))
             {
                 if (tHit < t)
+                {
                     t = tHit;
+                    hit = true;
+                }
+                    
             }
         }
+
+        float epsilon = 0.01f;
+        t -= epsilon;
         
         //Return if there even was a collision
-        return Math.Abs(t - float.MaxValue) > 1f;
+        return hit;
     }
     
     /// <summary>

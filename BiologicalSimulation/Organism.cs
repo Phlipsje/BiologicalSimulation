@@ -158,10 +158,11 @@ public abstract class Organism : IMinimumBoundable
             
             Vector3 direction = new Vector3(x, y, z);
             
-            Vector3 positiveNewPosition = Position + direction * Size;
-            Vector3 negativeNewPosition = Position - direction * Size;
-            Vector3 onlyPositiveNewPosition = Position + direction * 2 * Size;
-            Vector3 onlyNegativeNewPosition = Position - direction * 2 * Size;
+            float epsilon = 1.02f;
+            Vector3 positiveNewPosition = Position + direction * (Size * epsilon);
+            Vector3 negativeNewPosition = Position - direction * (Size * epsilon);
+            Vector3 onlyPositiveNewPosition = Position + direction * 2 * (Size * epsilon);
+            Vector3 onlyNegativeNewPosition = Position - direction * 2 * (Size * epsilon);
 
             //Check if both positions are not within another organism
             if (!CheckCollision(positiveNewPosition) && !CheckCollision(negativeNewPosition))

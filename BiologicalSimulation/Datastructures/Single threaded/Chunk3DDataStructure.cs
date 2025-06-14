@@ -184,6 +184,7 @@ public class Chunk3DDataStructure : DataStructure
     public override bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length, out float t)
     {
         t = float.MaxValue;
+        bool hit = false;
         
         if (!World.IsInBounds(organism.Position + normalizedDirection * length))
         {
@@ -198,8 +199,11 @@ public class Chunk3DDataStructure : DataStructure
         //Check within own chunk
         if (FindMinimumIntersection(organism, normalizedDirection, length, chunk.Organisms, out float hitT1))
         {
-            if(hitT1 < t)
+            if (hitT1 < t)
+            {
                 t = hitT1;
+                hit = true;
+            }
         }
         
         //Check edges of other chunks
@@ -209,8 +213,11 @@ public class Chunk3DDataStructure : DataStructure
                 t = hitT2;
         }
         
+        float epsilon = 0.01f;
+        t -= epsilon;
+        
         //Return if there even was a collision
-        return Math.Abs(t - float.MaxValue) > 1f;
+        return hit;
     }
 
     /// <summary>
@@ -263,6 +270,28 @@ public class Chunk3DDataStructure : DataStructure
         }
         
         return knownNearest;
+    }
+    
+    
+    public override IEnumerable<Organism> OrganismsWithinRange(Organism organism, float range)
+    {
+        List<Organism> organismsWithinRange = new List<Organism>(50);
+        foreach (ExtendedChunk3D chunk3D in chunks)
+        {
+            if (Vector3.DistanceSquared(organism.Position, chunk3D.Center) <=
+                (range + chunk3D.HalfDimension) * (range + chunk3D.HalfDimension))
+            {
+                foreach (Organism otherOrganism in chunk3D.Organisms)
+                {
+                    if (Vector3.DistanceSquared(organism.Position, otherOrganism.Position) <= range * range)
+                    {
+                        organismsWithinRange.Add(otherOrganism);
+                    }
+                }
+            }
+        }
+
+        return organismsWithinRange;
     }
     
     #region Warnings and errors
