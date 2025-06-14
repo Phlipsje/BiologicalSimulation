@@ -14,7 +14,7 @@ public class TestOrganism : Organism
     private int ticksForReproduction = 0;
     public override Vector3 Color => color;
     private static readonly Vector3 color = new Vector3(0.15f, 0.5f, 0.15f);
-    public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
+    public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure) : base(startingPosition, size, world, dataStructure)
     {
         Program.OrganismACount++;
         ticksForReproduction = 20; //random.Next(210, 250);
@@ -22,15 +22,15 @@ public class TestOrganism : Organism
 
     public override TestOrganism CreateNewOrganism(Vector3 startingPosition)
     {
-        return new TestOrganism(startingPosition, Size, World, DataStructure, Random);
+        return new TestOrganism(startingPosition, Size, World, DataStructure);
     }
 
     public override void Step()
     {
         //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
         //Also known as brownian motion
-        Vector3 direction = new Vector3((Random.NextSingle() * 0.02f - 0.01f),
-            (float)(Random.NextDouble() * 0.02 - 0.01), (Random.NextSingle() * 0.02f - 0.01f));
+        Vector3 direction = new Vector3((Randomiser.NextSingle() * 0.02f - 0.01f),
+            (float)(Randomiser.NextDouble() * 0.02 - 0.01), (Randomiser.NextSingle() * 0.02f - 0.01f));
         Move(direction);
         
         Reproduction();

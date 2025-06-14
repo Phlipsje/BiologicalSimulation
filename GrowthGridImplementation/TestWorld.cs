@@ -21,20 +21,20 @@ public class TestWorld : World
         this.simulation = simulation;
         this.worldHalfSize = worldHalfSize;
     }
-    public override void StartingDistribution(Random random)
+    public override void StartingDistribution()
     {
         float range = worldHalfSize * 0.9f;
         
         //This spawns 8 organisms of type A in random position in world
         for (int i = 0; i < 8; i++)
         {
-            new TestOrganism(new Vector3(random.NextSingle()*range-range/2, random.NextSingle()*range-range/2, random.NextSingle()*range-range/2), 0.5f, this, DataStructure, random);
+            new TestOrganism(new Vector3(Randomiser.NextSingle()*range-range/2, Randomiser.NextSingle()*range-range/2, Randomiser.NextSingle()*range-range/2), 0.5f, this, DataStructure);
         }
         
         //This spawns 8 organisms of type B in random position in world
         for (int i = 0; i < 8; i++)
         {
-            new TestOrganismB(new Vector3(random.NextSingle()*range-range/2, random.NextSingle()*range-range/2, random.NextSingle()*range-range/2), 0.5f, this, DataStructure, random);
+            new TestOrganismB(new Vector3(Randomiser.NextSingle()*range-range/2, Randomiser.NextSingle()*range-range/2, Randomiser.NextSingle()*range-range/2), 0.5f, this, DataStructure);
         }
 
     }

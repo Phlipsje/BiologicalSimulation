@@ -18,7 +18,8 @@ public class RTreeDataStructure(float orthogonalMoveRange, int minimumBranchingF
     {
         removedOrganisms.Clear();
         List<Organism> organisms = rTree.ToList(); //can't apply step directly to data structure as it contents will change
-        
+        if (World.RandomisedExecutionOrder)
+            HelperFunctions.KnuthShuffle(organisms);
         for (int i = 0; i < organisms.Count; i++)
         {
             Organism organism = organisms[i];

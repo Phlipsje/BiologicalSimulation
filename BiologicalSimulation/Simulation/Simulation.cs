@@ -13,11 +13,6 @@ public class Simulation
     /// Holds the data structure that the simulation makes use of.
     /// </summary>
     private DataStructure dataStructure;
-        
-    /// <summary>
-    /// Generates random numbers for the simulation.
-    /// </summary>
-    private Random random;
     
     /// <summary>
     /// Used to stop the simulation.
@@ -89,10 +84,9 @@ public class Simulation
     /// </summary>
     /// <param name="world"></param>
     /// <param name="random"></param>
-    public void CreateSimulation(World world, Random random)
+    public void CreateSimulation(World world)
     {
         this.world = world;
-        this.random = random;
         dataStructure = new NoDataStructure(); //Default data structure has no optimizations
         simulationExporter = new SimulationExporter();
         
@@ -117,7 +111,7 @@ public class Simulation
     public void StartSimulation()
     {
         world.Initialize();
-        world.StartingDistribution(random);
+        world.StartingDistribution();
         
         CheckWarnings();
         CheckErrors();

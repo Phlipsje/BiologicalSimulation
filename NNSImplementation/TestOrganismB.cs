@@ -16,14 +16,14 @@ public class TestOrganismB : Organism
     private int ticksForReproduction = 0;
     public override Vector3 Color => color;
     private static readonly Vector3 color = new Vector3(0.5f, 0.15f, 0.15f);
-    public TestOrganismB(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
+    public TestOrganismB(Vector3 startingPosition, float size, World world, DataStructure dataStructure) : base(startingPosition, size, world, dataStructure)
     {
-        ticksForReproduction = random.Next(210, 250);
+        ticksForReproduction = Randomiser.Next(210, 250);
     }
 
     public override TestOrganismB CreateNewOrganism(Vector3 startingPosition)
     {
-        return new TestOrganismB(startingPosition, Size, World, DataStructure, Random);
+        return new TestOrganismB(startingPosition, Size, World, DataStructure);
     }
 
     public override void Step()
@@ -35,10 +35,13 @@ public class TestOrganismB : Organism
         float magnitude = Speed;
         if (other == null)
         {
-            direction = new Vector3((float)(Random.NextDouble() * 0.02 - 0.01), 
-                (float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01));
+            direction = new Vector3((float)(Randomiser.NextDouble() * 0.02 - 0.01), 
+                (float)(Randomiser.NextDouble() * 0.02 - 0.01), (float)(Randomiser.NextDouble() * 0.02 - 0.01));
+            Reproduction();
+            reproductionCounter++;
+            return;
         }
-        else if (other is TestOrganismB)
+        if (other is TestOrganismB)
         {
             direction = (this.Position - other.Position);
             direction /= direction.Length(); //normalise
@@ -54,10 +57,8 @@ public class TestOrganismB : Organism
         float killRadius = this.Size + other.Size + KillRange;
         if (other is TestOrganism && (other.Position - Position).LengthSquared() < killRadius * killRadius)
         {
-            if (!DataStructure.RemoveOrganism(other))
-                throw new Exception();
+            DataStructure.RemoveOrganism(other);
         }
-        
         Reproduction();
         reproductionCounter++;
     }

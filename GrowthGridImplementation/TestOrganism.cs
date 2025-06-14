@@ -17,10 +17,10 @@ public class TestOrganism : Organism
     public float Biomass;
     public override Vector3 Color => color;
     private static readonly Vector3 color = new Vector3(0.15f, 0.5f, 0.15f);
-    public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random) : base(startingPosition, size, world, dataStructure, random)
+    public TestOrganism(Vector3 startingPosition, float size, World world, DataStructure dataStructure) : base(startingPosition, size, world, dataStructure)
     {
         Program.OrganismACount++;
-        GrowthRate = random.NextSingle(); //Between 0 and 1
+        GrowthRate = Randomiser.NextSingle(); //Between 0 and 1
         Resources = 0;
         BB1 = 0;
         BB2 = 0;
@@ -29,15 +29,15 @@ public class TestOrganism : Organism
 
     public override TestOrganism CreateNewOrganism(Vector3 startingPosition)
     {
-        return new TestOrganism(startingPosition, Size, World, DataStructure, Random);
+        return new TestOrganism(startingPosition, Size, World, DataStructure);
     }
 
     public override void Step()
     {
         //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
         //Also known as brownian motion
-        Vector3 direction = new Vector3((float)(Random.NextDouble() * 0.02 - 0.01),
-            (float)(Random.NextDouble() * 0.02 - 0.01), (float)(Random.NextDouble() * 0.02 - 0.01));
+        Vector3 direction = new Vector3((float)(Randomiser.NextDouble() * 0.02 - 0.01),
+            (float)(Randomiser.NextDouble() * 0.02 - 0.01), (float)(Randomiser.NextDouble() * 0.02 - 0.01));
         Move(direction);
         
         Reproduction();

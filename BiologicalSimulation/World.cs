@@ -101,7 +101,7 @@ public abstract class World
     /// A method used to indicate the starting conditions of your simulation.
     /// </summary>
     /// <param name="random"></param>
-    public abstract void StartingDistribution(Random random);
+    public abstract void StartingDistribution();
     
     /// <summary>
     /// Use this to define the confines of the space all organisms are in, if false, it can't move to that position.

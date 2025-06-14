@@ -28,7 +28,7 @@ namespace NNSImplementation
         
             //Create a world which implements the data structure and defines rules such as:
             // where organisms start in the simulation, what the bounds are of the virtual environment and when to stop the simulation automatically
-            SimulationRunner.World = new TestWorld(SimulationRunner.DataStructure, simulation, worldHalfSize, true);
+            SimulationRunner.World = new TestWorld(SimulationRunner.DataStructure, simulation, worldHalfSize, true, true);
         
             //Decide if, and when, to save the contents of the simulation to a file
             simulation.FileWritingEnabled = false;
@@ -43,7 +43,7 @@ namespace NNSImplementation
             //Choose in what form the simulation is run (this decides if you get a Console view, 2D view or 3D view)
             SimulationRunner.ProgramMedium = new OpenTK3DRenderer();
 
-            runner.Start(500);
+            runner.Start();
         }
     }
 }

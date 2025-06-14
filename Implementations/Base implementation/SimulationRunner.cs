@@ -30,13 +30,12 @@ public class SimulationRunner : IDisposable
     /// <summary>
     /// This will start the simulation.
     /// </summary>
-    public void Start(int randomSeed = 0)
+    public void Start()
     {
-        if(randomSeed != 0 && DataStructure.IsMultithreaded)
+        if(Randomiser.IsUsingSeed && DataStructure.IsMultithreaded)
             throw new ArgumentException("Deterministic seed is not supported for multithreading!");
         
-        Random random = randomSeed == 0 ? new Random() : new Random(randomSeed);
-        Simulation.CreateSimulation(World, random);
+        Simulation.CreateSimulation(World);
         Simulation.SetDataStructure(DataStructure);
         
         Simulation.OnEnd += StopProgram;

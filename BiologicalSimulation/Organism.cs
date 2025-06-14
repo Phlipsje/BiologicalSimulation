@@ -54,16 +54,14 @@ public abstract class Organism : IMinimumBoundable
     /// This is the same random class passed when Simulation was made and thus makes use of the same starting seed.
     /// This means that all actions in Organism are deterministic with seed (as long as multithreaded data structure is not being used).
     /// </summary>
-    protected Random Random { get; }
     
-    public Organism(Vector3 startingPosition, float size, World world, DataStructure dataStructure, Random random)
+    public Organism(Vector3 startingPosition, float size, World world, DataStructure dataStructure)
     {
         World = world;
         Size = size; //first assign size so mbb is correctly calculated
         Position = startingPosition;
         
         DataStructure = dataStructure;
-        Random = random;
         DataStructure.AddOrganism(this);
     }
 
@@ -150,8 +148,8 @@ public abstract class Organism : IMinimumBoundable
         for (int i = 0; i < 5; i++)
         {
             //Get a direction in a 3D circular radius, length is exactly 1
-            float phi = MathF.Acos(2 * Random.NextSingle() - 1) - MathF.PI / 2f;
-            float lambda = 2 * MathF.PI * Random.NextSingle();
+            float phi = MathF.Acos(2 * Randomiser.NextSingle() - 1) - MathF.PI / 2f;
+            float lambda = 2 * MathF.PI * Randomiser.NextSingle();
             float x = MathF.Cos(phi) * MathF.Cos(lambda);
             float y = MathF.Cos(phi) * MathF.Sin(lambda);
             float z = MathF.Sin(phi);
