@@ -14,6 +14,7 @@ public class Chunk3DDataStructure : DataStructure
     public override bool IsMultithreaded { get; } = false;
     
     private ExtendedChunk3D[,,] chunks;
+    private ExtendedChunk3D[] chunkExecutionOrder;
     private Vector3 minPosition;
     private float chunkSize;
     private int chunkCountX;
@@ -26,6 +27,7 @@ public class Chunk3DDataStructure : DataStructure
         chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
         chunkCountZ = (int)Math.Ceiling((maxPosition.Z - minPosition.Z) / chunkSize);
         chunks = new ExtendedChunk3D[chunkCountX, chunkCountY, chunkCountZ];
+        chunkExecutionOrder = new ExtendedChunk3D[chunkCountX * chunkCountY * chunkCountZ];
         this.minPosition = minPosition;
         this.chunkSize = chunkSize;
 
@@ -50,6 +52,7 @@ public class Chunk3DDataStructure : DataStructure
                 for (int k = 0; k < chunkCountZ; k++)
                 {
                     chunks[i, j, k].Initialize(GetConnectedChunks(i, j, k));
+                    chunkExecutionOrder[k*chunkCountX*chunkCountY + j*chunkCountX + i] = chunks[i, j, k];
                 }
             }
         }
@@ -103,6 +106,9 @@ public class Chunk3DDataStructure : DataStructure
 
     public override Task Step()
     {
+        if(World.RandomisedExecutionOrder)
+            HelperFunctions.KnuthShuffle(chunkExecutionOrder);
+        
         foreach (ExtendedChunk3D chunk3D in chunks)
         {
             chunk3D.Step();

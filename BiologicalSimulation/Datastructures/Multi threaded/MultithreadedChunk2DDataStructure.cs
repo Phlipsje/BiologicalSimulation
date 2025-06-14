@@ -142,6 +142,9 @@ public class MultithreadedChunk2DDataStructure : DataStructure
 
         stepping = true;
         
+        if(World.RandomisedExecutionOrder)
+            HelperFunctions.KnuthShuffle(chunkGroupBatches);
+        
         for (int group = 0; group < groupCount; group++)
         {
             List<Func<Task>> tasks = chunkGroupBatches[group]

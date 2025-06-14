@@ -15,6 +15,7 @@ public class Chunk2DDataStructure : DataStructure
     public override bool IsMultithreaded { get; } = false;
     
     private ExtendedChunk2D[,] chunks;
+    private ExtendedChunk2D[] chunkExecutionOrder;
     private Vector2 minPosition;
     private float chunkSize;
     private int chunkCountX;
@@ -25,6 +26,7 @@ public class Chunk2DDataStructure : DataStructure
         chunkCountX = (int)Math.Ceiling((maxPosition.X - minPosition.X) / chunkSize);
         chunkCountY = (int)Math.Ceiling((maxPosition.Y - minPosition.Y) / chunkSize);
         chunks = new ExtendedChunk2D[chunkCountX, chunkCountY];
+        chunkExecutionOrder = new ExtendedChunk2D[chunkCountX * chunkCountY];
         this.minPosition = minPosition;
         this.chunkSize = chunkSize;
 
@@ -44,6 +46,7 @@ public class Chunk2DDataStructure : DataStructure
             for (int j = 0; j < chunkCountY; j++)
             {
                 chunks[i, j].Initialize(GetConnectedChunks(i, j));
+                chunkExecutionOrder[j*chunkCountX + i] = chunks[i, j];
             }
         }
         
@@ -89,7 +92,10 @@ public class Chunk2DDataStructure : DataStructure
 
     public override Task Step()
     {
-        foreach (ExtendedChunk2D chunk2D in chunks)
+        if(World.RandomisedExecutionOrder)
+            HelperFunctions.KnuthShuffle(chunkExecutionOrder);
+        
+        foreach (ExtendedChunk2D chunk2D in chunkExecutionOrder)
         {
             chunk2D.Step();
         }
