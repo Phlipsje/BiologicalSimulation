@@ -28,19 +28,31 @@ public class RTreeDataStructure(float orthogonalMoveRange, int minimumBranchingF
             Mbb possibleCollisionArea = new Mbb(organism.Position - collisionRange, organism.Position + collisionRange);
             List<Organism> collidables = rTree.Search(possibleCollisionArea);
             collisionBuffer[organism] = collidables;
-            Vector3 oldPos = organism.Position;
+            //Vector3 oldPos = currentOrganism.Position;
             organism.Step();
-            Vector3 newPos = organism.Position;
-            if (newPos != oldPos)
+            //Vector3 newPos = currentOrganism.Position;
+            /*if (newPos != oldPos)
             {
                 //update tree structure
-                Mbb newMbb = organism.GetMbb();
-                organism.Position = oldPos; //the entry is contained in the rTree with the oldPos so reset it to ensure the entry is found
-                rTree.UpdateMbb(organism, newMbb);
-            }
+                Mbb newMbb = currentOrganism.GetMbb();
+                currentOrganism.Position = oldPos; //the entry is contained in the rTree with the oldPos so reset it to ensure the entry is found
+                if (!rTree.UpdateMbb(currentOrganism, newMbb))
+                {
+                    //entry was not found but could be caused by an update through splitnode in insert
+                    currentOrganism.Position = possibleNewPositionInTree; //try to find with possible new position
+                    if(!rTree.UpdateMbb(currentOrganism, newMbb))
+                        throw new Exception();
+                }
+            }*/
         }
     }
-
+    
+    public void OnReposition(Organism organism, Mbb newPos)
+    {
+        if (!rTree.UpdateMbb(organism, newPos))
+            throw new Exception();
+    }
+    
     public override void Clear()
     {
         rTree.Clear();
@@ -49,6 +61,7 @@ public class RTreeDataStructure(float orthogonalMoveRange, int minimumBranchingF
     public override void AddOrganism(Organism organism)
     {
         rTree.Insert(organism);
+        organism.OnReposition += OnReposition;
         organismCount++;
     }
 

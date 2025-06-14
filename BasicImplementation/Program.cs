@@ -1,6 +1,8 @@
 ﻿using System.Numerics;
 using Continuum.Datastructures.MultiThreaded;
+using Continuum;
 using Continuum.Datastructures.SingleThreaded;
+using Continuum.Datastructures.SingleThreaded.RTree;
 using Continuum.Simulation;
 using Implementations;
 using Implementations.BaseImplementation;
@@ -29,13 +31,15 @@ class Program
         float worldHalfSize = 32f;
         float organismSize = 0.5f;
         
+        //Randomiser.SetSeed(1);
+        
         //SimulationRunner.DataStructure = new RTreeDataStructure(0.1f);
         //SimulationRunner.DataStructure = new NoDataStructure();
         SimulationRunner.DataStructure = new MultithreadedChunk3DDataStructure(new Vector3(-worldHalfSize), new Vector3(worldHalfSize), 4f, organismSize);
         
         //Create a world which implements the data structure and defines rules such as:
         // where organisms start in the simulation, what the bounds are of the virtual environment and when to stop the simulation automatically
-        SimulationRunner.World = new TestWorld(SimulationRunner.DataStructure, simulation, worldHalfSize, true, true);
+        SimulationRunner.World = new TestWorld(SimulationRunner.DataStructure, simulation, worldHalfSize, false, false);
         
         //Decide if, and when, to save the contents of the simulation to a file
         simulation.FileWritingEnabled = false;

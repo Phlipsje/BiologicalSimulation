@@ -4,7 +4,7 @@ namespace Continuum.Datastructures.SingleThreaded.RTree;
 
 public struct Mbb(Vector3 minimum, Vector3 maximum)
 {
-    private const float Epsilon = 0.1f; //extra offset to contains to account for floating point errors
+    private const float Epsilon = 0.001f; //extra offset to contains to account for floating point errors
     public Vector3 Minimum = minimum;
     public Vector3 Maximum = maximum;
     public Vector3 Position => Maximum - (Maximum - Minimum) / 2;

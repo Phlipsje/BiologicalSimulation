@@ -10,6 +10,8 @@ namespace Continuum;
 /// </summary>
 public abstract class Organism : IMinimumBoundable
 {
+    public delegate void OnRepositionEventHandler(Organism organism, Mbb newMbb);
+    public event OnRepositionEventHandler? OnReposition; //can be used to let data structure know when to update its indexing
     /// <summary>
     /// Used to identify type of organism in a file.
     /// </summary>
@@ -25,8 +27,10 @@ public abstract class Organism : IMinimumBoundable
         get => _position;
         set
         {
-            _position = value;
-            SetMbb(_position);
+            Vector3 sizeVector = new Vector3(Size);
+            Mbb newMbb = new Mbb(value - sizeVector, value + sizeVector);
+            OnReposition?.Invoke(this, newMbb);
+            SetMbb(newMbb);
         } 
     }
     
@@ -220,17 +224,6 @@ public abstract class Organism : IMinimumBoundable
     {
         _position = mbb.Minimum + new Vector3(Size);
         _mbb = mbb;
-    }
-    
-    /// <summary>
-    /// Set minimum bounding box
-    /// </summary>
-    /// <param name="position"></param>
-    private void SetMbb(Vector3 position)
-    {
-        Vector3 sizeVector = new Vector3(Size);
-        _mbb = new Mbb(position - sizeVector, position + sizeVector);
-        _position = position;
     }
 
     public bool CheckCollision(Vector3 position, IEnumerable<Organism> otherOrganisms)
