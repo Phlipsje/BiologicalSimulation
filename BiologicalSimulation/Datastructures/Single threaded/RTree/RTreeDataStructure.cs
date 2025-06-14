@@ -12,6 +12,7 @@ public class RTreeDataStructure(float orthogonalMoveRange) : DataStructure
     private int organismCount;
     private Dictionary<Organism, List<Organism>> collisionBuffer = [];
     private HashSet<Organism> removedOrganisms = [];
+    private List<Organism> organismsInRangeResult = [];
     
     public override Task Step()
     {
@@ -119,6 +120,17 @@ public class RTreeDataStructure(float orthogonalMoveRange) : DataStructure
     
     public override IEnumerable<Organism> OrganismsWithinRange(Organism organism, float range)
     {
-        throw new NotImplementedException();
+        Vector3 rangeVector = new Vector3(range);
+        Mbb searchArea = new Mbb(organism.Position - rangeVector, organism.Position + rangeVector);
+        List<Organism> possibleInRange = rTree.Search(searchArea);
+        organismsInRangeResult.Clear();
+        float rangeSquared = range * range;
+        foreach (Organism otherOrganism in possibleInRange)
+        {
+            if(organism == otherOrganism || (otherOrganism.Position - organism.Position).LengthSquared() > rangeSquared)
+                continue;
+            organismsInRangeResult.Add(otherOrganism);
+        }
+        return organismsInRangeResult;
     }
 }
