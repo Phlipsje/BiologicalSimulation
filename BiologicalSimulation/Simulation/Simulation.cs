@@ -141,7 +141,10 @@ public class Simulation
         
         Tick++;
         world.Step();
-        await dataStructure.Step();
+        if(dataStructure.IsMultithreaded)
+            dataStructure.Step().Wait();
+        else
+            dataStructure.Step();
         OnTick?.Invoke(world);
 
         //Save file and invoke event letting know that it happened
