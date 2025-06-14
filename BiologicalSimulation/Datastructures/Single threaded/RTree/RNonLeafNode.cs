@@ -31,11 +31,13 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
     {
         if (activeBranchList == null)
             activeBranchList = new(maxSize);
-        foreach (var node in NodeEntries)
+        for (int i = 0; i < NodeEntries.Count; i++)
         {
+            RNode<T> node = NodeEntries[i];
             float minDist = node.Mbb.MinDist(searchEntry.GetMbb().Position);
             activeBranchList.Enqueue((node, minDist), minDist);
         }
+
         while (activeBranchList.Count != 0)
         {
             (RNode<T> node, float dist) = activeBranchList.Dequeue();
@@ -97,9 +99,9 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
             //In this case reinserting at the right height is not possible so deconstruct the node and reinsert entries
             List<T> entries = [];
             node.GetAllLeafEntries(entries);
-            foreach (T entry in entries)
+            for (int i = 0; i < entries.Count; i++)
             {
-                root.Insert(entry, ref root);
+                root.Insert(entries[i], ref root);
             }
 
             return;
@@ -110,9 +112,9 @@ public class RNonLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSi
 
     public override void GetAllLeafEntries(List<T> results)
     {
-        foreach (RNode<T> node in NodeEntries)
+        for (var i = 0; i < NodeEntries.Count; i++)
         {
-            node.GetAllLeafEntries(results);
+            NodeEntries[i].GetAllLeafEntries(results);
         }
     }
 

@@ -42,24 +42,26 @@ public abstract class RNode<T>(int minSize, int maxSize) : IMinimumBoundable whe
         {
             RecalculateMbb();
             List<T> leafEntriesToBeAdded = [];
-            foreach ((RNode<T> node, int level) in eliminatedNodes)
+            for (int i = 0; i < eliminatedNodes.Count; i++)
             {
+                (RNode<T> node, int level) = eliminatedNodes[i];
                 node.Parent = null; //ensure node can be removed from memory
                 if (node is RLeafNode<T> leafNode)
                 {
                     leafEntriesToBeAdded.AddRange(leafNode.LeafEntries);
                 }
-                else
+                else if(node is RNonLeafNode<T> nonLeafNode)
                 {
-                    foreach (RNode<T> subNode in ((RNonLeafNode<T>)node).NodeEntries)
+                    for (var j = 0; j < nonLeafNode.NodeEntries.Count; j++)
                     {
+                        RNode<T> subNode = nonLeafNode.NodeEntries[j];
                         root.ReInsert(subNode, level + 1, ref root);
                     }
                 }
             }
-            foreach (var entry in leafEntriesToBeAdded)
+            for (int i = 0; i < leafEntriesToBeAdded.Count; i++)
             {
-                root.Insert(entry, ref root);
+                root.Insert(leafEntriesToBeAdded[i], ref root);
             }
             return;
         }

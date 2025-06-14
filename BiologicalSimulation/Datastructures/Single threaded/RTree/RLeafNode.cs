@@ -14,15 +14,16 @@ public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
 
     public override void ForEach(Action<T> action)
     {
-        foreach (T entry in LeafEntries)
+        for (int i = 0; i < LeafEntries.Count; i++)
         {
-            action(entry);
+            action(LeafEntries[i]);
         }
     }
     public override void Search(Mbb searchArea, List<T> results)
     {
-        foreach (T entry in LeafEntries)
+        for(int i = 0; i < LeafEntries.Count; i++)
         {
+            T entry = LeafEntries[i];
             if (entry.GetMbb().Intersects(searchArea))
                 results.Add(entry);
         }
@@ -30,9 +31,10 @@ public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
 
     public override void NearestNeighbour(T searchEntry, NearestNeighbour<T> nearest, Func<T,T,float> distance)
     {
-        foreach (var entry in LeafEntries)
+        for (int i = 0; i < LeafEntries.Count; i++)
         {
-            if(entry.Equals(searchEntry))
+            T entry = LeafEntries[i];
+            if (entry.Equals(searchEntry))
                 continue;
             float dist = distance(searchEntry, entry);
             if (dist < nearest.Distance)
@@ -66,9 +68,9 @@ public class RLeafNode<T>(int minSize, int maxSize) : RNode<T>(minSize, maxSize)
         //In this case reinserting at the right height is not possible so deconstruct the node and reinsert entries
         List<T> entries = [];
         node.GetAllLeafEntries(entries);
-        foreach (var entry in entries)
+        for (int i = 0; i < entries.Count; i++)
         {
-            root.Insert(entry, ref root);
+            root.Insert(entries[i], ref root);
         }
     }
 
