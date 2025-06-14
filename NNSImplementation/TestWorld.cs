@@ -13,7 +13,7 @@ public class TestWorld : World
 {
     private Simulation simulation;
     private float worldHalfSize;
-    public TestWorld(DataStructure dataStructure, Simulation simulation, float worldHalfSize, bool preciseMovement = true) : base(dataStructure, preciseMovement)
+    public TestWorld(DataStructure dataStructure, Simulation simulation, float worldHalfSize, bool preciseMovement = true, bool randomisedExecutionOrder = false) : base(dataStructure, preciseMovement, randomisedExecutionOrder)
     {
         this.simulation = simulation;
         this.worldHalfSize = worldHalfSize;
