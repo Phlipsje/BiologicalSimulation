@@ -317,20 +317,33 @@ public class MultithreadedChunk3DDataStructure : DataStructure
         Chunk3D chunk = chunks[cX, cY, cZ];
 
         //Check within own chunk
-        if (FindMinimumIntersection(organism, normalizedDirection, length, chunk.Organisms, out float hitT1))
+        //Check within own chunk
+        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
         {
-            if(hitT1 < t)
-                t = hitT1;
+            Organism otherOrganism = node.Value;
+
+            if (RayIntersects(organism.Position, normalizedDirection, length, otherOrganism.Position,
+                    organism.Size + otherOrganism.Size, out float tHit))
+            {
+                if (tHit < t)
+                    t = tHit;
+            }
         }
         
         //Check edges of other chunks
         foreach (Chunk3D neighbouringChunk in chunk.ConnectedChunks)
         {
-            if (FindMinimumIntersection(organism, normalizedDirection, length, neighbouringChunk.Organisms, out float hitT2))
+            for (LinkedListNode<Organism> node = neighbouringChunk.Organisms.First!; node != null; node = node.Next!)
             {
-                if (hitT2 < t)
-                    t = hitT2;
-            }
+                Organism otherOrganism = node.Value;
+
+                if (RayIntersects(organism.Position, normalizedDirection, length, otherOrganism.Position,
+                        organism.Size + otherOrganism.Size, out float tHit))
+                {
+                    if (tHit < t)
+                        t = tHit;
+                }
+            } 
         }
 
         //Return if there even was a collision

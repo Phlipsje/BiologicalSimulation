@@ -29,9 +29,9 @@ class Program
         float worldHalfSize = 16f;
         float organismSize = 0.5f;
         
-        SimulationRunner.DataStructure = new RTreeDataStructure(MathF.Sqrt(3f * 0.1f * 0.1f) + 0.18f);
+        //SimulationRunner.DataStructure = new RTreeDataStructure(MathF.Sqrt(3f * 0.1f * 0.1f) + 0.18f);
         //SimulationRunner.DataStructure = new NoDataStructure();
-        //SimulationRunner.DataStructure = new MultithreadedChunk3DDataStructure(new Vector3(-worldHalfSize), new Vector3(worldHalfSize), 4f, organismSize);
+        SimulationRunner.DataStructure = new MultithreadedChunk3DDataStructure(new Vector3(-worldHalfSize), new Vector3(worldHalfSize), 4f, organismSize);
         
         //Create a world which implements the data structure and defines rules such as:
         // where organisms start in the simulation, what the bounds are of the virtual environment and when to stop the simulation automatically
@@ -52,6 +52,6 @@ class Program
 
         //Starts the simulation, add an integer value as a parameter to set a seed,
         // doing so will cause the simulation to play out exactly the same every time (with exception to multithreading data structures due to race conditions).
-        runner.Start(500);
+        runner.Start();
     }
 }
