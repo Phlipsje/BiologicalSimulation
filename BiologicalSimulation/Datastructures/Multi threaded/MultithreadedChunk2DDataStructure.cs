@@ -286,8 +286,6 @@ public class MultithreadedChunk2DDataStructure : DataStructure
     
     public override bool FindFirstCollision(Organism organism, Vector3 normalizedDirection, float length, out float t)
     {
-        t = float.MaxValue;
-        
         if (!World.IsInBounds(organism.Position + normalizedDirection * length))
         {
             //Still block movement normally upon hitting world limit
@@ -297,6 +295,9 @@ public class MultithreadedChunk2DDataStructure : DataStructure
         
         (int cX, int cY) = GetChunk(organism.Position);
         Chunk2D chunk = chunks[cX, cY];
+        
+        t = float.MaxValue;
+        bool hit = false;
 
         //Check within own chunk
         for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
@@ -307,7 +308,10 @@ public class MultithreadedChunk2DDataStructure : DataStructure
                     organism.Size + otherOrganism.Size, out float tHit))
             {
                 if (tHit < t)
+                {
                     t = tHit;
+                    hit = true;
+                }
             }
         }
         
@@ -322,14 +326,19 @@ public class MultithreadedChunk2DDataStructure : DataStructure
                         organism.Size + otherOrganism.Size, out float tHit))
                 {
                     if (tHit < t)
+                    {
                         t = tHit;
+                        hit = true;
+                    }
                 }
             } 
         }
         
-
+        float epsilon = 0.01f;
+        t -= epsilon;
+        
         //Return if there even was a collision
-        return Math.Abs(t - float.MaxValue) > 1f;
+        return hit;
     }
 
     /// <summary>

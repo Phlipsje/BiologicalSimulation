@@ -108,19 +108,30 @@ public abstract class DataStructure
     /// <returns></returns>
     protected static bool FindMinimumIntersection(Organism organism, Vector3 normalizedDirection, float length, IEnumerable<Organism> otherOrganisms, out float t)
     {
+        bool hit = false;
         t = float.MaxValue;
         foreach (Organism otherOrganism in otherOrganisms)
         {
+            if (organism == otherOrganism)
+                continue;
+            
             if (RayIntersects(organism.Position, normalizedDirection, length, otherOrganism.Position,
                     organism.Size + otherOrganism.Size, out float tHit))
             {
                 if (tHit < t)
+                {
                     t = tHit;
+                    hit = true;
+                }
+                    
             }
         }
+
+        float epsilon = 0.01f;
+        t -= epsilon;
         
         //Return if there even was a collision
-        return Math.Abs(t - float.MaxValue) > 1f;
+        return hit;
     }
     
     /// <summary>

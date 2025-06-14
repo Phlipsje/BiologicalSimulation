@@ -83,7 +83,11 @@ public class NoDataStructure : DataStructure
             return true;
         }
         
-        return FindMinimumIntersection(organism, normalizedDirection, length, Organisms, out t);
+        bool hit = FindMinimumIntersection(organism, normalizedDirection, length, Organisms, out t);
+            
+        float epsilon = 0.01f;
+        t -= epsilon;
+        return hit;
     }
     
     public override Task Clear()
