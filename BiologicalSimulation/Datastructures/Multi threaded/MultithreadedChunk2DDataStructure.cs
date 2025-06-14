@@ -197,10 +197,9 @@ public class MultithreadedChunk2DDataStructure : DataStructure
         LinkedList<Organism> o = new LinkedList<Organism>();
         foreach (Chunk2D chunk in chunks)
         {
-            for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
+            for (int i = 0; i < chunk.OrganismCount; i++)
             {
-                Organism organism = node.Value;
-                o.AddLast(organism);
+                o.AddLast(chunk.Organisms[i]);
             }
         }
 
@@ -239,9 +238,9 @@ public class MultithreadedChunk2DDataStructure : DataStructure
             return true;
         
         //Check for organisms within the chunk
-        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
+        for (int i = 0; i < chunk.OrganismCount; i++)
         {
-            Organism otherOrganism = node.Value;
+            Organism otherOrganism = chunk.Organisms[i];
             
             if (organism == otherOrganism)
                 continue;
@@ -261,9 +260,9 @@ public class MultithreadedChunk2DDataStructure : DataStructure
         //Check all organisms in neighbouring chunks
         foreach (Chunk2D neighbouringChunk in chunk.ConnectedChunks)
         {
-            for (LinkedListNode<Organism> node = neighbouringChunk.Organisms.First!; node != null; node = node.Next!)
+            for (int i = 0; i < neighbouringChunk.OrganismCount; i++)
             {
-                Organism otherOrganism = node.Value;
+                Organism otherOrganism = neighbouringChunk.Organisms[i];
             
                 if (organism == otherOrganism)
                     continue;
@@ -300,9 +299,9 @@ public class MultithreadedChunk2DDataStructure : DataStructure
         bool hit = false;
 
         //Check within own chunk
-        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
+        for (int i = 0; i < chunk.OrganismCount; i++)
         {
-            Organism otherOrganism = node.Value;
+            Organism otherOrganism = chunk.Organisms[i];
 
             if (RayIntersects(organism.Position, normalizedDirection, length, otherOrganism.Position,
                     organism.Size + otherOrganism.Size, out float tHit))
@@ -318,9 +317,9 @@ public class MultithreadedChunk2DDataStructure : DataStructure
         //Check edges of other chunks
         foreach (Chunk2D neighbouringChunk in chunk.ConnectedChunks)
         {
-            for (LinkedListNode<Organism> node = neighbouringChunk.Organisms.First!; node != null; node = node.Next!)
+            for (int i = 0; i < neighbouringChunk.OrganismCount; i++)
             {
-                Organism otherOrganism = node.Value;
+                Organism otherOrganism = neighbouringChunk.Organisms[i];
 
                 if (RayIntersects(organism.Position, normalizedDirection, length, otherOrganism.Position,
                         organism.Size + otherOrganism.Size, out float tHit))
@@ -356,9 +355,9 @@ public class MultithreadedChunk2DDataStructure : DataStructure
         Organism? knownNearest = null;
         
         //Check for organisms within the chunk
-        for (LinkedListNode<Organism> node = chunk.Organisms.First!; node != null; node = node.Next!)
+        for (int i = 0; i < chunk.OrganismCount; i++)
         {
-            Organism otherOrganism = node.Value;
+            Organism otherOrganism = chunk.Organisms[i];
             
             if (organism == otherOrganism)
                 continue;
@@ -374,9 +373,9 @@ public class MultithreadedChunk2DDataStructure : DataStructure
         //Check all organisms in neighbouring chunks
         foreach (Chunk2D neighbouringChunk in chunk.ConnectedChunks)
         {
-            for (LinkedListNode<Organism> node = neighbouringChunk.Organisms.First!; node != null; node = node.Next!)
+            for (int i = 0; i < neighbouringChunk.OrganismCount; i++)
             {
-                Organism otherOrganism = node.Value;
+                Organism otherOrganism = neighbouringChunk.Organisms[i];
             
                 if (organism == otherOrganism)
                     continue;

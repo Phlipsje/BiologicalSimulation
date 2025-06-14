@@ -7,10 +7,11 @@ namespace BioSim.Datastructures;
 
 internal class Chunk2D
 {
+    internal World World { get; set; }
     public Vector2 Center { get; }
     public float HalfDimension { get; } //Size from center (so half of full length)
     public int OrganismCount { get; private set; }
-    public LinkedList<Organism> Organisms { get; }
+    public List<Organism> Organisms { get; }
     public ConcurrentQueue<Organism> CheckToBeAdded; //This is a queue, because emptied every frame
     public Chunk2D[] ConnectedChunks; //Connected chunks is at most a list of 26 (9+8+9 for each chunk touching this chunk (also diagonals))
     private bool stepping = false;
@@ -19,7 +20,7 @@ internal class Chunk2D
     {
         Center = center;
         HalfDimension = size/2f;
-        Organisms = new LinkedList<Organism>();
+        Organisms = new List<Organism>(50);
         CheckToBeAdded = new ConcurrentQueue<Organism>();
     }
     
@@ -39,28 +40,27 @@ internal class Chunk2D
 
         stepping = true;
         
+        if (World.RandomisedExecutionOrder)
+            HelperFunctions.KnuthShuffle(Organisms);
+        
         //Check what should be added to chunk
         //No removals happen during this
         CheckNewPossibleAdditions();
         
         //Run update loop
-        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
+        for (int i = 0; i < Organisms.Count; i++)
         {
-            Organism organism = organismNode.Value;
-            
             //Move and run step for organism (organism does collision check with knowledge of exclusively what this chunk knows (which is enough)
-            organism.Step();
+            Organisms[i].Step();
         }
         
         //Update what should and should not be in this chunk
         //No additions happen during this (to this chunk)
-        Queue<LinkedListNode<Organism>> toRemove = new Queue<LinkedListNode<Organism>>();
-        for (LinkedListNode<Organism> organismNode = Organisms.First!; organismNode != null; organismNode = organismNode.Next!)
+        for (int i = 0; i < Organisms.Count; i++)
         {
-            //Get organism at this index
-            Organism organism = organismNode.Value;
-            
-            CheckPosition(organism, organismNode);
+            bool removed = CheckPosition(Organisms[i]);
+            if (removed)
+                i--;
         }
 
         stepping = false;
@@ -85,7 +85,7 @@ internal class Chunk2D
             //Might not even need the contains, but keeping it for now to be safe
             if (singleAxisDistance <= HalfDimension && !Organisms.Contains(organism))
             {
-                Organisms.AddLast(organism);
+                Organisms.Add(organism);
                 OrganismCount++;
             }
         }
@@ -96,8 +96,7 @@ internal class Chunk2D
     /// O(#connectedChunks) = O(26)
     /// </summary>
     /// <param name="organism"></param>
-    /// <param name="organismNode"></param>
-    private void CheckPosition(Organism organism, LinkedListNode<Organism> organismNode)
+    private bool CheckPosition(Organism organism)
     {
         //Set the largest of the distances per axis, that is enough to check if it should be within or not
         float singleAxisDistance = SingleAxisDistance(organism);
@@ -111,9 +110,12 @@ internal class Chunk2D
             }
             
             //Removing via node if faster
-            Organisms.Remove(organismNode);
+            Organisms.Remove(organism);
             OrganismCount--;
+            return true;
         }
+
+        return false;
     }
 
     [Pure]
@@ -128,7 +130,7 @@ internal class Chunk2D
     /// <param name="organism"></param>
     public void DirectlyInsertOrganism(Organism organism)
     {
-        Organisms.AddLast(organism);
+        Organisms.Add(organism);
         OrganismCount++;
     }
 }

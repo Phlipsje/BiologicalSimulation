@@ -20,7 +20,7 @@ internal class Chunk3D
     {
         Center = center;
         HalfDimension = size/2f;
-        Organisms = new List<Organism>();
+        Organisms = new List<Organism>(50);
         CheckToBeAdded = new ConcurrentQueue<Organism>();
     }
     
@@ -96,7 +96,6 @@ internal class Chunk3D
     /// O(#connectedChunks) = O(26)
     /// </summary>
     /// <param name="organism"></param>
-    /// <param name="organismNode"></param>
     private bool CheckPosition(Organism organism)
     {
         //Set the largest of the distances per axis, that is enough to check if it should be within or not
