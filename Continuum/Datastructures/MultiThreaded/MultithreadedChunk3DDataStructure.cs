@@ -270,6 +270,9 @@ public class MultithreadedChunk3DDataStructure : MultiThreadedDataStructure
         for (int i = 0; i < chunk.Organisms.Count; i++)
         {
             Organism otherOrganism = chunk.Organisms[i];
+
+            if (otherOrganism == null)
+                continue;
             
             if (organism == otherOrganism)
                 continue;
@@ -293,6 +296,9 @@ public class MultithreadedChunk3DDataStructure : MultiThreadedDataStructure
             {
                 Organism otherOrganism = neighbouringChunk.Organisms[i];
             
+                if (otherOrganism == null)
+                    continue;
+                
                 if (organism == otherOrganism)
                     continue;
             
