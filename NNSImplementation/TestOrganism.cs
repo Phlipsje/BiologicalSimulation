@@ -28,8 +28,6 @@ public class TestOrganism : Organism
 
     public override void Step()
     {
-        //Moves randomly by maximum of 0.1 in positive or negative direction for every axis
-        //Also known as brownian motion
         Organism? other = DataStructure.NearestNeighbour(this);
         Vector3 direction;
         float magnitude = Speed;
